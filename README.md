@@ -1,5 +1,5 @@
-Welcome to your new TanStack app! 
-agriaxis webapp
+Welcome to the agriaxis webapp
+uses TanStack for routing!
 
 # Getting Started
 
