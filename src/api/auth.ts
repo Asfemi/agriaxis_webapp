@@ -61,7 +61,7 @@ export const useLogout = () => {
 export const useForgotPassword = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: {email: string}) => {
+    mutationFn: async (data: { email?: string; phone?: string }) => {
       const response = await apiClient.post("/forgot-password", data);
       return response.data;
     },
@@ -74,7 +74,7 @@ export const useForgotPassword = () => {
 export const useVerifyOtpMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: {otp: string, email: string}) => {
+    mutationFn: async (data: { otp: string; email: string }) => {
       const response = await apiClient.post("/verify-otp", data);
       return response.data;
     },
@@ -82,4 +82,4 @@ export const useVerifyOtpMutation = () => {
       queryClient.invalidateQueries();
     },
   });
-}
+};
