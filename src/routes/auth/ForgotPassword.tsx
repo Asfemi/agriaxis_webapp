@@ -1,9 +1,20 @@
 import { useForgotPassword } from "@/api/auth";
 import { Button } from "@/components/Button";
 import { allCountries, type Country } from "@/data/countries";
-import { createRoute, type AnyRoute } from "@tanstack/react-router";
+import {
+  createRoute,
+  useNavigate,
+  type AnyRoute,
+} from "@tanstack/react-router";
 import { LoaderCircle, Search, X } from "lucide-react";
 import { useRef, useState, useMemo, useEffect } from "react";
+import { useForgotPasswordStore } from "@/stores/useForgotPasswordStore";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  ForgotPasswordSchema,
+  type ForgotPasswordFormData,
+} from "@/models/forgot-password.schema";
 
 type LoginType = "phone" | "email";
 
@@ -13,17 +24,32 @@ const flagStyle = {
   marginLeft: "0.5rem",
 };
 
-interface ForgotPasswordFormData {
-  email: string;
-}
-
-const initialFormData: ForgotPasswordFormData = {
-  email: "",
-};
-
 function ForgotPassword() {
+  const {
+    formData,
+    updateFormData,
+    errors: storeErrors,
+  } = useForgotPasswordStore();
+
+  const {
+    register,
+    formState: { errors },
+    watch,
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(ForgotPasswordSchema),
+    mode: "onChange",
+    defaultValues: formData,
+  });
+
+  useEffect(() => {
+    const subscription = watch((value) => {
+      updateFormData(value as Partial<ForgotPasswordFormData>);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, updateFormData]);
+
+  const navigate = useNavigate();
   const { mutate, isPending } = useForgotPassword();
-  // const [loginType, setLoginType] = useState<LoginType>("email");
   const [loginType] = useState<LoginType>("email");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [selectedCountry, setSelectedCountry] = useState(
@@ -31,8 +57,6 @@ function ForgotPassword() {
   );
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [formData, setFormData] =
-    useState<ForgotPasswordFormData>(initialFormData);
 
   const filteredCountries = useMemo<Country[]>(() => {
     const lowerCaseSearch = searchTerm.toLowerCase().trim();
@@ -46,25 +70,11 @@ function ForgotPassword() {
     });
   }, [searchTerm]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (emailError) setEmailError("");
-  };
-
   const handleSelectCountry = (country: Country) => {
     setSelectedCountry(country);
     setIsDropdownOpen(false);
     setSearchTerm("");
   };
-  const [phoneError, setPhoneError] = useState("");
-  const [emailError, setEmailError] = useState("");
-
-  // setPhoneError('Phone number not recognized');
-  // setEmailError('Email not recognized');
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -84,7 +94,9 @@ function ForgotPassword() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutate(formData);
+    mutate(formData, {
+      onSuccess: () => navigate({ to: "/reset-password-otp", replace: true }),
+    });
   };
 
   return (
@@ -172,23 +184,23 @@ function ForgotPassword() {
                 </div>
                 <div
                   className={`flex w-full items-center justify-between rounded-lg border-2 p-4 transition-colors ${
-                    phoneError
+                    errors.phone
                       ? "border-red-500 bg-[#E52B670D]"
                       : "border-transparent bg-[#F3F6F8]"
                   }`}
                 >
                   <input
                     type="tel"
+                    {...register("phone")}
                     className="w-11/12 border-none text-sm text-[#423C59] outline-0 placeholder:text-[#423C59] placeholder:opacity-70"
                     placeholder="081 **** 572"
-                    onChange={() => {
-                      if (phoneError) setPhoneError("");
-                    }}
                   />
                 </div>
               </div>
-              {phoneError && (
-                <p className="mt-1 text-sm text-red-600">{phoneError}</p>
+              {(errors.phone || storeErrors.phone) && (
+                <p className="mt-1 text-xs text-red-600">
+                  {errors.phone?.message || storeErrors.phone}
+                </p>
               )}
             </div>
           ) : (
@@ -196,22 +208,22 @@ function ForgotPassword() {
               <label className="mb-0.5 text-sm text-[#130B30]">Email</label>
               <div
                 className={`rounded-lg border-2 p-4 transition-colors ${
-                  emailError
+                  errors.email
                     ? "border-red-500 bg-[#E52B670D]"
                     : "border-transparent bg-[#F3F6F8]"
                 }`}
               >
                 <input
-                  name="email"
                   type="email"
                   className="w-11/12 border-none text-sm text-[#423C59] outline-0 placeholder:text-[#423C59] placeholder:opacity-70"
                   placeholder="user@example.com"
-                  value={formData.email}
-                  onChange={handleInputChange}
+                  {...register("email")}
                 />
               </div>
-              {emailError && (
-                <p className="mt-1 text-sm text-red-600">{emailError}</p>
+              {(errors.email || storeErrors.email) && (
+                <p className="mt-1 text-xs text-red-600">
+                  {errors.email?.message || storeErrors.email}
+                </p>
               )}
             </div>
           )}
