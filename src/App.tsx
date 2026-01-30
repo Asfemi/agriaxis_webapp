@@ -25,6 +25,7 @@ function App() {
     <>
       <HeadContent />
       <DesktopOnlyOverlay />
+      <Toaster position="top-right" richColors />
       <Outlet />
       <TanStackRouterDevtools />
     </>

@@ -1,4 +1,4 @@
-import { userToken } from "@/lib/utils";
+import { getOrgId, userToken } from "@/lib/utils";
 import axios from "axios";
 
 const apiClient = axios.create({
@@ -16,6 +16,12 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  const orgId = getOrgId();
+  if (orgId) {
+    config.headers["X-ORG-ID"] = orgId;
+  }
+
   return config;
 });
 
