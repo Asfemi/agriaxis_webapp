@@ -8,7 +8,7 @@ import { NewFarmSchema, type NewFarmFormData } from "@/models/farm.model";
 import { useLocations } from "@/api/locations";
 import { useCreateFarm } from "@/api/farms";
 import { toast } from "sonner";
-import { useMe } from "@/api/auth";
+import { useUserStore } from "@/stores/useUserStore";
 
 const farm_size_options: SelectOption[] = [
   { label: "Acre", value: "acre", disabled: true },
@@ -47,7 +47,8 @@ const AddNewFarmSheet: React.FC<{ onClose: () => void; isOpen: boolean }> = ({
 
   const { data: locations } = useLocations();
   const { mutate, isPending } = useCreateFarm();
-  const { data: user } = useMe();
+  // const { data: user } = useMe();
+  const user = useUserStore((state) => state.user);
 
   const selectedStateName = watch("state");
 

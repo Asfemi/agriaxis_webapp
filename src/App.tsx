@@ -1,8 +1,20 @@
 import { Outlet, HeadContent } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "sonner";
+import { useMe } from "@/api/auth";
+import { useUserStore } from "@/stores/useUserStore";
+import { useEffect } from "react";
 
 function DesktopOnlyOverlay() {
+  const { data: user } = useMe();
+  const setUser = useUserStore((state) => state.setUser);
+
+  useEffect(() => {
+    if (user) {
+      setUser(user);
+    }
+  }, [user]);
+
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-white md:hidden">
       <div className="max-w-sm px-6 text-center">

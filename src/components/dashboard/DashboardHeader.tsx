@@ -5,8 +5,8 @@ import NotificationPermissionModal from "@/components/dashboard/NotificationPerm
 import LocationPermissionModal from "@/components/dashboard/LocationPermissionModal";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { Link, useMatches } from "@tanstack/react-router";
-import { useMe } from "@/api/auth";
 import { saveOrgId } from "@/lib/utils";
+import { useUserStore } from "@/stores/useUserStore";
 
 interface IconButtonProps {
   children: React.ReactNode;
@@ -23,7 +23,7 @@ const IconButton: React.FC<IconButtonProps> = ({ children, badge = false }) => (
 );
 
 const ProfileButton: React.FC<{ profilePath: string }> = ({ profilePath }) => {
-  const { data: user } = useMe();
+  const user = useUserStore((state) => state.user);
 
   useEffect(() => {
     if (user) saveOrgId(user.organisations[0].id.toString());
