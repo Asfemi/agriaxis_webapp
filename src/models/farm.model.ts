@@ -67,3 +67,34 @@ export interface GetAllFarmResponse {
   amount_of_poor_farms: number;
   list_of_farm: Farm[];
 }
+
+export interface FarmDetails {
+  id: number;
+  name: string;
+  location: {
+    latitude: null | number;
+    longitude: null | number;
+    state: string;
+    lga: string;
+    physical_address: string;
+  };
+  size_hectares: string;
+  crop_type: string;
+  planting_date: null | string;
+  expected_harvest_date: null | string;
+  status: string;
+  health_status: string;
+  notes: null | string;
+  farmer: {
+    id: number;
+    name: string;
+    email: string;
+    phone: null | string;
+  };
+  organisation: {
+    id: number;
+    name: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
