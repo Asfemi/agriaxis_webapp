@@ -4,7 +4,6 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { ListFilter } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -47,10 +46,12 @@ export function DataTable<T>({
           <h1 className="font-neue text-lg font-semibold text-[#939397] sm:text-xl">
             {title}
           </h1>
-          <div className="flex items-center gap-2 rounded-lg border border-[#E8E8E8] bg-[#F3F6F8] px-3 py-2.5">
-            <ListFilter size={16} />
-            <span className="text-[#130B30]">Filter</span>
-          </div>
+          {/** 
+             <div className="flex items-center gap-2 rounded-lg border border-[#E8E8E8] bg-[#F3F6F8] px-3 py-2.5">
+             <ListFilter size={16} />
+             <span className="text-[#130B30]">Filter</span>
+             </div>
+            */}
         </header>
       )}
       <Table>

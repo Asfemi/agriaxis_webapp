@@ -6,26 +6,20 @@ import { FarmStatusCard } from "@/components/dashboard/FarmStatusCard";
 import { generateFarmStatus } from "@/data/farm_status.data";
 import { AddNewFarmSheet } from "@/components/dashboard/AddNewFarmSheet";
 import { useState } from "react";
-import { FarmsListContainer } from "@/components/dashboard/FarmsListContainer";
 import { FarmDetailsContainer } from "@/components/dashboard/FarmDetailsContainer";
 import type { Farm } from "@/models/farm.model";
-import { createRoute, type AnyRoute } from "@tanstack/react-router";
+import { createRoute, Link, type AnyRoute } from "@tanstack/react-router";
 import { useGetDashboard } from "@/api/farms";
 
 const farmStatus = generateFarmStatus();
 
 type DASHBOARD_VIEW = "overview" | "farms" | "farm-details";
 
-function DashboardIndex() {
+function DashboardIndex({farmListPath = "farms"}) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentView, setCurrentView] = useState<DASHBOARD_VIEW>("overview");
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
   const { data } = useGetDashboard();
-
-  const handleSelectFarm = (farm: Farm) => {
-    setSelectedFarm(farm);
-    setCurrentView("farm-details");
-  };
 
   return (
     <>
@@ -78,12 +72,14 @@ function DashboardIndex() {
                 <h1 className="font-neue text-lg font-semibold text-[#939397] sm:text-xl">
                   Farm overview
                 </h1>
-                <button
-                  onClick={() => setCurrentView("farms")}
-                  className="font-medium text-[#0A814A] underline hover:opacity-80"
-                >
-                  See all farms
-                </button>
+                <Link to={farmListPath}>
+                  <button
+                    // onClick={() => setCurrentView("farms")}
+                    className="font-medium text-[#0A814A] underline hover:opacity-80"
+                  >
+                    See all farms
+                  </button>
+                </Link>
               </header>
               <div className="w-full">
                 <FarmHealthCardWrapper data={data} />
@@ -108,13 +104,6 @@ function DashboardIndex() {
             </section>
           </main>
         </div>
-      )}
-      {currentView === "farms" && (
-        <FarmsListContainer
-          onClose={() => setCurrentView("overview")}
-          onAddNewFarm={() => setIsFormOpen(true)}
-          selectFarm={handleSelectFarm}
-        />
       )}
       {currentView === "farm-details" && selectedFarm && (
         <FarmDetailsContainer

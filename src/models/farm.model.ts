@@ -7,10 +7,10 @@ export interface Farm {
   location: string;
   status: string;
   date: string;
-  soilPh: number;
-  moisture: number;
-  nutrient: string;
-  tests: FarmTest[];
+  // soilPh: number;
+  // moisture: number;
+  // nutrient: string;
+  // tests: FarmTest[];
 }
 
 export interface FarmTest {
