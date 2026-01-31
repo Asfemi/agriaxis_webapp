@@ -2,11 +2,11 @@ import { z } from "zod";
 
 export interface Farm {
   id: string;
-  farmName: string;
-  size: number;
+  farm_name: string;
+  size: string;
   location: string;
   status: string;
-  dateCreated: string;
+  date: string;
   soilPh: number;
   moisture: number;
   nutrient: string;
@@ -37,6 +37,33 @@ export const NewFarmSchema = z.object({
   health_status: z.string().optional(),
   user_id: z.number().optional(),
   notes: z.string().optional(),
-})
+});
 
 export type NewFarmFormData = z.infer<typeof NewFarmSchema>;
+
+export interface DashboardResponse {
+  no_of_farm: number;
+  no_of_users: number;
+  overall_no_of_tests: number;
+  farm_health_summary: {
+    healthy: number;
+    poor: number;
+    average: number;
+  };
+  farm_lists: {
+    farm_name: string;
+    farm_health: string;
+    soil_pH: number;
+    nutrient: string;
+    size: string;
+    moisture: number;
+  }[];
+}
+
+export interface GetAllFarmResponse {
+  total_farms: number;
+  amount_of_healthy_farms: number;
+  amount_of_average_farms: number;
+  amount_of_poor_farms: number;
+  list_of_farm: Farm[];
+}

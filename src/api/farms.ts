@@ -1,12 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import apiClient from "./api-client";
-import type { NewFarmFormData } from "@/models/farm.model";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import apiClient from "@/api/api-client";
+import type { DashboardResponse, GetAllFarmResponse, NewFarmFormData } from "@/models/farm.model";
 
 export const useGetAllFarms = () => {
   return useQuery({
     queryKey: ["farms"],
     queryFn: async () => {
-      const { data } = await apiClient.get("/org/farms");
+      const { data } = await apiClient.get<GetAllFarmResponse>("/org/farms");
       return data;
     },
   })
@@ -22,5 +22,15 @@ export const useCreateFarm = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["farms"] });
     },
+  })
+}
+
+export const useGetDashboard = () => {
+  return useSuspenseQuery({
+    queryKey: ["dashboard"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<DashboardResponse>("/dashboard");
+      return data;
+    }
   })
 }

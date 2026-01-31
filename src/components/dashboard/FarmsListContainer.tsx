@@ -5,7 +5,6 @@ import FarmIconHealthy from "/assets/icons/farm.svg";
 import FarmIconAverage from "/assets/icons/farm-yellow.svg";
 import FarmIconPoor from "/assets/icons/farm-red.svg";
 import { DataTable } from "@/components/DataTable";
-import { generateFarms } from "@/data/farm.data";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Farm } from "@/models/farm.model";
 import StatusBadge from "@/components/StatusBadge";
@@ -16,22 +15,22 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useMemo, useState } from "react";
-
-const farms = generateFarms(5);
+import { useMemo } from "react";
+import { useGetAllFarms } from "@/api/farms";
 
 export const FarmsListContainer: React.FC<{
   onClose: () => void;
   onAddNewFarm: () => void;
   selectFarm: (farm: Farm) => void;
 }> = ({ onClose, onAddNewFarm, selectFarm }) => {
+  const { data: response, isPending, isError } = useGetAllFarms();
   const farmColumns: ColumnDef<Farm>[] = [
     {
       accessorKey: "id",
       header: "ID",
     },
     {
-      accessorKey: "farmName",
+      accessorKey: "farm_name",
       header: "Farm name",
     },
     {
@@ -47,13 +46,13 @@ export const FarmsListContainer: React.FC<{
       header: "Status",
       cell: ({ row }) => (
         <StatusBadge<Farm["status"]>
-          status={row.original.status}
-          variant={row.original.status === "healthy" ? "success" : "warning"}
+        status={row.original.status}
+        variant={row.original.status === "healthy" ? "success" : "warning"}
         />
       ),
     },
     {
-      accessorKey: "dateCreated",
+      accessorKey: "date",
       header: "Date created",
     },
     {
@@ -61,27 +60,35 @@ export const FarmsListContainer: React.FC<{
       header: "More",
       cell: ({ row }) => (
         <div className="">
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <MoreVertical size={15} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Action</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => selectFarm(row.original)}>
-                View farm
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <span className="text-[#E61504CC]">Delete farm</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <DropdownMenu>
+        <DropdownMenuTrigger>
+        <MoreVertical size={15} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+        <DropdownMenuLabel>Action</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => selectFarm(row.original)}>
+        View farm
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+        <span className="text-[#E61504CC]">Delete farm</span>
+        </DropdownMenuItem>
+        </DropdownMenuContent>
+        </DropdownMenu>
         </div>
       ),
     },
   ];
-
   const columns = useMemo(() => farmColumns, []);
-  const [data] = useState(() => farms);
+  
+  if (isPending) {
+    return <div className="bg-white p-6">Fetching farms...</div>
+  }
+
+  if (isError || !response) {
+    return <div className="bg-white p-6">Error fetching farms</div>;
+  }
+
+  const data = response.list_of_farm;
 
   return (
     <main className="rounded-[1.25rem] bg-white p-6 pb-9">
@@ -112,7 +119,7 @@ export const FarmsListContainer: React.FC<{
               </div>
             }
             title="Total no. of farm"
-            value="15"
+            value={response.total_farms}
           />
           <StatCard
             icon={
@@ -121,7 +128,7 @@ export const FarmsListContainer: React.FC<{
               </div>
             }
             title="Healthy"
-            value="8"
+            value={response.amount_of_healthy_farms}
           />
           <StatCard
             icon={
@@ -130,7 +137,7 @@ export const FarmsListContainer: React.FC<{
               </div>
             }
             title="Average"
-            value="5"
+            value={response.amount_of_average_farms}
           />
           <StatCard
             icon={
@@ -139,7 +146,7 @@ export const FarmsListContainer: React.FC<{
               </div>
             }
             title="Poor"
-            value="2"
+            value={response.amount_of_poor_farms}
           />
         </div>
         <DataTable title="Farms" columns={columns} data={data} />

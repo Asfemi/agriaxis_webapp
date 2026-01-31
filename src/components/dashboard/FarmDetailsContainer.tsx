@@ -88,7 +88,7 @@ export const FarmDetailsContainer: React.FC<{
           <div className="mb-6">
             <div className="mb-2 flex items-center gap-6">
               <h6 className="font-neue text-2xl font-bold text-[#0F172A]">
-                {`${farm.farmName}, ${farm.location}`}
+                {`${farm.farm_name}, ${farm.location}`}
               </h6>
               <StatusBadge<Farm["status"]>
                 status={farm.status}

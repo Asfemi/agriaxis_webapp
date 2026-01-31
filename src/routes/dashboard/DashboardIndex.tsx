@@ -10,6 +10,7 @@ import { FarmsListContainer } from "@/components/dashboard/FarmsListContainer";
 import { FarmDetailsContainer } from "@/components/dashboard/FarmDetailsContainer";
 import type { Farm } from "@/models/farm.model";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
+import { useGetDashboard } from "@/api/farms";
 
 const farmStatus = generateFarmStatus();
 
@@ -19,6 +20,7 @@ function DashboardIndex() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentView, setCurrentView] = useState<DASHBOARD_VIEW>("overview");
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
+  const { data } = useGetDashboard();
 
   const handleSelectFarm = (farm: Farm) => {
     setSelectedFarm(farm);
@@ -49,7 +51,7 @@ function DashboardIndex() {
                     </div>
                   }
                   title="No. of farms"
-                  value="12"
+                  value={data.no_of_farm}
                 />
                 <StatCard
                   icon={
@@ -58,7 +60,7 @@ function DashboardIndex() {
                     </div>
                   }
                   title="No. of users"
-                  value="34"
+                  value={data.no_of_users}
                 />
                 <StatCard
                   icon={
@@ -67,7 +69,7 @@ function DashboardIndex() {
                     </div>
                   }
                   title="Crop monitoring"
-                  value="12"
+                  value={data.overall_no_of_tests}
                 />
               </div>
             </section>
@@ -84,7 +86,7 @@ function DashboardIndex() {
                 </button>
               </header>
               <div className="w-full">
-                <FarmHealthCardWrapper />
+                <FarmHealthCardWrapper data={data} />
               </div>
             </section>
             <section>
