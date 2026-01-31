@@ -2,7 +2,7 @@ import type { Farm, FarmTest } from "@/models/farm.model";
 import { ChevronLeft, MoreVertical } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Activity, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,11 +13,13 @@ import {
 import { DataTable } from "@/components/DataTable";
 import { ViewSoilTestResultSheet } from "@/components/dashboard/ViewSoilTestResultSheet";
 import { RenameResultModal } from "@/components/dashboard/RenameResultModal";
+import { Link, useParams } from "@tanstack/react-router";
+import { useGetFarm } from "@/api/farms";
 
-export const FarmDetailsContainer: React.FC<{
-  onClose: () => void;
-  farm: Farm;
-}> = ({ onClose, farm }) => {
+export const FarmDetailsContainer = ({ farmListPath = "/dashboard/dashboard/farms" }) => {
+  const { id } = useParams({ from: "/dashboard/dashboard/farms/details/$id" });
+
+  const { data: farmData } = useGetFarm(Number(id));
   const testColumns: ColumnDef<FarmTest>[] = [
     {
       accessorKey: "testID",
@@ -71,7 +73,7 @@ export const FarmDetailsContainer: React.FC<{
   ];
 
   const columns = useMemo(() => testColumns, []);
-  const [data] = useState(() => farm.tests);
+  const [data] = useState(() => []);
   const [viewSoilTestResult, setViewSoilTestResult] = useState(false);
   const [showRenameResultModal, setShowRenameResultModal] = useState(false);
 
@@ -79,20 +81,21 @@ export const FarmDetailsContainer: React.FC<{
     <>
       <main className="rounded-[1.25rem] bg-white p-6 pb-9">
         <header className="mb-3">
-          <button
-            onClick={onClose}
-            className="mb-5 grid size-7 place-items-center rounded-full bg-[#E8E8E8]"
-          >
-            <ChevronLeft size={20} />
-          </button>
+          <Link to={farmListPath}>
+            <button className="mb-5 grid size-7 place-items-center rounded-full bg-[#E8E8E8]">
+              <ChevronLeft size={20} />
+            </button>
+          </Link>
           <div className="mb-6">
             <div className="mb-2 flex items-center gap-6">
               <h6 className="font-neue text-2xl font-bold text-[#0F172A]">
-                {`${farm.farm_name}, ${farm.location}`}
+                {`${farmData.name}, ${farmData.location.state}`}
               </h6>
               <StatusBadge<Farm["status"]>
-                status={farm.status}
-                variant={farm.status === "healthy" ? "success" : "warning"}
+                status={farmData.health_status}
+                variant={
+                  farmData.health_status === "healthy" ? "success" : "warning"
+                }
               />
             </div>
             <div className="flex items-center gap-3">
@@ -108,16 +111,16 @@ export const FarmDetailsContainer: React.FC<{
                   fill="#939397"
                 />
               </svg>
-              <span className="font-neue text-lg font-semibold text-[#434449]">{`${farm.size} Hectares`}</span>
+              <span className="font-neue text-lg font-semibold text-[#434449]">{`${farmData.size_hectares} Hectares`}</span>
             </div>
           </div>
-          <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
             <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F3F6F8] p-4">
               <span className="font-medium text-[#626267]">
                 Soil PH <span className="text-[#64748B]">(from last test)</span>
               </span>
               <span className="font-neue text-3xl font-bold text-[#0A814A]">
-                {farm.soilPh}
+                {0}
               </span>
             </div>
             <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F3F6F8] p-4">
@@ -126,7 +129,7 @@ export const FarmDetailsContainer: React.FC<{
                 <span className="text-[#64748B]">(from last test)</span>
               </span>
               <span className="font-neue text-3xl font-bold text-[#D9A728]">
-                {farm.moisture}%
+                {0}%
               </span>
             </div>
             <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F3F6F8] p-4">
@@ -135,7 +138,7 @@ export const FarmDetailsContainer: React.FC<{
                 <span className="text-[#64748B]">(from last test)</span>
               </span>
               <span className="font-neue text-3xl font-bold text-[#0A814A] capitalize">
-                {farm.nutrient}
+                {0}
               </span>
             </div>
             <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F3F6F8] p-4">
@@ -143,28 +146,27 @@ export const FarmDetailsContainer: React.FC<{
                 Total no. of test
               </span>
               <span className="font-neue text-3xl font-bold text-[#130B30]">
-                {farm.tests.length}
+                {0}
               </span>
             </div>
           </div>
           <DataTable title="Test performed" columns={columns} data={data} />
         </header>
       </main>
-      <Activity mode={viewSoilTestResult ? "visible" : "hidden"}>
-        <ViewSoilTestResultSheet
-          onClose={() => setViewSoilTestResult(false)}
-          isOpen={viewSoilTestResult}
-          test={data[0]}
+      {/** 
+         <ViewSoilTestResultSheet
+         onClose={() => setViewSoilTestResult(false)}
+         isOpen={viewSoilTestResult}
+         test={data[0]}
+         />
+         <RenameResultModal
+         isOpen={showRenameResultModal}
+        // value={data[0].testID}
+        value={"1"}
+        onSave={() => setShowRenameResultModal(false)}
+        onClose={() => setShowRenameResultModal(false)}
         />
-      </Activity>
-      <Activity mode={showRenameResultModal ? "visible" : "hidden"}>
-        <RenameResultModal
-          isOpen={showRenameResultModal}
-          value={data[0].testID}
-          onSave={() => setShowRenameResultModal(false)}
-          onClose={() => setShowRenameResultModal(false)}
-        />
-      </Activity>
+        */}
     </>
   );
 };

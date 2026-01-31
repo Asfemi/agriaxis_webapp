@@ -64,11 +64,11 @@ export const FarmsListContainer = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Action</DropdownMenuLabel>
-              <DropdownMenuItem
-              // onClick={() => selectFarm(row.original)}
+              <Link
+                to={`/dashboard/dashboard/farms/details/${parseInt(row.original.id.split("G")[1])}`}
               >
-                View farm
-              </DropdownMenuItem>
+                <DropdownMenuItem>View farm</DropdownMenuItem>
+              </Link>
               <DropdownMenuItem>
                 <span className="text-[#E61504CC]">Delete farm</span>
               </DropdownMenuItem>

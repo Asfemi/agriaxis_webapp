@@ -53,10 +53,10 @@ export interface DashboardResponse {
   farm_lists: {
     farm_name: string;
     farm_health: string;
-    soil_pH: number;
+    soil_pH: number | null;
     nutrient: string;
     size: string;
-    moisture: number;
+    moisture: number | null;
   }[];
 }
 

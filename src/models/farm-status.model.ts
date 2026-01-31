@@ -2,9 +2,9 @@ export type FarmStatus = "healthy" | "no data" | "average" | "poor";
 export type NutrientLevel = "High" | "Medium" | "Low" | "-";
 
 export interface FarmStatValues {
-  soilPh: string;
-  moisture: string;
-  nutrient: NutrientLevel;
+  soilPh: number | null;
+  moisture: number | null;
+  nutrient: string | null;
   size: string;
 }
 
