@@ -1,13 +1,10 @@
 import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/Button";
-import { useState } from "react";
 
 export const FarmMeasurementMethodCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;
   onConfirm: (selection: "google" | "manual") => void;
 }> = ({ onClose, onConfirm }) => {
-  const [selection, setSelection] = useState<"google" | "manual">("google");
 
   return (
     <section className="size-full">
@@ -32,7 +29,7 @@ export const FarmMeasurementMethodCard: React.FC<{
           <section className="mx-20 space-y-6 pb-10">
             <div className="lg:max-w-md space-y-6">
               <button
-                onClick={() => setSelection("google")}
+                onClick={() => onConfirm("google")}
                 type="button"
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 py-4 text-sm font-medium text-gray-800 transition hover:bg-gray-100"
               >
@@ -72,7 +69,7 @@ export const FarmMeasurementMethodCard: React.FC<{
               </div>
 
               <button
-                onClick={() => setSelection("manual")}
+                onClick={() => onConfirm("manual")}
                 type="button"
                 className="w-full rounded-xl bg-[#E7F2ED] py-4 text-center font-medium text-[#0A814A]"
               >
@@ -80,12 +77,6 @@ export const FarmMeasurementMethodCard: React.FC<{
               </button>
             </div>
           </section>
-        </div>
-
-        <div className="mx-20">
-          <Button onClick={() => onConfirm(selection)} variant="primary">
-            Proceed to payment
-          </Button>
         </div>
       </div>
     </section>
