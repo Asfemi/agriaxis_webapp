@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell } from "recharts";
 import FarmIconHealthy from "/assets/icons/farm.svg";
 import FarmIconAverage from "/assets/icons/farm-yellow.svg";
 import FarmIconPoor from "/assets/icons/farm-red.svg";
+import type { DashboardResponse } from "@/models/farm.model";
 
 interface FarmData {
   name: "Healthy" | "Average" | "Poor";
@@ -16,14 +17,6 @@ interface FarmHealthCardProps {
   data: FarmData[];
   totalFarms: number;
 }
-
-const mockData: FarmData[] = [
-  { name: "Healthy", value: 8, fill: "#17AD49", percentage: "54%" },
-  { name: "Average", value: 5, fill: "#FFC107", percentage: "33%" },
-  { name: "Poor", value: 2, fill: "#E91E63", percentage: "13%" },
-];
-
-const mockTotalFarms = mockData.reduce((sum, entry) => sum + entry.value, 0);
 
 const iconMap: { [key in FarmData["name"]]: string } = {
   Healthy: FarmIconHealthy,
@@ -48,7 +41,7 @@ const FarmHealthCard: React.FC<FarmHealthCardProps> = ({
 
   const CenterText: React.FC = () => (
     <div
-      className="font-neue pointer-events-none absolute text-center top-1/2 left-1/2"
+      className="font-neue pointer-events-none absolute top-1/2 left-1/2 text-center"
       style={{
         transform: "translate(-50%, -50%)",
       }}
@@ -84,9 +77,7 @@ const FarmHealthCard: React.FC<FarmHealthCardProps> = ({
             <div>
               <div className="text-sm font-semibold">{entry.name}</div>
               <div className="mt-0.5 flex items-baseline justify-between">
-                <span className="mr-2 text-lg font-bold">
-                  {entry.value}
-                </span>
+                <span className="mr-2 text-lg font-bold">{entry.value}</span>
                 <span className="text-base text-gray-600">
                   {entry.percentage}
                 </span>
@@ -133,8 +124,42 @@ const FarmHealthCard: React.FC<FarmHealthCardProps> = ({
   );
 };
 
-const FarmHealthCardWrapper: React.FC = () => (
-  <FarmHealthCard data={mockData} totalFarms={mockTotalFarms} />
-);
+const FarmHealthCardWrapper: React.FC<{ data: DashboardResponse }> = ({
+  data,
+}) => {
+  const totalFarms = data.no_of_farm;
+
+  const chartData: FarmData[] = [
+    {
+      name: "Healthy",
+      value: data.farm_health_summary.healthy,
+      fill: "#17AD49",
+      percentage:
+        totalFarms > 0
+          ? `${Math.round((data.farm_health_summary.healthy / totalFarms) * 100)}%`
+          : "0%",
+    },
+    {
+      name: "Average",
+      value: data.farm_health_summary.average,
+      fill: "#FFC107",
+      percentage:
+        totalFarms > 0
+          ? `${Math.round((data.farm_health_summary.average / totalFarms) * 100)}%`
+          : "0%",
+    },
+    {
+      name: "Poor",
+      value: data.farm_health_summary.poor,
+      fill: "#E91E63",
+      percentage:
+        totalFarms > 0
+          ? `${Math.round((data.farm_health_summary.poor / totalFarms) * 100)}%`
+          : "0%",
+    },
+  ];
+
+  return <FarmHealthCard data={chartData} totalFarms={totalFarms} />;
+};
 
 export default FarmHealthCardWrapper;

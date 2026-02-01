@@ -33,6 +33,8 @@ import RolesRoute from "./routes/dashboard/Roles.tsx";
 import UsersRoute from "./routes/dashboard/Users.tsx";
 import ProfileRoute from "./routes/dashboard/Profile.tsx";
 import ResetPasswordOTPRoute from "./routes/auth/ResetPasswordOTP.tsx";
+import FarmsListRoute from "./routes/dashboard/farms/list.tsx";
+import FarmDetailsRoute from "./routes/dashboard/farms/details.tsx";
 
 const rootRoute = createRootRoute({
   head: () => ({
@@ -98,6 +100,8 @@ const routeTree = rootRoute.addChildren([
     RolesRoute(dashboardLayoutRoute),
     UsersRoute(dashboardLayoutRoute),
     ProfileRoute(dashboardLayoutRoute),
+    FarmsListRoute(dashboardLayoutRoute),
+    FarmDetailsRoute(dashboardLayoutRoute),
   ]),
 ]);
 

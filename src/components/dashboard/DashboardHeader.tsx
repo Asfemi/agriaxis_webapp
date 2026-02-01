@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Search, Bell, ChevronsRight } from "lucide-react";
 import { useState } from "react";
 import NotificationPermissionModal from "@/components/dashboard/NotificationPermissionModal";
 import LocationPermissionModal from "@/components/dashboard/LocationPermissionModal";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { Link, useMatches } from "@tanstack/react-router";
-import { useMe } from "@/api/auth";
+import { saveOrgId } from "@/lib/utils";
+import { useUserStore } from "@/stores/useUserStore";
 
 interface IconButtonProps {
   children: React.ReactNode;
@@ -22,7 +23,11 @@ const IconButton: React.FC<IconButtonProps> = ({ children, badge = false }) => (
 );
 
 const ProfileButton: React.FC<{ profilePath: string }> = ({ profilePath }) => {
-  const { data: user } = useMe();
+  const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    if (user) saveOrgId(user.organisations[0].id.toString());
+  }, [user])
 
   return (
     <button className="flex items-center space-x-2 rounded-full border border-gray-200 bg-white p-1 pr-3 pl-1 transition duration-150 ease-in-out hover:shadow-md">
