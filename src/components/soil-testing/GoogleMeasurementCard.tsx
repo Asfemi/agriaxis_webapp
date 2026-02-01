@@ -27,7 +27,7 @@ export const GoogleMeasurementCard: React.FC<{
             </button>
             <div>
               <h5 className="font-neue text-xl font-bold text-[#130B30]">
-                Google measurement
+                Leaflet measurement
               </h5>
               <h6 className="text-[#423C59] w-4/5">
                 You can move any of the points on the next map to get accurate

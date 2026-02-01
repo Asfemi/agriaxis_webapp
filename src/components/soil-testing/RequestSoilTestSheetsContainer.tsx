@@ -4,6 +4,7 @@ import { FarmSizeForMeasurementCard } from "@/components/soil-testing/FarmSizeFo
 import { FarmMeasurementMethodCard } from "@/components/soil-testing/FarmMeasurementMethodCard";
 import { GoogleMeasurementCard } from "@/components/soil-testing/GoogleMeasurementCard";
 import { ManualMeasurementCard } from "@/components/soil-testing/ManualMeasurementCard";
+import { MapMeasurementCard } from "./MapMeasurementCard";
 
 const RequestSoilTestSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -53,6 +54,12 @@ const RequestSoilTestSheetsContainer: React.FC<{
         >
           <GoogleMeasurementCard
             onClose={() => setCurrentView("measurement_method")}
+            onConfirm={() => setCurrentView("leaflet_map")}
+          />
+        </Activity>
+        <Activity mode={currentView === "leaflet_map" ? "visible" : "hidden"}>
+          <MapMeasurementCard
+            onClose={() => setCurrentView("google_measurement")}
             onConfirm={onClose}
           />
         </Activity>
