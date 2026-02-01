@@ -23,7 +23,6 @@ function ResetPasswordOtp() {
   const [loginType, setLoginType] = useState<LoginType>("email");
   const [otpTarget, setOtpTarget] = useState<string>("");
   const [otpValue, setOtpValue] = useState("");
-  // TODO: Use correct endpoint/mutation for forgot-password OTP
   const { mutate: verify, isPending } = useVerifyOtpMutation();
 
   useEffect(() => {

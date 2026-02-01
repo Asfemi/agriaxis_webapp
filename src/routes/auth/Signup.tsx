@@ -2,6 +2,7 @@ import { Button } from "@/components/Button";
 import { allCountries, type Country } from "@/data/countries";
 import { Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   createRoute,
   redirect,
@@ -36,8 +37,6 @@ function Signup() {
   const navigate = useNavigate();
   const updateFormData = useRegistrationStore((state) => state.updateFormData);
   const [loginType, setLoginType] = useState<LoginType>("email");
-  const [phoneError, setPhoneError] = useState("");
-  const [emailError, setEmailError] = useState("");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [selectedCountry, setSelectedCountry] = useState(
@@ -45,6 +44,18 @@ function Signup() {
   );
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<SignupFormData>({
+    defaultValues: initialFormData,
+  });
+
+  const firstNameValue = watch("first_name");
 
   const filteredCountries = useMemo<Country[]>(() => {
     const lowerCaseSearch = searchTerm.toLowerCase().trim();
@@ -57,35 +68,22 @@ function Signup() {
       );
     });
   }, [searchTerm]);
-  const [signupFormData, setSignupFormData] =
-    useState<SignupFormData>(initialFormData);
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSignupFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
 
-    if (phoneError) setPhoneError("");
-    if (emailError) setEmailError("");
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    updateFormData(signupFormData);
-    // const finalPayload = useRegistrationStore.getState().formData
-    // registerUser(finalPayload);
+  const onSubmit = (data: SignupFormData) => {
+    updateFormData(data);
     navigate({
       to: "/create-password",
     });
   };
 
-  const handleSelectLoginType = (loginType: LoginType) => {
-    setLoginType(loginType);
-    if (loginType === "phone number") {
-      updateFormData({ phone: "" });
-    } else {
+  const handleSelectLoginType = (type: LoginType) => {
+    setLoginType(type);
+    if (type === "phone number") {
+      setValue("email", "");
       updateFormData({ email: "" });
+    } else {
+      setValue("phone", "");
+      updateFormData({ phone: "" });
     }
   };
 
@@ -111,6 +109,11 @@ function Signup() {
     };
   }, [dropdownRef]);
 
+  // Determine which contact field is active for the submit button check
+  const phoneValue = watch("phone");
+  const emailValue = watch("email");
+  const contactFieldEmpty = loginType === "email" ? !emailValue : !phoneValue;
+
   return (
     <div className="max-h-[82vh] max-w-5/12 min-w-135 space-y-8 overflow-y-auto rounded-3xl bg-white p-12">
       <header className="space-y-2">
@@ -119,18 +122,16 @@ function Signup() {
         </h5>
         <h6 className="text-[#423C59]">Let's have your details</h6>
       </header>
-      <form className="space-y-8" onSubmit={handleSubmit}>
+      <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
         <section className="space-y-6">
           <div>
             <label className="mb-0.5 text-sm text-[#130B30]">First name</label>
             <div className="rounded-lg bg-[#F3F6F8] p-4">
               <input
-                name="first_name"
+                {...register("first_name")}
                 type="text"
                 className="w-11/12 border-none text-sm text-[#423C59] outline-0 placeholder:text-[#423C59] placeholder:opacity-70"
                 placeholder="Enter your first name"
-                value={signupFormData.first_name}
-                onChange={handleInputChange}
               />
             </div>
           </div>
@@ -138,12 +139,10 @@ function Signup() {
             <label className="mb-0.5 text-sm text-[#130B30]">Last name</label>
             <div className="rounded-lg bg-[#F3F6F8] p-4">
               <input
-                name="last_name"
+                {...register("last_name")}
                 type="text"
                 className="w-11/12 border-none text-sm text-[#423C59] outline-0 placeholder:text-[#423C59] placeholder:opacity-70"
                 placeholder="Enter your last name"
-                value={signupFormData.last_name}
-                onChange={handleInputChange}
               />
             </div>
           </div>
@@ -221,24 +220,33 @@ function Signup() {
                   </div>
                   <div
                     className={`flex w-full items-center justify-between rounded-lg border-2 p-4 transition-colors ${
-                      phoneError
+                      errors.phone
                         ? "border-red-500 bg-[#E52B670D]"
                         : "border-transparent bg-[#F3F6F8]"
                     }`}
                   >
                     <input
-                      name="phone"
+                      {...register("phone", {
+                        validate: (value) => {
+                          if (loginType !== "phone number") return true;
+                          if (!value) return "Phone number is required";
+                          // Basic numeric check (adjust pattern as needed)
+                          if (!/^\d[\d\s\-()]{6,}$/.test(value))
+                            return "Enter a valid phone number";
+                          return true;
+                        },
+                      })}
                       type="tel"
                       className="w-11/12 border-none text-sm text-[#423C59] outline-0 placeholder:text-[#423C59] placeholder:opacity-70 disabled:cursor-not-allowed disabled:opacity-70"
                       placeholder="081 **** 572"
-                      value={signupFormData.phone}
-                      disabled={!signupFormData.first_name}
-                      onChange={handleInputChange}
+                      disabled={!firstNameValue}
                     />
                   </div>
                 </div>
-                {phoneError && (
-                  <p className="mt-1 text-sm text-red-600">{phoneError}</p>
+                {errors.phone && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.phone.message}
+                  </p>
                 )}
                 <p
                   className="ml-auto w-fit cursor-pointer text-sm text-[#0A814A]"
@@ -252,23 +260,31 @@ function Signup() {
                 <label className="mb-0.5 text-sm text-[#130B30]">Email</label>
                 <div
                   className={`rounded-lg border-2 p-4 transition-colors ${
-                    emailError
+                    errors.email
                       ? "border-red-500 bg-[#E52B670D]"
                       : "border-transparent bg-[#F3F6F8]"
                   }`}
                 >
                   <input
-                    name="email"
+                    {...register("email", {
+                      validate: (value) => {
+                        if (loginType !== "email") return true;
+                        if (!value) return "Email is required";
+                        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+                          return "Enter a valid email address";
+                        return true;
+                      },
+                    })}
                     type="email"
                     className="w-11/12 border-none text-sm text-[#423C59] outline-0 placeholder:text-[#423C59] placeholder:opacity-70 disabled:cursor-not-allowed disabled:opacity-70"
                     placeholder="user@example.com"
-                    value={signupFormData.email}
-                    disabled={!signupFormData.first_name}
-                    onChange={handleInputChange}
+                    disabled={!firstNameValue}
                   />
                 </div>
-                {emailError && (
-                  <p className="mt-1 text-sm text-red-600">{emailError}</p>
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.email.message}
+                  </p>
                 )}
                 {/** 
                    <p
@@ -283,11 +299,7 @@ function Signup() {
           </>
         </section>
 
-        <Button
-          variant="primary"
-          type="submit"
-          disabled={!signupFormData.email && !signupFormData.phone}
-        >
+        <Button variant="primary" type="submit" disabled={contactFieldEmpty}>
           Sign up
         </Button>
       </form>
@@ -312,6 +324,3 @@ export default (parentRoute: AnyRoute) =>
       }
     },
   });
-
-// TODO: Update error handling, to return popop error messages
-// TODO: Update form validation
