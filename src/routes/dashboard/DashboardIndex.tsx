@@ -3,7 +3,6 @@ import StatCard from "@/components/dashboard/StatCard";
 import farmIcon from "/assets/icons/farm.svg";
 import FarmHealthCardWrapper from "@/components/dashboard/FarmHealthCard";
 import { FarmStatusCard } from "@/components/dashboard/FarmStatusCard";
-import { generateFarmStatus } from "@/data/farm_status.data";
 import { AddNewFarmSheet } from "@/components/dashboard/AddNewFarmSheet";
 import { useState } from "react";
 import { createRoute, Link, type AnyRoute } from "@tanstack/react-router";
