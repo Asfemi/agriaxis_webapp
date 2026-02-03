@@ -12,6 +12,18 @@ interface Coordinate {
   lng: number;
 }
 
+const RecenterMap: React.FC<{ position: [number, number] | null }> = ({
+  position,
+}) => {
+  const map = useMap();
+  useEffect(() => {
+    if (position) {
+      map.flyTo(position, 16, { animate: true });
+    }
+  }, [position, map]);
+  return null;
+};
+
 const GeomanController: React.FC<{
   setCoords: (coords: Coordinate[]) => void;
 }> = ({ setCoords }) => {
@@ -24,12 +36,15 @@ const GeomanController: React.FC<{
 
     leafletMap.pm.addControls({
       position: "topleft",
-      drawRectangle: true,
-      // drawMarker: false,
-      // drawPolygon: true,
-      // editMode: true,
-      // dragMode: true,
-      // removalMode: true,
+      drawPolygon: true,
+      drawRectangle: false,
+      drawMarker: false,
+      drawCircle: false,
+      drawPolyline: false,
+      drawCircleMarker: false,
+      drawText: false,
+      editMode: true,
+      removalMode: true,
     });
 
     leafletMap.pm.setGlobalOptions({
@@ -67,11 +82,30 @@ export const MapMeasurementCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;
   onConfirm: () => void;
-}> = ({ onClose, onConfirm }) => {
+}> = ({ onClose, isOpen, onConfirm }) => {
+  if (!isOpen) return null;
+
   const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
+  const [userPos, setUserPos] = useState<[number, number] | null>(null);
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserPos([pos.coords.latitude, pos.coords.longitude]);
+        },
+        (err) => console.error("Error getting location", err),
+        { enableHighAccuracy: true },
+      );
+    }
+  }, []);
+
+  const handleSave = () => {
+    console.log("coordinates", coordinates);
+  };
 
   return (
-    <section className="size-full px-7 overflow-y-auto">
+    <section className="size-full overflow-y-auto px-7">
       <header className="mb-10 flex items-center gap-3.5 pt-7">
         <button
           onClick={onClose}
@@ -80,12 +114,15 @@ export const MapMeasurementCard: React.FC<{
           <ChevronLeft size={24} className="text-[#434449]" />
         </button>
         <div>
-          <h5 className="font-neue text-xl font-bold text-[#130B30]">Map view</h5>
+          <h5 className="font-neue text-xl font-bold text-[#130B30]">
+            Map view
+          </h5>
         </div>
       </header>
-      <div className="h-135 mb-5">
+      <div className="mb-5 h-135">
         <MapContainer
-          center={[-1.2863, 36.8219]}
+          key={"leaflet"}
+          center={[6.5244, 3.3792]}
           zoom={16}
           className="h-full w-full"
           zoomControl={false}
@@ -94,20 +131,15 @@ export const MapMeasurementCard: React.FC<{
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             attribution="&copy; Esri"
           />
+          <RecenterMap position={userPos} />
           <GeomanController setCoords={setCoordinates} />
         </MapContainer>
-
-        {/* Coordinate Preview Footer */}
-        {coordinates.length > 0 && (
-          <div className="absolute bottom-4 left-1/2 z-[1000] -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-[10px] text-white backdrop-blur-md">
-            Vertices Captured: {coordinates.length}
-          </div>
-        )}
       </div>
       <div className="flex flex-col gap-4 pb-5">
-        <Button variant="primary">Save GPS coordinate</Button>
+        <Button type="button" variant="primary" onClick={handleSave}>
+          Save GPS coordinate
+        </Button>
       </div>
     </section>
   );
 };
-

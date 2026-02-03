@@ -57,12 +57,11 @@ const RequestSoilTestSheetsContainer: React.FC<{
             onConfirm={() => setCurrentView("leaflet_map")}
           />
         </Activity>
-        <Activity mode={currentView === "leaflet_map" ? "visible" : "hidden"}>
-          <MapMeasurementCard
-            onClose={() => setCurrentView("google_measurement")}
-            onConfirm={onClose}
-          />
-        </Activity>
+        <MapMeasurementCard
+          isOpen={currentView === "leaflet_map"}
+          onClose={() => setCurrentView("google_measurement")}
+          onConfirm={onClose}
+        />
         <Activity
           mode={currentView === "manual_measurement" ? "visible" : "hidden"}
         >

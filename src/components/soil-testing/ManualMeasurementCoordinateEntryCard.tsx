@@ -73,7 +73,7 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
   const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
 
   return (
-    <section className="size-full px-7 overflow-y-auto">
+    <section className="size-full overflow-y-auto px-7">
       <header className="mb-10 flex items-center gap-3.5 pt-7">
         <button
           onClick={onClose}
@@ -85,8 +85,9 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
           <h5 className="font-neue text-xl font-bold text-[#130B30]">Map</h5>
         </div>
       </header>
-      <div className="h-135 mb-5">
+      <div className="mb-5 h-135">
         <MapContainer
+          key={"manual"}
           center={[-1.2863, 36.8219]}
           zoom={16}
           className="h-full w-full"
