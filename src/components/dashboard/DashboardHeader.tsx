@@ -5,7 +5,7 @@ import NotificationPermissionModal from "@/components/dashboard/NotificationPerm
 import LocationPermissionModal from "@/components/dashboard/LocationPermissionModal";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { Link, useMatches } from "@tanstack/react-router";
-import { useMe } from "@/api/auth";
+import { useUserStore } from "@/stores/useUserStore";
 
 interface IconButtonProps {
   children: React.ReactNode;
@@ -22,7 +22,7 @@ const IconButton: React.FC<IconButtonProps> = ({ children, badge = false }) => (
 );
 
 const ProfileButton: React.FC<{ profilePath: string }> = ({ profilePath }) => {
-  const { data: user } = useMe();
+  const user = useUserStore((state) => state.user);
 
   return (
     <button className="flex items-center space-x-2 rounded-full border border-gray-200 bg-white p-1 pr-3 pl-1 transition duration-150 ease-in-out hover:shadow-md">

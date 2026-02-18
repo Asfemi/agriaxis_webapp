@@ -1,8 +1,32 @@
 import { Outlet, HeadContent } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "sonner";
+import { useMe } from "@/api/auth";
+import { useUserStore } from "@/stores/useUserStore";
+import { useEffect } from "react";
+import { saveOrgId } from "@/lib/utils";
 
 function DesktopOnlyOverlay() {
+  const { data: user, isLoading } = useMe();
+  const setUser = useUserStore((state) => state.setUser);
+
+  useEffect(() => {
+    if (user) {
+      setUser(user);
+      saveOrgId(user.organisations[0].id.toString());
+    }
+  }, [user]);
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-50">
+        <p className="animate-pulse text-xl font-medium text-gray-500">
+          Checking credentials...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-white md:hidden">
       <div className="max-w-sm px-6 text-center">
@@ -21,11 +45,14 @@ function DesktopOnlyOverlay() {
 }
 
 function App() {
+  const { isLoading } = useMe();
+
   return (
     <>
       <HeadContent />
       <DesktopOnlyOverlay />
-      <Outlet />
+      <Toaster position="top-right" richColors />
+      {!isLoading && <Outlet />}
       <TanStackRouterDevtools />
     </>
   );

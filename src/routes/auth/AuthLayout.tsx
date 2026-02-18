@@ -11,12 +11,11 @@ import { userToken } from "@/lib/utils";
 function AuthLayout() {
   return (
     <main className="relative grid h-screen w-screen place-items-center bg-[#E7F2ED]">
-      <Link to="/">
+      <Link to="/" className="absolute top-20 left-20">
         <img
           src={fullLogo}
           width={183}
           height={49}
-          className="absolute top-20 left-20"
         />
       </Link>
       <div className="z-5">

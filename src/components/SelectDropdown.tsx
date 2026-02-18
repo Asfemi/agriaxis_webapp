@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 export interface SelectOption {
   label: string;
   value: string;
+  disabled?: boolean;
 }
 
 interface BaseProps {
@@ -68,7 +69,9 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = (props) => {
     .map((o) => o.label)
     .join(", ");
 
-  const toggleValue = (val: string) => {
+  const toggleValue = (val: string, isDisabled?: boolean) => {
+    if (isDisabled) return;
+
     if (props.mode === "single") {
       props.onChange(val);
       setOpen(false);
@@ -125,32 +128,43 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = (props) => {
 
           {/* Options */}
           <div className="max-h-52 space-y-3 overflow-y-auto px-4 py-3">
-            {options.map((option) => (
-              <label
-                key={option.value}
-                onClick={() => toggleValue(option.value)}
-                className="flex items-center gap-3 text-sm text-gray-700"
-              >
-                {isMulti ? (
-                  <Checkbox
-                    className="data-[state=checked]:border-green-600 data-[state=checked]:bg-green-600 data-[state=checked]:text-white dark:data-[state=checked]:border-green-700 dark:data-[state=checked]:bg-blue-700"
-                    checked={selectedValues.includes(option.value)}
-                    onCheckedChange={() => toggleValue(option.value)}
-                  />
-                ) : (
-                  <div
-                    role="radio"
-                    onClick={() => toggleValue(option.value)}
-                    className="grid size-4 place-items-center rounded-full border border-[#0A814A] p-0.5"
-                  >
-                    {selectedValues.includes(option.value) && (
-                      <div className="size-full rounded-full bg-[#0A814A]"></div>
-                    )}
-                  </div>
-                )}
-                {option.label}
-              </label>
-            ))}
+            {options.map((option) => {
+              const isDisabled = option.disabled;
+
+              return (
+                <label
+                  key={option.value}
+                  onClick={() => !isDisabled && toggleValue(option.value)}
+                  className="flex items-center gap-3 text-sm text-gray-700"
+                >
+                  {isMulti ? (
+                    <Checkbox
+                      disabled={isDisabled}
+                      className="data-[state=checked]:border-green-600 data-[state=checked]:bg-green-600 data-[state=checked]:text-white dark:data-[state=checked]:border-green-700 dark:data-[state=checked]:bg-blue-700"
+                      checked={selectedValues.includes(option.value)}
+                      onCheckedChange={() =>
+                        !isDisabled && toggleValue(option.value)
+                      }
+                    />
+                  ) : (
+                    <div
+                      role="radio"
+                      onClick={() => toggleValue(option.value)}
+                      className={`grid size-4 place-items-center rounded-full border p-0.5 ${
+                        isDisabled ? "border-gray-300" : "border-[#0A814A]"
+                      }`}
+                    >
+                      {selectedValues.includes(option.value) && (
+                        <div className={`size-full rounded-full ${isDisabled ? "bg-gray-300" : "bg-[#0A814A]"}`}></div>
+                      )}
+                    </div>
+                  )}
+                  <span className={isDisabled ? "text-gray-400" : ""}>
+                    {option.label}
+                  </span>
+                </label>
+              );
+            })}
           </div>
 
           {/* Footer (multi only) */}

@@ -1,3 +1,4 @@
+import { useGetUsers } from "@/api/users";
 import { Button, DataTable } from "@/components";
 import StatusBadge from "@/components/StatusBadge";
 import {
@@ -8,15 +9,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AddNewUserSheet } from "@/components/users/AddNewUserSheet";
-import { generateUsers } from "@/data/user.data";
-import type { User } from "@/models/user.model";
+import type { UserSummary } from "@/models/user.model";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreVertical } from "lucide-react";
 import { Activity, useMemo, useState } from "react";
 
 function Users() {
-  const userColumns: ColumnDef<User>[] = [
+  const { data: users } = useGetUsers();
+  const userColumns: ColumnDef<UserSummary>[] = [
     {
       accessorKey: "id",
       header: "User ID",
@@ -24,15 +25,16 @@ function Users() {
     {
       id: "name",
       header: "User name",
-      accessorFn: (row) => `${row.name}`,
+      cell: ({ row }) => <div className="capitalize">{row.original.username}</div>
     },
     {
       accessorKey: "email",
       header: "Email",
     },
     {
-      accessorKey: "role",
+      id: "role",
       header: "Role",
+      cell: ({ row }) => <div className="capitalize">{row.original.role}</div>,
     },
     {
       accessorKey: "status",
@@ -40,7 +42,7 @@ function Users() {
       cell: ({ row }) => (
         <StatusBadge
           status={row.original.status}
-          variant={row.original.status === "active" ? "success" : "warning"}
+          variant={row.original.status === "healthy" ? "success" : "warning"}
         />
       ),
     },
@@ -66,7 +68,6 @@ function Users() {
     },
   ];
   const columns = useMemo(() => userColumns, []);
-  const [data] = useState(() => generateUsers(5));
   const [showAddUserForm, setShowAddUserForm] = useState(false);
 
   return (
@@ -86,7 +87,7 @@ function Users() {
               </Button>
             </div>
           </header>
-          <DataTable columns={columns} data={data} hideHeader={true} />
+          <DataTable columns={columns} data={users} hideHeader={true} />
         </div>
       </section>
       <Activity mode={showAddUserForm ? "visible" : "hidden"}>

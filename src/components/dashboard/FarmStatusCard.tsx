@@ -70,20 +70,20 @@ const FarmStatusCard: React.FC<FarmStatusCardProps> = ({
       <div className="mt-6 grid grid-cols-2 gap-4">
         <Stat
           label="Soil PH"
-          value={stats.soilPh}
+          value={stats.soilPh?.toLocaleString() || "N/A"}
           valueClass={styles.valueText}
         />
         <Stat
           label="Moisture"
-          value={stats.moisture}
+          value={stats.moisture?.toLocaleString() || "N/A"}
           valueClass={styles.valueText}
         />
         <Stat
           label="Nutrient"
-          value={stats.nutrient}
+          value={stats.nutrient?.toLocaleString() || "N/A"}
           valueClass={styles.valueText}
         />
-        <Stat label="Size" value={stats.size} />
+        <Stat label="Size" value={`${stats.size} Hectares`} />
       </div>
     </div>
   );
