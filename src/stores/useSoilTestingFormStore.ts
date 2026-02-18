@@ -2,7 +2,7 @@ import {
   SoilTestingSchema,
   type SoilTestingFormData,
   type SoilTestingState,
-} from "@/models/soil-testing-model";
+} from "@/models/soil-testing.model";
 import { create } from "zustand";
 
 const initialData: SoilTestingFormData = {
@@ -10,6 +10,7 @@ const initialData: SoilTestingFormData = {
   coordinatesCsv: "",
   crop: "",
   depth: "",
+  cost: 0
 };
 
 export const useSoilTestingFormStore = create<SoilTestingState>((set, get) => ({
@@ -18,6 +19,7 @@ export const useSoilTestingFormStore = create<SoilTestingState>((set, get) => ({
     coordinatesCsv: "",
     crop: "",
     depth: "",
+    cost: 0
   },
   errors: {},
 
@@ -58,5 +60,3 @@ export const useSoilTestingFormStore = create<SoilTestingState>((set, get) => ({
 
   resetForm: () => set({ formData: { ...initialData }, errors: {} }),
 }));
-
-

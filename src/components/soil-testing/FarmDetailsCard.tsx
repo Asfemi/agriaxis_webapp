@@ -10,7 +10,7 @@ import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import {
   SoilTestingSchema,
   type SoilTestingFormData,
-} from "@/models/soil-testing-model";
+} from "@/models/soil-testing.model";
 
 const CROP_TYPE_OPTIONS: { id: number; title: string }[] = [
   {

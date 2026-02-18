@@ -9,12 +9,18 @@ import "leaflet/dist/leaflet.css";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { useUserStore } from "@/stores/useUserStore";
 import {
-  useSoilTestingCost,
   useSoilTestingPayment,
   useSoilTestingPaymentInitialise,
+  useSoilTestingRun,
+  useSoilTestingUpload,
 } from "@/api/soil-testing";
 import { toast } from "sonner";
-import type { SoilTestingPaymentInitialiseResponse } from "@/models/soil-testing-model";
+import type { SoilTestingPaymentInitialiseResponse } from "@/models/soil-testing.model";
+import {
+  useCoordinatesStore,
+  type PointsFormData,
+} from "@/stores/useCoordinatesStore";
+import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
 
 interface Coordinate {
   lat: number;
@@ -90,17 +96,22 @@ const GeomanController: React.FC<{
 export const MapMeasurementCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;
-  onConfirm?: () => void;
-}> = ({ onClose, isOpen }) => {
+  onConfirm: () => void;
+}> = ({ onClose, isOpen, onConfirm }) => {
   if (!isOpen) return null;
 
   const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const { formData } = useSoilTestingFormStore();
   const user = useUserStore((state) => state.user);
-  const { data: cost } = useSoilTestingCost(Number(formData.depth));
   const { mutate: initialisePayment } = useSoilTestingPaymentInitialise();
   const { mutate: confirmPayment } = useSoilTestingPayment();
+  const { mutate: uploadSoilTest } = useSoilTestingUpload();
+  const { mutate: runSoilTest } = useSoilTestingRun();
+  const {
+    updateFormData: updateCoordinatesFormData,
+  } = useCoordinatesStore();
+  const { setResult } = useSoilTestingResultStore();
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -115,14 +126,20 @@ export const MapMeasurementCard: React.FC<{
   }, []);
 
   const handleSave = () => {
-    // console.log(formData);
+    const updates: Partial<PointsFormData> = {};
+
+    coordinates.forEach((coord, index) => {
+      const key = `point_${index + 1}` as keyof PointsFormData;
+      updates[key] = `${coord.lat.toFixed(6)},${coord.lng.toFixed(6)}`;
+    });
+
+    updateCoordinatesFormData(updates);
     const result = coordinates
       .map((coord) => `${coord.lat.toFixed(4)}:${coord.lng.toFixed(4)}`)
       .join(",");
-    console.log(result);
     const request = {
       farmId: formData.farm_id ?? "",
-      amount: cost?.amount ?? 0,
+      amount: formData.cost ?? 0,
       currency: "NGN",
       customer: {
         email: user?.email ?? "",
@@ -135,7 +152,7 @@ export const MapMeasurementCard: React.FC<{
       onSuccess: (data) => {
         toast.success("Payment initiated successfully!");
 
-        openPaymentModal(data);
+        openPaymentModal(data, result);
       },
       onError: () =>
         toast.error("Failed to initiate payment. Please try again."),
@@ -144,6 +161,7 @@ export const MapMeasurementCard: React.FC<{
 
   const openPaymentModal = (
     paymentData: SoilTestingPaymentInitialiseResponse,
+    coordinates: string,
   ) => {
     const { payment_link, tx_ref, amount, currency, farm_id } = paymentData;
 
@@ -167,21 +185,49 @@ export const MapMeasurementCard: React.FC<{
       ];
 
       if (!allowedOrigins.includes(event.origin)) return;
-      console.log("Event type:", event.data?.type);
 
       if (event.data?.type === "PAYMENT_COMPLETE") {
         messageReceived = true;
 
         const { status, transactionId } = event.data;
-        confirmPayment({
-          farmId: farm_id,
-          amount,
-          currency,
-          txRef: tx_ref,
-          transactionId: String(transactionId) ?? "",
-          status: status ?? "",
-          success: status === "successful" || status === "completed",
-        });
+        confirmPayment(
+          {
+            farmId: farm_id,
+            amount,
+            currency,
+            txRef: tx_ref,
+            transactionId: String(transactionId) ?? "",
+            status: status ?? "",
+            success: status === "successful" || status === "completed",
+          },
+          {
+            onSuccess: () => {
+              toast.success("Payment confirmed successfully!");
+              uploadSoilTest(
+                { farmId: farm_id, coordinatesCsv: coordinates },
+                {
+                  onSuccess: () => {
+                    toast.success("Soil test uploaded successfully!");
+                    runSoilTest(
+                      {
+                        farmId: farm_id,
+                        crop: formData.crop ?? "",
+                        depth: "0-20",
+                      },
+                      {
+                        onSuccess: (data) => {
+                          setResult(data);
+                          toast.success("Soil test run successfully!");
+                          onConfirm();
+                        },
+                      },
+                    );
+                  },
+                },
+              );
+            },
+          },
+        );
 
         cleanup();
       }
@@ -194,14 +240,12 @@ export const MapMeasurementCard: React.FC<{
             if (!messageReceived) cleanup();
           }, 500);
         } else {
-          console.log("No message received, closing popup");
           cleanup();
         }
       }
     }, 1000);
 
     const cleanup = () => {
-      console.log("Cleaning up listeners");
       clearInterval(checkClosed);
       window.removeEventListener("message", handleMessage);
     };

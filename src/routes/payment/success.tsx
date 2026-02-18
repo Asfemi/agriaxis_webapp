@@ -25,7 +25,7 @@ function Success() {
         window.location.origin,
       );
 
-      const timeout = setTimeout(() => window.close(), 350);
+      const timeout = setTimeout(() => window.close(), 500);
       return () => clearTimeout(timeout);
     }
   }, [search]);

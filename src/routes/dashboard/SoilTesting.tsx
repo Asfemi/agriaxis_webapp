@@ -73,8 +73,8 @@ function SoilTesting() {
                   <img src={testingIconGrey} width={20} height={20} />
                 </div>
               }
-              title="Total Revenue"
-              value={data.total_revenue}
+              title="Total Expense"
+              value={`₦${data.total_revenue.toLocaleString('en-GB', { maximumFractionDigits: 2 })}`}
             />
             <StatCard
               icon={

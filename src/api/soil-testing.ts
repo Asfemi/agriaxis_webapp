@@ -1,11 +1,20 @@
-import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import apiClient from "@/api/api-client";
 import type {
   SoilTestingDashboard,
   SoilTestingPaymentRequest,
   SoilTestingPaymentInitialiseRequest,
   SoilTestingPaymentInitialiseResponse,
-} from "@/models/soil-testing-model";
+  SoilTestingUploadRequest,
+  SoilTestingRunRequest,
+  SoilTestingResult,
+  SoilTestingRecommendationResponse,
+} from "@/models/soil-testing.model";
 
 export const useSoilTestingDashboard = () => {
   return useSuspenseQuery({
@@ -36,16 +45,19 @@ export const useSoilTestingCost = (hectares: number) => {
 export const useSoilTestingPaymentInitialise = () => {
   return useMutation({
     mutationFn: async (request: SoilTestingPaymentInitialiseRequest) => {
-      const response = await apiClient.post<SoilTestingPaymentInitialiseResponse>(
-        "/soil-testing/payments/flutterwave/initialize",
-        request,
-      );
+      const response =
+        await apiClient.post<SoilTestingPaymentInitialiseResponse>(
+          "/soil-testing/payments/flutterwave/initialize",
+          request,
+        );
       return response.data;
     },
   });
 };
 
 export const useSoilTestingPayment = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (request: SoilTestingPaymentRequest) => {
       const response = await apiClient.post(
@@ -53,6 +65,61 @@ export const useSoilTestingPayment = () => {
         request,
       );
       return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["soil-testing-dashboard"] });
+    },
+  });
+};
+
+export const useSoilTestingUpload = () => {
+  return useMutation({
+    mutationFn: async (data: SoilTestingUploadRequest) => {
+      const response = await apiClient.post("/soil-testing/farm/upload", data);
+      return response.data;
+    },
+  });
+};
+
+export const useSoilTestingRun = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: SoilTestingRunRequest) => {
+      const response = await apiClient.post<SoilTestingResult>(
+        "/soil-testing/run",
+        data,
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["soil-testing-dashboard"] });
+    },
+  });
+};
+
+export const useSoilTestingRecommendation = (id: number) => {
+  return useQuery({
+    queryKey: ["soil-testing-recommendation", id],
+    queryFn: async () => {
+      const { data } = await apiClient.get<SoilTestingRecommendationResponse>(
+        `/soil-testing/results/${id}/recommendation`,
+      );
+      return data;
+    },
+    enabled: !!id,
+  });
+};
+
+export const useSoilTestingResults = (farmId?: string) => {
+  return useQuery({
+    queryKey: ["soil-testing-results", farmId],
+    queryFn: async () => {
+      const { data } = await apiClient.get<SoilTestingResult[]>(
+        "/soil-testing/results",
+        { params: { farmId } },
+      );
+      return data;
     },
   });
 };
