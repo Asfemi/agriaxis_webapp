@@ -1,4 +1,8 @@
-import { useSoilTestingResults } from "@/api/soil-testing";
+import {
+  useDeleteSoilTestingResult,
+  useRenameSoilTestingResult,
+  useSoilTestingResults,
+} from "@/api/soil-testing";
 import { DataTable } from "@/components/DataTable";
 import {
   DropdownMenu,
@@ -8,10 +12,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/utils";
-import type { SoilTestingResult, Transaction } from "@/models/soil-testing.model";
+import type {
+  SoilTestingResult,
+  Transaction,
+} from "@/models/soil-testing.model";
 import { type ColumnDef } from "@tanstack/react-table";
 import { LoaderCircle, MoreVertical } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { RenameResultModal } from "../dashboard/RenameResultModal";
+import { toast } from "sonner";
 
 const StatusBadge: React.FC<{ status: Transaction["status"] }> = ({
   status,
@@ -22,7 +31,7 @@ const StatusBadge: React.FC<{ status: Transaction["status"] }> = ({
 
   return (
     <span
-      className={`inline-flex capitalize items-center rounded-full px-3 py-1 text-sm font-medium ${bgColor} ${textColor}`}
+      className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium capitalize ${bgColor} ${textColor}`}
     >
       {status}
     </span>
@@ -31,6 +40,26 @@ const StatusBadge: React.FC<{ status: Transaction["status"] }> = ({
 
 const SoilTestingResultsTable = () => {
   const { data: results, isLoading } = useSoilTestingResults();
+  const { mutate: deleteResult } = useDeleteSoilTestingResult();
+  const { mutate: renameResult } = useRenameSoilTestingResult();
+  const [showRenameResultModal, setShowRenameResultModal] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<SoilTestingResult>();
+
+  const handleDeleteResult = (id: number) => {
+    deleteResult(id);
+  };
+
+  const handleRenameResult = ( result: SoilTestingResult ) => {
+    setShowRenameResultModal(true);
+    setSelectedResult(result);
+  };
+
+  const handleConfirmRenameResult = (newName: string, result: SoilTestingResult) => {
+    renameResult({ id: result.id, name: newName }, { onSuccess: () => {
+      toast.success("Result renamed successfully!");
+      setShowRenameResultModal(false);
+    } });
+  }
 
   const soilColumns: ColumnDef<SoilTestingResult>[] = [
     {
@@ -46,32 +75,34 @@ const SoilTestingResultsTable = () => {
       header: "Status",
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
     },
-      {
-        accessorKey: "completed_at",
-        header: "Date",
-        cell: ({row}) => <div>{formatDate(row.original.completed_at)}</div>,
-      },
-      {
-        id: "actions",
-        header: "Actions",
-        cell: () => (
-          <div className="">
+    {
+      accessorKey: "completed_at",
+      header: "Date",
+      cell: ({ row }) => <div>{formatDate(row.original.completed_at)}</div>,
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="">
           <DropdownMenu>
-          <DropdownMenuTrigger>
-          <MoreVertical size={15} />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-          <DropdownMenuLabel>Action</DropdownMenuLabel>
-          <DropdownMenuItem>View result</DropdownMenuItem>
-          <DropdownMenuItem>Rename result</DropdownMenuItem>
-          <DropdownMenuItem>
-          <span className="text-[#E61504CC]">Delete Result</span>
-          </DropdownMenuItem>
-          </DropdownMenuContent>
+            <DropdownMenuTrigger>
+              <MoreVertical size={15} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Action</DropdownMenuLabel>
+              {/**<DropdownMenuItem>View result</DropdownMenuItem>*/}
+              <DropdownMenuItem onClick={() => handleRenameResult(row.original)}>Rename result</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleDeleteResult(row.original.id)}
+              >
+                <span className="text-[#E61504CC]">Delete Result</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
           </DropdownMenu>
-          </div>
-        ),
-      },
+        </div>
+      ),
+    },
   ];
 
   const columns = useMemo(() => soilColumns, []);
@@ -82,6 +113,12 @@ const SoilTestingResultsTable = () => {
   return (
     <>
       <DataTable title="Test Result" columns={columns} data={data} />
+      <RenameResultModal 
+        isOpen={showRenameResultModal}
+        value={selectedResult?.name ?? ""}
+        onSave={(newName) => handleConfirmRenameResult(newName, selectedResult!)}
+        onClose={() => setShowRenameResultModal(false)}
+      />
     </>
   );
 };
