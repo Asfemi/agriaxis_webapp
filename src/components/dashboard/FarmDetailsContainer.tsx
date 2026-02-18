@@ -16,7 +16,9 @@ import { RenameResultModal } from "@/components/dashboard/RenameResultModal";
 import { Link, useParams } from "@tanstack/react-router";
 import { useGetFarm } from "@/api/farms";
 
-export const FarmDetailsContainer = ({ farmListPath = "/dashboard/dashboard/farms" }) => {
+export const FarmDetailsContainer = ({
+  farmListPath = "/dashboard/dashboard/farms",
+}) => {
   const { id } = useParams({ from: "/dashboard/dashboard/farms/details/$id" });
 
   const { data: farmData } = useGetFarm(Number(id));
@@ -153,20 +155,18 @@ export const FarmDetailsContainer = ({ farmListPath = "/dashboard/dashboard/farm
           <DataTable title="Test performed" columns={columns} data={data} />
         </header>
       </main>
-      {/** 
-         <ViewSoilTestResultSheet
-         onClose={() => setViewSoilTestResult(false)}
-         isOpen={viewSoilTestResult}
-         test={data[0]}
-         />
-         <RenameResultModal
-         isOpen={showRenameResultModal}
+      <ViewSoilTestResultSheet
+        onClose={() => setViewSoilTestResult(false)}
+        isOpen={viewSoilTestResult}
+        test={data[0]}
+      />
+      <RenameResultModal
+        isOpen={showRenameResultModal}
         // value={data[0].testID}
         value={"1"}
         onSave={() => setShowRenameResultModal(false)}
         onClose={() => setShowRenameResultModal(false)}
-        />
-        */}
+      />
     </>
   );
 };
