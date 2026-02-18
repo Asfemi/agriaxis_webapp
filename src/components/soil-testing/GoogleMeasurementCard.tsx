@@ -11,8 +11,8 @@ export const GoogleMeasurementCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;
   onConfirm: () => void;
-}> = ({ onClose, onConfirm }) => {
-  //   if (!isOpen) return null;
+}> = ({ isOpen, onClose, onConfirm }) => {
+  if (!isOpen) return null;
 
   return (
     <section className="size-full">
@@ -29,7 +29,7 @@ export const GoogleMeasurementCard: React.FC<{
               <h5 className="font-neue text-xl font-bold text-[#130B30]">
                 Leaflet measurement
               </h5>
-              <h6 className="text-[#423C59] w-4/5">
+              <h6 className="w-4/5 text-[#423C59]">
                 You can move any of the points on the next map to get accurate
                 farm measurement
               </h6>

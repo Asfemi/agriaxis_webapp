@@ -6,6 +6,15 @@ import L from "leaflet";
 import "@geoman-io/leaflet-geoman-free";
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import "leaflet/dist/leaflet.css";
+import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
+import { useUserStore } from "@/stores/useUserStore";
+import {
+  useSoilTestingCost,
+  useSoilTestingPayment,
+  useSoilTestingPaymentInitialise,
+} from "@/api/soil-testing";
+import { toast } from "sonner";
+import type { SoilTestingPaymentInitialiseResponse } from "@/models/soil-testing-model";
 
 interface Coordinate {
   lat: number;
@@ -87,6 +96,11 @@ export const MapMeasurementCard: React.FC<{
 
   const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
+  const { formData } = useSoilTestingFormStore();
+  const user = useUserStore((state) => state.user);
+  const { data: cost } = useSoilTestingCost(Number(formData.depth));
+  const { mutate: initialisePayment } = useSoilTestingPaymentInitialise();
+  const { mutate: confirmPayment } = useSoilTestingPayment();
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -101,7 +115,85 @@ export const MapMeasurementCard: React.FC<{
   }, []);
 
   const handleSave = () => {
-    console.log("coordinates", coordinates);
+    // console.log(formData);
+    const result = coordinates
+      .map((coord) => `${coord.lat.toFixed(4)}:${coord.lng.toFixed(4)}`)
+      .join(",");
+    const request = {
+      farmId: formData.farm_id ?? "",
+      amount: cost?.amount ?? 0,
+      currency: "NGN",
+      customer: {
+        email: user?.email ?? "",
+        name: user?.name ?? "",
+        phonenumber: user?.phone ?? "",
+      },
+    };
+
+    initialisePayment(request, {
+      onSuccess: (data) => {
+        toast.success("Payment initiated successfully!");
+
+        openPaymentModal(data);
+      },
+      onError: () =>
+        toast.error("Failed to initiate payment. Please try again."),
+    });
+  };
+
+  const openPaymentModal = (
+    paymentData: SoilTestingPaymentInitialiseResponse,
+  ) => {
+    const { payment_link, tx_ref, amount, currency, farm_id } = paymentData;
+
+    const popup = window.open(
+      payment_link,
+      "flutterwave_payment",
+      "width=800,height=600,scrollbars=yes,resizable=yes,left=200,top=100",
+    );
+
+    if (!popup) {
+      toast.error("Popup blocked! Please allow popups and try again.");
+      return;
+    }
+
+    const handleMessage = (event: MessageEvent) => {
+      const allowedOrigins = [
+        window.location.origin,
+        "https://agriaxis-webapp.vercel.app",
+      ];
+
+      if (!allowedOrigins.includes(event.origin)) return;
+
+      if (event.data?.type === "PAYMENT_COMPLETE") {
+        const { status, transactionId } = event.data;
+
+        confirmPayment({
+          farmId: farm_id,
+          amount,
+          currency,
+          txRef: tx_ref,
+          transactionId: transactionId ?? "",
+          status: status ?? "",
+          success: status === "successful" || status === "completed",
+        });
+
+        cleanup();
+      }
+    };
+
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        cleanup();
+      }
+    }, 1000);
+
+    const cleanup = () => {
+      clearInterval(checkClosed);
+      window.removeEventListener("message", handleMessage);
+    };
+
+    window.addEventListener("message", handleMessage);
   };
 
   return (

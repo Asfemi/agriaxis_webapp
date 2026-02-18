@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { useMe } from "@/api/auth";
 import { useUserStore } from "@/stores/useUserStore";
 import { useEffect } from "react";
+import { saveOrgId } from "@/lib/utils";
 
 function DesktopOnlyOverlay() {
   const { data: user, isLoading } = useMe();
@@ -12,6 +13,7 @@ function DesktopOnlyOverlay() {
   useEffect(() => {
     if (user) {
       setUser(user);
+      saveOrgId(user.organisations[0].id.toString());
     }
   }, [user]);
 

@@ -1,41 +1,79 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, X } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useState } from "react";
 import { ManualMeasurementCoordinateEntryCard } from "./ManualMeasurementCoordinateEntryCard";
+import { useCoordinatesStore } from "@/stores/useCoordinatesStore";
 
 const MEASUREMENT_STEPS = [
   "Stand at each corner of your land",
-  "Mark/save GPS coordinates for each corner",
+  "Enter GPS coordinates for each corner",
   "Record 4 points for your farm land",
-];
-
-const POINTS = [
-  {
-    title: "Point 1",
-    coordinate: "",
-  },
-  {
-    title: "Point 2",
-    coordinate: "",
-  },
-  {
-    title: "Point 3",
-    coordinate: "",
-  },
-  {
-    title: "Point 4",
-    coordinate: "",
-  },
 ];
 
 export const ManualMeasurementCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;
   onConfirm: () => void;
-}> = ({ onClose, onConfirm }) => {
-  //   if (!isOpen) return null;
+}> = ({ isOpen, onClose, onConfirm }) => {
+  if (!isOpen) return null;
   const [openCoordinatesSelection, setOpenCoordinatesSelection] =
     useState(false);
+  const { formData, updateFormData } = useCoordinatesStore();
+
+  const handleSelectCoordinate = (index: number) => {
+    const currentPoint = index + 1;
+    updateFormData({ currentPoint: currentPoint.toString() });
+    setOpenCoordinatesSelection(true);
+  };
+
+  const handleRemoveCoordinate = (index: number) => {
+    const pointKey = `point_${index + 1}` as keyof typeof formData;
+    updateFormData({ [pointKey]: "" });
+  };
+
+  const formatCoordinate = (coord: string) => {
+    if (!coord) return "";
+    const [lat, lng] = coord.split(",").map(Number);
+
+    /**
+     * @description Convert to degrees, minutes, seconds format
+     * @param value - The value to be converted
+     * @param isLat - Whether the value is latitude or longitude
+     * @returns The formatted coordinate string in degrees, minutes, seconds format
+     */
+    const formatDMS = (value: number, isLat: boolean) => {
+      const absolute = Math.abs(value);
+      const degrees = Math.floor(absolute);
+      const minutesFloat = (absolute - degrees) * 60;
+      const minutes = Math.floor(minutesFloat);
+      const seconds = ((minutesFloat - minutes) * 60).toFixed(1);
+      const direction = isLat
+        ? value >= 0
+          ? "N"
+          : "S"
+        : value >= 0
+          ? "E"
+          : "W";
+
+      return `${degrees}°${minutes}'${seconds}"${direction}`;
+    };
+
+    return `${formatDMS(lat, true)}, ${formatDMS(lng, false)}`;
+  };
+
+  const points = [
+    { title: "Point 1", coordinate: formData.point_1 },
+    { title: "Point 2", coordinate: formData.point_2 },
+    { title: "Point 3", coordinate: formData.point_3 },
+    { title: "Point 4", coordinate: formData.point_4 },
+  ];
+
+  /**
+   * @description Handles the confirmation of the soil testing form
+   */
+  const handleConfirm = () => {
+    onConfirm();
+  };
 
   return (
     <>
@@ -54,7 +92,7 @@ export const ManualMeasurementCard: React.FC<{
                   <h5 className="font-neue text-xl font-bold text-[#130B30]">
                     Manual measurement
                   </h5>
-                  <h6 className="text-[#423C59] w-4/5">
+                  <h6 className="w-4/5 text-[#423C59]">
                     You can move any of the points on the next map to get
                     accurate farm measurement
                   </h6>
@@ -62,30 +100,60 @@ export const ManualMeasurementCard: React.FC<{
               </header>
               <section className="mx-20 space-y-10 pb-10">
                 <div className="grid grid-cols-3 gap-3">
-                  {POINTS.map((entry, index) => (
+                  {points.map((point, index) => (
                     <div
                       key={index}
-                      className="rounded-xl border border-[#0A814A] bg-[#E7F2ED] p-3 pb-7"
-                      onClick={() => setOpenCoordinatesSelection(true)}
+                      className={`rounded-xl border p-3 pb-7 transition-all ${
+                        point.coordinate
+                          ? "border-[#0A814A] bg-[#181B11] text-white"
+                          : "cursor-pointer border-[#0A814A] bg-[#E7F2ED]"
+                      }`}
+                      onClick={() =>
+                        !point.coordinate && handleSelectCoordinate(index)
+                      }
                     >
-                      <div className="mb-3">
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M10 1.875C8.39303 1.875 6.82214 2.35152 5.486 3.24431C4.14985 4.1371 3.10844 5.40605 2.49348 6.8907C1.87852 8.37535 1.71762 10.009 2.03112 11.5851C2.34463 13.1612 3.11846 14.6089 4.25476 15.7452C5.39106 16.8815 6.8388 17.6554 8.4149 17.9689C9.99099 18.2824 11.6247 18.1215 13.1093 17.5065C14.594 16.8916 15.8629 15.8502 16.7557 14.514C17.6485 13.1779 18.125 11.607 18.125 10C18.1227 7.84581 17.266 5.78051 15.7427 4.25727C14.2195 2.73403 12.1542 1.87727 10 1.875ZM10 16.875C8.64026 16.875 7.31105 16.4718 6.18046 15.7164C5.04987 14.9609 4.16868 13.8872 3.64833 12.6309C3.12798 11.3747 2.99183 9.99237 3.2571 8.65875C3.52238 7.32513 4.17716 6.10013 5.13864 5.13864C6.10013 4.17716 7.32514 3.52237 8.65876 3.2571C9.99238 2.99183 11.3747 3.12798 12.631 3.64833C13.8872 4.16868 14.9609 5.04987 15.7164 6.18045C16.4718 7.31104 16.875 8.64025 16.875 10C16.8729 11.8227 16.1479 13.5702 14.8591 14.8591C13.5702 16.1479 11.8227 16.8729 10 16.875ZM13.75 10C13.75 10.1658 13.6842 10.3247 13.5669 10.4419C13.4497 10.5592 13.2908 10.625 13.125 10.625H10.625V13.125C10.625 13.2908 10.5592 13.4497 10.4419 13.5669C10.3247 13.6842 10.1658 13.75 10 13.75C9.83424 13.75 9.67527 13.6842 9.55806 13.5669C9.44085 13.4497 9.375 13.2908 9.375 13.125V10.625H6.875C6.70924 10.625 6.55027 10.5592 6.43306 10.4419C6.31585 10.3247 6.25 10.1658 6.25 10C6.25 9.83424 6.31585 9.67527 6.43306 9.55806C6.55027 9.44085 6.70924 9.375 6.875 9.375H9.375V6.875C9.375 6.70924 9.44085 6.55027 9.55806 6.43306C9.67527 6.31585 9.83424 6.25 10 6.25C10.1658 6.25 10.3247 6.31585 10.4419 6.43306C10.5592 6.55027 10.625 6.70924 10.625 6.875V9.375H13.125C13.2908 9.375 13.4497 9.44085 13.5669 9.55806C13.6842 9.67527 13.75 9.83424 13.75 10Z"
-                            fill="#0A814A"
-                          />
-                        </svg>
+                      <div className="mb-3 flex items-start justify-between">
+                        {point.coordinate ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveCoordinate(index);
+                            }}
+                            className="grid size-5 cursor-pointer place-items-center rounded-full bg-white/80 hover:bg-white/70"
+                          >
+                            <X size={14} className="text-red-400" />
+                          </button>
+                        ) : (
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M10 1.875C8.39303 1.875 6.82214 2.35152 5.486 3.24431C4.14985 4.1371 3.10844 5.40605 2.49348 6.8907C1.87852 8.37535 1.71762 10.009 2.03112 11.5851C2.34463 13.1612 3.11846 14.6089 4.25476 15.7452C5.39106 16.8815 6.8388 17.6554 8.4149 17.9689C9.99099 18.2824 11.6247 18.1215 13.1093 17.5065C14.594 16.8916 15.8629 15.8502 16.7557 14.514C17.6485 13.1779 18.125 11.607 18.125 10C18.1227 7.84581 17.266 5.78051 15.7427 4.25727C14.2195 2.73403 12.1542 1.87727 10 1.875ZM10 16.875C8.64026 16.875 7.31105 16.4718 6.18046 15.7164C5.04987 14.9609 4.16868 13.8872 3.64833 12.6309C3.12798 11.3747 2.99183 9.99237 3.2571 8.65875C3.52238 7.32513 4.17716 6.10013 5.13864 5.13864C6.10013 4.17716 7.32514 3.52237 8.65876 3.2571C9.99238 2.99183 11.3747 3.12798 12.631 3.64833C13.8872 4.16868 14.9609 5.04987 15.7164 6.18045C16.4718 7.31104 16.875 8.64025 16.875 10C16.8729 11.8227 16.1479 13.5702 14.8591 14.8591C13.5702 16.1479 11.8227 16.8729 10 16.875ZM13.75 10C13.75 10.1658 13.6842 10.3247 13.5669 10.4419C13.4497 10.5592 13.2908 10.625 13.125 10.625H10.625V13.125C10.625 13.2908 10.5592 13.4497 10.4419 13.5669C10.3247 13.6842 10.1658 13.75 10 13.75C9.83424 13.75 9.67527 13.6842 9.55806 13.5669C9.44085 13.4497 9.375 13.2908 9.375 13.125V10.625H6.875C6.70924 10.625 6.55027 10.5592 6.43306 10.4419C6.31585 10.3247 6.25 10.1658 6.25 10C6.25 9.83424 6.31585 9.67527 6.43306 9.55806C6.55027 9.44085 6.70924 9.375 6.875 9.375H9.375V6.875C9.375 6.70924 9.44085 6.55027 9.55806 6.43306C9.67527 6.31585 9.83424 6.25 10 6.25C10.1658 6.25 10.3247 6.31585 10.4419 6.43306C10.5592 6.55027 10.625 6.70924 10.625 6.875V9.375H13.125C13.2908 9.375 13.4497 9.44085 13.5669 9.55806C13.6842 9.67527 13.75 9.83424 13.75 10Z"
+                              fill="#0A814A"
+                            />
+                          </svg>
+                        )}
                       </div>
-                      <p className="font-neue font-semibold text-[#130B30]">
-                        {entry.title}
+                      <p
+                        className={`font-neue mb-1 font-semibold ${
+                          point.coordinate ? "text-white" : "text-[#130B30]"
+                        }`}
+                      >
+                        {point.title}
                       </p>
-                      <p className="text-sm text-[#615C74]">Add Coordinate</p>
+                      <p
+                        className={`text-xs ${
+                          point.coordinate ? "text-white/90" : "text-[#615C74]"
+                        }`}
+                      >
+                        {point.coordinate
+                          ? formatCoordinate(point.coordinate)
+                          : "Add Coordinate"}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -162,7 +230,16 @@ export const ManualMeasurementCard: React.FC<{
             </div>
 
             <div className="mx-20">
-              <Button onClick={onConfirm} variant="tertiary">
+              <Button
+                onClick={handleConfirm}
+                variant="primary"
+                disabled={
+                  !formData.point_1 ||
+                  !formData.point_2 ||
+                  !formData.point_3 ||
+                  !formData.point_4
+                }
+              >
                 Done
               </Button>
             </div>

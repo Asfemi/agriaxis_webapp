@@ -1,18 +1,30 @@
 import { Button } from "@/components/Button";
+import farmIcon from "/assets/icons/farm.svg";
 import StatCard from "@/components/dashboard/StatCard";
 import { SoilTestingResultsTable } from "@/components/soil-testing/SoilTestResultsTable";
-import processingIcon from "/assets/icons/processing.svg";
 import soilEmptyIcon from "/assets/icons/soil-empty.png";
 import soilIcon from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
 import testingIcon from "/assets/icons/testing.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RequestSoilTestSheetsContainer } from "@/components/soil-testing/RequestSoilTestSheetsContainer";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
+import {
+  useSoilTestingCost,
+  useSoilTestingDashboard,
+} from "@/api/soil-testing";
+import { LoaderCircle } from "lucide-react";
 
 function SoilTesting() {
   const [showRequestTest, setShowRequestTest] = useState(false);
-  const IS_EMPTY = false;
+  const [IS_EMPTY, setIsEmpty] = useState(false);
+  const { data } = useSoilTestingDashboard();
+  const { data: cost, isLoading: isLoadingCost } = useSoilTestingCost(1);
+
+  useEffect(() => {
+    const isEmpty = Object.values(data).every((value) => value === 0);
+    setIsEmpty(isEmpty);
+  }, [data]);
 
   return (
     <>
@@ -24,10 +36,15 @@ function SoilTesting() {
             </h1>
             <div className="w-fit">
               <Button
+                disabled={isLoadingCost}
                 variant="primary"
                 onClick={() => setShowRequestTest(true)}
               >
-                Request Test ₦25,000
+                {isLoadingCost ? (
+                  <LoaderCircle className="mx-auto animate-spin" />
+                ) : (
+                  `Request Test ₦${cost?.amount ?? 0}`
+                )}
               </Button>
             </div>
           </header>
@@ -39,7 +56,7 @@ function SoilTesting() {
                 </div>
               }
               title="Total Soil Tests"
-              value="0"
+              value={data.total_soil_tests}
             />
             <StatCard
               icon={
@@ -48,7 +65,7 @@ function SoilTesting() {
                 </div>
               }
               title="Pending Tests"
-              value="0"
+              value={data.pending_payments}
             />
             <StatCard
               icon={
@@ -56,17 +73,17 @@ function SoilTesting() {
                   <img src={testingIconGrey} width={20} height={20} />
                 </div>
               }
-              title="Completed Tests"
-              value="0"
+              title="Total Revenue"
+              value={data.total_revenue}
             />
             <StatCard
               icon={
                 <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#4F3824] bg-[#EDEBE9]">
-                  <img src={processingIcon} width={20} height={20} />
+                  <img src={farmIcon} width={20} height={20} />
                 </div>
               }
-              title="Average turnaround time"
-              value="0"
+              title="Total farms"
+              value={data.total_farms}
             />
           </div>
         </section>

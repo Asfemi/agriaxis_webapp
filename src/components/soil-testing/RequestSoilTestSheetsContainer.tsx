@@ -1,5 +1,5 @@
 import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
-import { Activity, useState } from "react";
+import { useState } from "react";
 import { FarmSizeForMeasurementCard } from "@/components/soil-testing/FarmSizeForMeasurementCard";
 import { FarmMeasurementMethodCard } from "@/components/soil-testing/FarmMeasurementMethodCard";
 import { GoogleMeasurementCard } from "@/components/soil-testing/GoogleMeasurementCard";
@@ -20,6 +20,10 @@ const RequestSoilTestSheetsContainer: React.FC<{
     }
   };
 
+  const handleConfirmSoilTesting = () => {
+
+  }
+
   return (
     <section
       className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity"
@@ -29,47 +33,36 @@ const RequestSoilTestSheetsContainer: React.FC<{
         className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <Activity mode={currentView === "details" ? "visible" : "hidden"}>
-          <FarmDetailsCard
-            onClose={onClose}
-            onConfirm={() => setCurrentView("size")}
-          />
-        </Activity>
-        <Activity mode={currentView === "size" ? "visible" : "hidden"}>
-          <FarmSizeForMeasurementCard
-            onClose={() => setCurrentView("details")}
-            onConfirm={() => setCurrentView("measurement_method")}
-          />
-        </Activity>
-        <Activity
-          mode={currentView === "measurement_method" ? "visible" : "hidden"}
-        >
-          <FarmMeasurementMethodCard
-            onClose={() => setCurrentView("size")}
-            onConfirm={handleMeasurementMethodSelection}
-          />
-        </Activity>
-        <Activity
-          mode={currentView === "google_measurement" ? "visible" : "hidden"}
-        >
-          <GoogleMeasurementCard
-            onClose={() => setCurrentView("measurement_method")}
-            onConfirm={() => setCurrentView("leaflet_map")}
-          />
-        </Activity>
+        <FarmDetailsCard
+          isOpen={currentView === "details"}
+          onClose={onClose}
+          onConfirm={() => setCurrentView("size")}
+        />
+        <FarmSizeForMeasurementCard
+          isOpen={currentView === "size"}
+          onClose={() => setCurrentView("details")}
+          onConfirm={() => setCurrentView("measurement_method")}
+        />
+        <FarmMeasurementMethodCard
+          isOpen={currentView === "measurement_method"}
+          onClose={() => setCurrentView("size")}
+          onConfirm={handleMeasurementMethodSelection}
+        />
+        <GoogleMeasurementCard
+          isOpen={currentView === "google_measurement"}
+          onClose={() => setCurrentView("measurement_method")}
+          onConfirm={() => setCurrentView("leaflet_map")}
+        />
         <MapMeasurementCard
           isOpen={currentView === "leaflet_map"}
           onClose={() => setCurrentView("google_measurement")}
-          onConfirm={onClose}
+          onConfirm={handleConfirmSoilTesting}
         />
-        <Activity
-          mode={currentView === "manual_measurement" ? "visible" : "hidden"}
-        >
-          <ManualMeasurementCard
-            onClose={() => setCurrentView("measurement_method")}
-            onConfirm={onClose}
-          />
-        </Activity>
+        <ManualMeasurementCard
+          isOpen={currentView === "manual_measurement"}
+          onClose={() => setCurrentView("measurement_method")}
+          onConfirm={handleConfirmSoilTesting}
+        />
       </section>
     </section>
   );

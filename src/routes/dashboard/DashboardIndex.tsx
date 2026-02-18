@@ -8,12 +8,20 @@ import { useState } from "react";
 import { createRoute, Link, type AnyRoute } from "@tanstack/react-router";
 import { useGetDashboard } from "@/api/farms";
 import type { FarmStatus } from "@/models/farm-status.model";
-
+import { useUserStore } from "@/stores/useUserStore";
 
 function DashboardIndex({ farmListPath = "farms" }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const user = useUserStore((state) => state.user);
   const { data } = useGetDashboard();
 
+  if (!user?.organisations?.[0]?.id) {
+    return (
+      <div className="flex items-center justify-center p-6">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
   return (
     <>
       <div className="pb-4">
@@ -89,7 +97,12 @@ function DashboardIndex({ farmListPath = "farms" }) {
                   key={index}
                   title={entry.farm_name}
                   status={entry.farm_health.toLowerCase() as FarmStatus}
-                  stats={{ soilPh: entry.soil_pH, moisture: entry.moisture, nutrient: entry.nutrient, size: entry.size }}
+                  stats={{
+                    soilPh: entry.soil_pH,
+                    moisture: entry.moisture,
+                    nutrient: entry.nutrient,
+                    size: entry.size,
+                  }}
                 />
               ))}
             </div>
@@ -115,3 +128,5 @@ export default (parentRoute: AnyRoute) =>
       title: "Dashboard",
     },
   });
+
+//TODO: Update load state so app isn't blank while fetching for first time

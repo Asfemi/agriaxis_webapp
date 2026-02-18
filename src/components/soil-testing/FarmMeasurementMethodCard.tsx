@@ -4,7 +4,8 @@ export const FarmMeasurementMethodCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;
   onConfirm: (selection: "google" | "manual") => void;
-}> = ({ onClose, onConfirm }) => {
+}> = ({ isOpen, onClose, onConfirm }) => {
+  if (!isOpen) return null;
 
   return (
     <section className="size-full">
@@ -27,7 +28,7 @@ export const FarmMeasurementMethodCard: React.FC<{
             </div>
           </header>
           <section className="mx-20 space-y-6 pb-10">
-            <div className="lg:max-w-md space-y-6">
+            <div className="space-y-6 lg:max-w-md">
               <button
                 onClick={() => onConfirm("google")}
                 type="button"

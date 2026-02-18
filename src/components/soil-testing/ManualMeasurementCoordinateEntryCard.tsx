@@ -1,66 +1,27 @@
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, useMap } from "react-leaflet";
 import L from "leaflet";
-import "@geoman-io/leaflet-geoman-free";
-import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import "leaflet/dist/leaflet.css";
+import { useCoordinatesStore } from "@/stores/useCoordinatesStore";
 
 interface Coordinate {
   lat: number;
   lng: number;
 }
 
-const GeomanController: React.FC<{
-  setCoords: (coords: Coordinate[]) => void;
-}> = ({ setCoords }) => {
+const MapUpdater: React.FC<{ coordinates: Coordinate[] }> = ({
+  coordinates,
+}) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!map) return;
-
-    // We cast to 'any' because Geoman injects 'pm' into the Leaflet Map instance
-    const leafletMap = map as any;
-
-    leafletMap.pm.addControls({
-      position: "topleft",
-      drawMarker: false,
-      drawRectangle: true,
-      drawPolygon: true,
-      editMode: true,
-      dragMode: true,
-      removalMode: true,
-    });
-
-    leafletMap.pm.setGlobalOptions({
-      pathOptions: {
-        color: "#22c55e", // Tailwind green-500
-        fillColor: "#22c55e",
-        fillOpacity: 0.3,
-      },
-    });
-
-    const handleLayerChange = (e: any) => {
-      const layer = e.layer as L.Polygon;
-      const latLngs = layer.getLatLngs() as L.LatLng[][];
-      // Flattening the Leaflet LatLng structure to a simple array
-      const formatted = (latLngs[0] as unknown as L.LatLng[]).map((point) => ({
-        lat: point.lat,
-        lng: point.lng,
-      }));
-      setCoords(formatted);
-    };
-
-    map.on("pm:create", (e: any) => {
-      handleLayerChange(e);
-      e.layer.on("pm:edit", () => handleLayerChange(e));
-    });
-
-    return () => {
-      map.off("pm:create");
-    };
-  }, [map, setCoords]);
+    if (coordinates.length > 0) {
+      const bounds = L.latLngBounds(coordinates.map((c) => [c.lat, c.lng]));
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [coordinates, map]);
 
   return null;
 };
@@ -70,7 +31,66 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
   onClose: () => void;
   onConfirm: () => void;
 }> = ({ onClose, onConfirm }) => {
-  const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
+  const { formData, updateFormData } = useCoordinatesStore();
+  const [coordinateInput, setCoordinateInput] = useState("");
+  const [error, setError] = useState("");
+
+  const coordinates: Coordinate[] = [
+    formData.point_1,
+    formData.point_2,
+    formData.point_3,
+    formData.point_4,
+  ]
+    .filter(Boolean)
+    .map((point) => {
+      const [lat, lng] = point!.split(",").map(Number);
+      return { lat, lng };
+    })
+    .filter((coord) => !isNaN(coord.lat) && !isNaN(coord.lng));
+
+  const handleEnterCoordinate = () => {
+    setError("");
+
+    // Parse input format: "lat,lng" or "lat:lng"
+    const parsed = coordinateInput.trim().replace(":", ",");
+    const [lat, lng] = parsed.split(",").map((n) => parseFloat(n.trim()));
+
+    if (isNaN(lat) || isNaN(lng)) {
+      setError("Invalid format. Use: latitude,longitude (e.g., 6.6172,3.3530)");
+      return;
+    }
+
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      setError(
+        "Invalid coordinates. Latitude: -90 to 90, Longitude: -180 to 180",
+      );
+      return;
+    }
+
+    const coordinateValue = `${lat},${lng}`;
+
+    if (formData.currentPoint === "1") {
+      updateFormData({ point_1: coordinateValue });
+    } else if (formData.currentPoint === "2") {
+      updateFormData({ point_2: coordinateValue });
+    } else if (formData.currentPoint === "3") {
+      updateFormData({ point_3: coordinateValue });
+    } else if (formData.currentPoint === "4") {
+      updateFormData({ point_4: coordinateValue });
+    } else {
+      setError("All 4 points already entered");
+      return;
+    }
+
+    setCoordinateInput("");
+    onConfirm();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleEnterCoordinate();
+    }
+  };
 
   return (
     <section className="size-full overflow-y-auto px-7">
@@ -83,33 +103,71 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
         </button>
         <div>
           <h5 className="font-neue text-xl font-bold text-[#130B30]">Map</h5>
+          <p className="text-sm text-[#615C74]">
+            Enter coordinates manually (format: lat,lng)
+          </p>
         </div>
       </header>
-      <div className="mb-5 h-135">
+
+      <div className="relative mb-5 h-135">
         <MapContainer
           key={"manual"}
-          center={[-1.2863, 36.8219]}
+          center={[6.6172, 3.353]}
           zoom={16}
           className="h-full w-full"
-          zoomControl={false} // Cleaner UI
+          zoomControl={false}
         >
           <TileLayer
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             attribution="&copy; Esri"
           />
-          <GeomanController setCoords={setCoordinates} />
+
+          {coordinates.length > 0 && (
+            <Polygon
+              positions={coordinates.map((c) => [c.lat, c.lng])}
+              pathOptions={{
+                color: "#22c55e",
+                fillColor: "#22c55e",
+                fillOpacity: 0.3,
+                weight: 2,
+              }}
+            />
+          )}
+
+          <MapUpdater coordinates={coordinates} />
         </MapContainer>
 
-        {/* Coordinate Preview Footer */}
+        {/* Coordinate Counter */}
         {coordinates.length > 0 && (
-          <div className="absolute bottom-4 left-1/2 z-[1000] -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-[10px] text-white backdrop-blur-md">
-            Vertices Captured: {coordinates.length}
+          <div className="absolute bottom-4 left-1/2 z-1000 -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-[10px] text-white backdrop-blur-md">
+            Points Entered: {coordinates.length} / 4
           </div>
         )}
       </div>
+
       <div className="flex flex-col gap-4 pb-10">
-        <Button variant="primary">Save GPS coordinate</Button>
-        <Button variant="secondary">Enter coordinate</Button>
+        <div>
+          <div className="rounded-lg bg-[#F3F6F8] p-3.5">
+            <input
+              id="coordinate"
+              type="text"
+              value={coordinateInput}
+              onChange={(e) => setCoordinateInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="w-full border-none text-sm text-[#423C59] outline-0 placeholder:text-sm placeholder:text-[#423C59] placeholder:opacity-70"
+              placeholder="Enter coordinate (e.g., 6.6172,3.3530)"
+            />
+          </div>
+          {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        </div>
+
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={handleEnterCoordinate}
+        >
+          Enter coordinate
+        </Button>
       </div>
     </section>
   );
