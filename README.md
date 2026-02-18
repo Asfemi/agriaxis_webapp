@@ -1,4 +1,5 @@
 Welcome to the agriaxis webapp
+uses laravel for BE
 uses TanStack for routing!
 
 # Getting Started
