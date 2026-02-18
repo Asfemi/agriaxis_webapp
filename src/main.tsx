@@ -36,8 +36,13 @@ import ResetPasswordOTPRoute from "./routes/auth/ResetPasswordOTP.tsx";
 import FarmsListRoute from "./routes/dashboard/farms/list.tsx";
 import FarmDetailsRoute from "./routes/dashboard/farms/details.tsx";
 import PaymentSuccessRoute from "./routes/payment/success.tsx";
+import type { QueryClient } from "@tanstack/react-query";
 
-const rootRoute = createRootRoute({
+interface MyRouterContext {
+  queryClient: QueryClient;
+}
+
+const rootRoute = createRootRoute<MyRouterContext>({
   head: () => ({
     meta: [
       {

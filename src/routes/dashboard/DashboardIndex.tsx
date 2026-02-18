@@ -8,14 +8,14 @@ import { useState } from "react";
 import { createRoute, Link, type AnyRoute } from "@tanstack/react-router";
 import { useGetDashboard } from "@/api/farms";
 import type { FarmStatus } from "@/models/farm-status.model";
-import { useUserStore } from "@/stores/useUserStore";
+import { useMe } from "@/api/auth";
 
 function DashboardIndex({ farmListPath = "farms" }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const user = useUserStore((state) => state.user);
+  const { isLoading } = useMe();
   const { data } = useGetDashboard();
 
-  if (!user?.organisations?.[0]?.id) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center p-6">
         <p className="text-gray-500">Loading...</p>

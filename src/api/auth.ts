@@ -1,7 +1,7 @@
 import type { RegistrationFormData } from "@/models/registration.schema";
 import type { LoginFormData, LoginResponse } from "@/models/login.schema";
-import apiClient from "./api-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import apiClient from "@/api/api-client";
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { User } from "@/models/user.model";
 import type { ForgotPasswordFormData } from "@/models/forgot-password.schema";
 
@@ -34,14 +34,21 @@ export const useRegisterUser = () => {
   });
 };
 
+export const fetchMe = async () => {
+  const { data } = await apiClient.get<{ user: User }>("/me");
+  return data.user;
+};
+
+// 2. Define Query Options (Best practice for sharing logic)
+export const meQueryOptions = () => queryOptions({
+  queryKey: ["me"],
+  queryFn: fetchMe,
+  staleTime: 1000 * 60 * 5, // 5 minutes
+});
+
+// 3. Keep your hook for components
 export const useMe = () => {
-  return useQuery<User>({
-    queryKey: ["me"],
-    queryFn: async () => {
-      const { data } = await apiClient.get<{ user: User }>("/me");
-      return data.user;
-    },
-  });
+  return useQuery(meQueryOptions());
 };
 
 export const useLogout = () => {
