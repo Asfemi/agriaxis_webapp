@@ -123,3 +123,16 @@ export const useSoilTestingResults = (farmId?: string) => {
     },
   });
 };
+
+export const useDeleteSoilTestingResult = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { data } = await apiClient.delete(`/soil-testing/results/${id}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["soil-testing-results"] });
+    }
+  });
+}
