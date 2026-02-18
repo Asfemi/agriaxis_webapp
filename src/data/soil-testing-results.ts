@@ -1,4 +1,4 @@
-import type { Transaction } from "@/models/soil-testing-model";
+import type { Transaction } from "@/models/soil-testing.model";
 
 export const defaultData: Transaction[] = [
   {

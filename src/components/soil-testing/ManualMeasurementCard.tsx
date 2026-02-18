@@ -1,8 +1,22 @@
 import { ChevronLeft, X } from "lucide-react";
 import { Button } from "@/components/Button";
-import { useState } from "react";
+import React, { useState } from "react";
 import { ManualMeasurementCoordinateEntryCard } from "./ManualMeasurementCoordinateEntryCard";
+import "@geoman-io/leaflet-geoman-free";
+import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
+import "leaflet/dist/leaflet.css";
+import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
+import { useUserStore } from "@/stores/useUserStore";
+import {
+  useSoilTestingPayment,
+  useSoilTestingPaymentInitialise,
+  useSoilTestingRun,
+  useSoilTestingUpload,
+} from "@/api/soil-testing";
+import { toast } from "sonner";
+import type { SoilTestingPaymentInitialiseResponse } from "@/models/soil-testing.model";
 import { useCoordinatesStore } from "@/stores/useCoordinatesStore";
+import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
 
 const MEASUREMENT_STEPS = [
   "Stand at each corner of your land",
@@ -19,6 +33,13 @@ export const ManualMeasurementCard: React.FC<{
   const [openCoordinatesSelection, setOpenCoordinatesSelection] =
     useState(false);
   const { formData, updateFormData } = useCoordinatesStore();
+  const { formData: soilTestingFormData } = useSoilTestingFormStore();
+  const user = useUserStore((state) => state.user);
+  const { mutate: initialisePayment } = useSoilTestingPaymentInitialise();
+  const { mutate: confirmPayment } = useSoilTestingPayment();
+  const { mutate: uploadSoilTest } = useSoilTestingUpload();
+  const { mutate: runSoilTest } = useSoilTestingRun();
+  const { setResult } = useSoilTestingResultStore();
 
   const handleSelectCoordinate = (index: number) => {
     const currentPoint = index + 1;
@@ -72,7 +93,122 @@ export const ManualMeasurementCard: React.FC<{
    * @description Handles the confirmation of the soil testing form
    */
   const handleConfirm = () => {
-    onConfirm();
+    const result = points.map((coord) => coord.coordinate).join(",");
+
+    const request = {
+      farmId: soilTestingFormData.farm_id ?? "",
+      amount: soilTestingFormData.cost ?? 0,
+      currency: "NGN",
+      customer: {
+        email: user?.email ?? "",
+        name: user?.name ?? "",
+        phonenumber: user?.phone ?? "",
+      },
+    };
+
+    initialisePayment(request, {
+      onSuccess: (data) => {
+        toast.success("Payment initiated successfully!");
+
+        openPaymentModal(data, result);
+      },
+      onError: () =>
+        toast.error("Failed to initiate payment. Please try again."),
+    });
+  };
+
+  const openPaymentModal = (
+    paymentData: SoilTestingPaymentInitialiseResponse,
+    coordinates: string,
+  ) => {
+    const { payment_link, tx_ref, amount, currency, farm_id } = paymentData;
+
+    const popup = window.open(
+      payment_link,
+      "flutterwave_payment",
+      "width=800,height=600,scrollbars=yes,resizable=yes,left=200,top=100",
+    );
+
+    if (!popup) {
+      toast.error("Popup blocked! Please allow popups and try again.");
+      return;
+    }
+
+    let messageReceived = false;
+
+    const handleMessage = (event: MessageEvent) => {
+      const allowedOrigins = [
+        window.location.origin,
+        "https://agriaxis-webapp.vercel.app",
+      ];
+
+      if (!allowedOrigins.includes(event.origin)) return;
+
+      if (event.data?.type === "PAYMENT_COMPLETE") {
+        messageReceived = true;
+
+        const { status, transactionId } = event.data;
+        confirmPayment(
+          {
+            farmId: farm_id,
+            amount,
+            currency,
+            txRef: tx_ref,
+            transactionId: String(transactionId) ?? "",
+            status: status ?? "",
+            success: status === "successful" || status === "completed",
+          },
+          {
+            onSuccess: () => {
+              toast.success("Payment confirmed successfully!");
+              uploadSoilTest(
+                { farmId: farm_id, coordinatesCsv: coordinates },
+                {
+                  onSuccess: () => {
+                    toast.success("Soil test uploaded successfully!");
+                    runSoilTest(
+                      {
+                        farmId: farm_id,
+                        crop: soilTestingFormData.crop ?? "",
+                        depth: "0-20",
+                      },
+                      {
+                        onSuccess: (data) => {
+                          setResult(data);
+                          toast.success("Soil test run successfully!");
+                          onConfirm();
+                        },
+                      },
+                    );
+                  },
+                },
+              );
+            },
+          },
+        );
+
+        cleanup();
+      }
+    };
+
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        if (!messageReceived) {
+          setTimeout(() => {
+            if (!messageReceived) cleanup();
+          }, 500);
+        } else {
+          cleanup();
+        }
+      }
+    }, 1000);
+
+    const cleanup = () => {
+      clearInterval(checkClosed);
+      window.removeEventListener("message", handleMessage);
+    };
+
+    window.addEventListener("message", handleMessage);
   };
 
   return (

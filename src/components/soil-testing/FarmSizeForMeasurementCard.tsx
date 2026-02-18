@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import {
   SoilTestingSchema,
   type SoilTestingFormData,
-} from "@/models/soil-testing-model";
+} from "@/models/soil-testing.model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 
@@ -44,7 +44,7 @@ export const FarmSizeForMeasurementCard: React.FC<{
   const { data: cost } = useSoilTestingCost(Number(formData.depth));
 
   const onSubmit = (data: SoilTestingFormData) => {
-    updateFormData(data);
+    updateFormData({ ...data, cost: cost?.amount ?? 0 });
     onConfirm();
   };
 
@@ -83,7 +83,9 @@ export const FarmSizeForMeasurementCard: React.FC<{
                 <div className="grid grid-cols-3 justify-between text-sm">
                   <div>
                     <p className="text-[#615C74]">Size</p>
-                    <p className="font-medium text-[#100A37]">1</p>
+                    <p className="font-medium text-[#100A37]">
+                      {formData.depth!.length > 0 ? formData.depth : 0}
+                    </p>
                   </div>
 
                   <div>
@@ -128,7 +130,7 @@ export const FarmSizeForMeasurementCard: React.FC<{
                   <p className="text-sm text-[#615C74]">Total price</p>
                   {formData.depth && cost?.amount}
                   <p className="font-medium text-[#615C74]">
-                    ₦{(cost?.amount ?? 0)}
+                    ₦{cost?.amount ?? 0}
                   </p>
                 </div>
                 <div className="flex w-full items-center justify-between">

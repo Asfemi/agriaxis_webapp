@@ -5,6 +5,7 @@ import { FarmMeasurementMethodCard } from "@/components/soil-testing/FarmMeasure
 import { GoogleMeasurementCard } from "@/components/soil-testing/GoogleMeasurementCard";
 import { ManualMeasurementCard } from "@/components/soil-testing/ManualMeasurementCard";
 import { MapMeasurementCard } from "./MapMeasurementCard";
+import { SoilTestResultsCard } from "./SoilTestResultsCard";
 
 const RequestSoilTestSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -21,8 +22,8 @@ const RequestSoilTestSheetsContainer: React.FC<{
   };
 
   const handleConfirmSoilTesting = () => {
-
-  }
+    setCurrentView("result");
+  };
 
   return (
     <section
@@ -62,6 +63,10 @@ const RequestSoilTestSheetsContainer: React.FC<{
           isOpen={currentView === "manual_measurement"}
           onClose={() => setCurrentView("measurement_method")}
           onConfirm={handleConfirmSoilTesting}
+        />
+        <SoilTestResultsCard
+          isOpen={currentView === "result"}
+          onClose={() => setCurrentView("measurement_method")}
         />
       </section>
     </section>
