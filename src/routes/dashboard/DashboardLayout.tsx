@@ -2,10 +2,16 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { useSidebar, SidebarProvider } from "@/contexts/SidebarContext";
 import { useEffect } from "react";
-import { createRoute, Outlet, redirect, type AnyRoute } from "@tanstack/react-router";
+import {
+  createRoute,
+  Outlet,
+  redirect,
+  type AnyRoute,
+} from "@tanstack/react-router";
 import { userToken } from "@/lib/utils";
 import { useIsFetching, useIsMutating } from "@tanstack/react-query";
 import { SquaresExclude } from "lucide-react";
+import { meQueryOptions } from "@/api/auth";
 
 function DashboardLayoutContent() {
   const { isOpen, close } = useSidebar();
@@ -69,12 +75,16 @@ export default (parentRoute: AnyRoute) =>
     path: "dashboard",
     component: DashboardLayout,
     getParentRoute: () => parentRoute,
-    beforeLoad: () => {
+    beforeLoad: async ({ context }) => {
       if (!userToken()) {
-        throw redirect({
-          to: "/signin",
-          replace: true,
-        });
+        throw redirect({ to: "/signin", replace: true });
+      }
+
+      try {
+        // Wait for user data to be ready and cached
+        await context.queryClient.ensureQueryData(meQueryOptions());
+      } catch (error) {
+        throw redirect({ to: "/signin", replace: true });
       }
     },
   });

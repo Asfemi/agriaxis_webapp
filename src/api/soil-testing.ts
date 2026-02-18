@@ -82,8 +82,6 @@ export const useSoilTestingUpload = () => {
 };
 
 export const useSoilTestingRun = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: SoilTestingRunRequest) => {
       const response = await apiClient.post<SoilTestingResult>(
@@ -91,9 +89,6 @@ export const useSoilTestingRun = () => {
         data,
       );
       return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["soil-testing-dashboard"] });
     },
   });
 };
