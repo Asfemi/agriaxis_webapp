@@ -25,14 +25,16 @@ function Success() {
         window.location.origin,
       );
 
-      const timeout = setTimeout(() => window.close(), 100);
+      const timeout = setTimeout(() => window.close(), 350);
       return () => clearTimeout(timeout);
     }
   }, [search]);
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <p className="font-sans text-lg">Processing payment, please wait...</p>
+      <p className="animate-pulse text-xl font-medium text-gray-500">
+        Processing payment, please wait...
+      </p>
     </div>
   );
 }

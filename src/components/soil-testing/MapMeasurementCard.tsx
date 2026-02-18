@@ -158,23 +158,27 @@ export const MapMeasurementCard: React.FC<{
       return;
     }
 
-    const handleMessage = (event: MessageEvent) => {
-      // const allowedOrigins = [
-      //   window.location.origin,
-      //   "https://agriaxis-webapp.vercel.app",
-      // ];
+    let messageReceived = false;
 
-      // if (!allowedOrigins.includes(event.origin)) return;
+    const handleMessage = (event: MessageEvent) => {
+      const allowedOrigins = [
+        window.location.origin,
+        "https://agriaxis-webapp.vercel.app",
+      ];
+
+      if (!allowedOrigins.includes(event.origin)) return;
+      console.log("Event type:", event.data?.type);
 
       if (event.data?.type === "PAYMENT_COMPLETE") {
-        const { status, transactionId } = event.data;
+        messageReceived = true;
 
+        const { status, transactionId } = event.data;
         confirmPayment({
           farmId: farm_id,
           amount,
           currency,
           txRef: tx_ref,
-          transactionId: transactionId ?? "",
+          transactionId: String(transactionId) ?? "",
           status: status ?? "",
           success: status === "successful" || status === "completed",
         });
@@ -185,11 +189,19 @@ export const MapMeasurementCard: React.FC<{
 
     const checkClosed = setInterval(() => {
       if (popup.closed) {
-        cleanup();
+        if (!messageReceived) {
+          setTimeout(() => {
+            if (!messageReceived) cleanup();
+          }, 500);
+        } else {
+          console.log("No message received, closing popup");
+          cleanup();
+        }
       }
     }, 1000);
 
     const cleanup = () => {
+      console.log("Cleaning up listeners");
       clearInterval(checkClosed);
       window.removeEventListener("message", handleMessage);
     };
