@@ -1,5 +1,6 @@
 import {
   useDeleteSoilTestingResult,
+  useRenameSoilTestingResult,
   useSoilTestingResults,
 } from "@/api/soil-testing";
 import { DataTable } from "@/components/DataTable";
@@ -17,7 +18,9 @@ import type {
 } from "@/models/soil-testing.model";
 import { type ColumnDef } from "@tanstack/react-table";
 import { LoaderCircle, MoreVertical } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { RenameResultModal } from "../dashboard/RenameResultModal";
+import { toast } from "sonner";
 
 const StatusBadge: React.FC<{ status: Transaction["status"] }> = ({
   status,
@@ -38,10 +41,25 @@ const StatusBadge: React.FC<{ status: Transaction["status"] }> = ({
 const SoilTestingResultsTable = () => {
   const { data: results, isLoading } = useSoilTestingResults();
   const { mutate: deleteResult } = useDeleteSoilTestingResult();
+  const { mutate: renameResult } = useRenameSoilTestingResult();
+  const [showRenameResultModal, setShowRenameResultModal] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<SoilTestingResult>();
 
   const handleDeleteResult = (id: number) => {
     deleteResult(id);
   };
+
+  const handleRenameResult = ( result: SoilTestingResult ) => {
+    setShowRenameResultModal(true);
+    setSelectedResult(result);
+  };
+
+  const handleConfirmRenameResult = (newName: string, result: SoilTestingResult) => {
+    renameResult({ id: result.id, name: newName }, { onSuccess: () => {
+      toast.success("Result renamed successfully!");
+      setShowRenameResultModal(false);
+    } });
+  }
 
   const soilColumns: ColumnDef<SoilTestingResult>[] = [
     {
@@ -73,8 +91,8 @@ const SoilTestingResultsTable = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Action</DropdownMenuLabel>
-              <DropdownMenuItem>View result</DropdownMenuItem>
-              <DropdownMenuItem>Rename result</DropdownMenuItem>
+              {/**<DropdownMenuItem>View result</DropdownMenuItem>*/}
+              <DropdownMenuItem onClick={() => handleRenameResult(row.original)}>Rename result</DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleDeleteResult(row.original.id)}
               >
@@ -95,6 +113,12 @@ const SoilTestingResultsTable = () => {
   return (
     <>
       <DataTable title="Test Result" columns={columns} data={data} />
+      <RenameResultModal 
+        isOpen={showRenameResultModal}
+        value={selectedResult?.name ?? ""}
+        onSave={(newName) => handleConfirmRenameResult(newName, selectedResult!)}
+        onClose={() => setShowRenameResultModal(false)}
+      />
     </>
   );
 };

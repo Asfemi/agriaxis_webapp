@@ -1,12 +1,12 @@
 import { X } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/Button";
 
 interface RenameResultModalProps {
   isOpen: boolean;
   value: string;
   //   onChange: (value: string) => void;
-  onSave: () => void;
+  onSave: (value: string) => void;
   onClose: () => void;
 }
 
@@ -18,6 +18,7 @@ export const RenameResultModal: React.FC<RenameResultModalProps> = ({
   onClose,
 }) => {
   if (!isOpen) return null;
+  const [newName, setNewName] = useState(value);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -48,18 +49,18 @@ export const RenameResultModal: React.FC<RenameResultModalProps> = ({
           <input
             id="result-title"
             type="text"
-            value={value}
-            // onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            //   onChange(e.target.value)
-            // }
+            value={newName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setNewName(e.target.value)
+            }
             className="w-full rounded-lg bg-gray-100 px-4 py-3 text-gray-900 outline-none focus:ring-2 focus:ring-green-600"
-            placeholder="Enter title"
+            placeholder={value}
           />
         </div>
 
         <Button
           variant="primary"
-          onClick={onSave}
+          onClick={() => onSave(newName)}
           className="w-full rounded-xl bg-green-700 py-3 font-semibold text-white transition hover:bg-green-800"
         >
           Save title

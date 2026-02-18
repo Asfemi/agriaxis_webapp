@@ -133,6 +133,27 @@ export const useDeleteSoilTestingResult = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["soil-testing-results"] });
-    }
+    },
   });
+};
+
+interface RenameResultRequest {
+  id: number;
+  name: string;
 }
+
+export const useRenameSoilTestingResult = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (request: RenameResultRequest) => {
+      const { data } = await apiClient.patch(
+        `/soil-testing/results/${request.id}/name`,
+        { name: request.name },
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["soil-testing-results"] });
+    },
+  });
+};
