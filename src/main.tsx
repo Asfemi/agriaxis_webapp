@@ -35,6 +35,7 @@ import ProfileRoute from "./routes/dashboard/Profile.tsx";
 import ResetPasswordOTPRoute from "./routes/auth/ResetPasswordOTP.tsx";
 import FarmsListRoute from "./routes/dashboard/farms/list.tsx";
 import FarmDetailsRoute from "./routes/dashboard/farms/details.tsx";
+import PaymentSuccessRoute from "./routes/payment/success.tsx";
 
 const rootRoute = createRootRoute({
   head: () => ({
@@ -103,6 +104,7 @@ const routeTree = rootRoute.addChildren([
     FarmsListRoute(dashboardLayoutRoute),
     FarmDetailsRoute(dashboardLayoutRoute),
   ]),
+  PaymentSuccessRoute(rootRoute),
 ]);
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
