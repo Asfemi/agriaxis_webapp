@@ -90,8 +90,8 @@ const GeomanController: React.FC<{
 export const MapMeasurementCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;
-  onConfirm: () => void;
-}> = ({ onClose, isOpen, onConfirm }) => {
+  onConfirm?: () => void;
+}> = ({ onClose, isOpen }) => {
   if (!isOpen) return null;
 
   const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
@@ -119,6 +119,7 @@ export const MapMeasurementCard: React.FC<{
     const result = coordinates
       .map((coord) => `${coord.lat.toFixed(4)}:${coord.lng.toFixed(4)}`)
       .join(",");
+    console.log(result);
     const request = {
       farmId: formData.farm_id ?? "",
       amount: cost?.amount ?? 0,
