@@ -159,12 +159,12 @@ export const MapMeasurementCard: React.FC<{
     }
 
     const handleMessage = (event: MessageEvent) => {
-      const allowedOrigins = [
-        window.location.origin,
-        "https://agriaxis-webapp.vercel.app",
-      ];
+      // const allowedOrigins = [
+      //   window.location.origin,
+      //   "https://agriaxis-webapp.vercel.app",
+      // ];
 
-      if (!allowedOrigins.includes(event.origin)) return;
+      // if (!allowedOrigins.includes(event.origin)) return;
 
       if (event.data?.type === "PAYMENT_COMPLETE") {
         const { status, transactionId } = event.data;
