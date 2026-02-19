@@ -1,4 +1,5 @@
 import { useSoilTestingRecommendation } from "@/api/soil-testing";
+import { formatDate } from "@/lib/utils";
 import { useCoordinatesStore } from "@/stores/useCoordinatesStore";
 import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
 import { ChevronLeft, LoaderCircle, TicketPercent } from "lucide-react";
@@ -14,19 +15,19 @@ export const SoilTestResultsCard: React.FC<{
     const keys = ["point_1", "point_2", "point_3", "point_4"] as const;
 
     return keys
-    .map((key, index) => {
-      const val = coordinatesStoreData[key];
-      if (!val) return null;
+      .map((key, index) => {
+        const val = coordinatesStoreData[key];
+        if (!val) return null;
 
-      const [lat, lng] = val.split(":");
+        const [lat, lng] = val.split(",");
 
-      return {
-        label: `point ${index + 1}`,
-        value1: lat ? `${lat}°N` : "—",
-        value2: lng ? `${lng}°E` : "—",
-      };
-    })
-    .filter(Boolean);
+        return {
+          label: `point ${index + 1}`,
+          value1: lat ? `${lat}°N` : "—",
+          value2: lng ? `${lng}°E` : "—",
+        };
+      })
+      .filter(Boolean);
   }, [coordinatesStoreData]);
 
   const { data: recommendations, isLoading: isLoadingRecommendations } =
@@ -42,7 +43,6 @@ export const SoilTestResultsCard: React.FC<{
         </p>
       </div>
     );
-
 
   return (
     <section className="size-full">
@@ -67,16 +67,18 @@ export const SoilTestResultsCard: React.FC<{
               <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
                 <TicketPercent size={20} className="text-[#0A814A]" />
               </div>
-              <p className="text-sm text-[#423C59]">{result.completed_at}</p>
+              <p className="text-sm text-[#423C59]">
+                {formatDate(result.completed_at)}
+              </p>
             </div>
             <div className="mb-6">
-              <h6 className="font-neue mb-4 text-lg font-semibold">
+              <h6 className="font-neue mb-4 text-xl font-semibold">
                 Land Measurement Report{" "}
                 <span className="text-sm">(Point to point)</span>
               </h6>
-              <p className="mb-4 font-medium text-[#423C59]">Coordinates</p>
+              <p className="mb-4 font-medium text-lg text-[#423C59]">Coordinates</p>
 
-              <div className="space-y-4">
+              <div className="space-y-2.5">
                 {coordinatesList.map((entry, index) => (
                   <div key={index} className="flex items-center gap-1">
                     <svg
@@ -97,7 +99,7 @@ export const SoilTestResultsCard: React.FC<{
                 ))}
               </div>
             </div>
-            <div className="mb-6">
+            <div className="mb-6 space-y-3">
               <p className="text-sm text-[#423C59]">
                 Current pH: {result.ph_level}
               </p>
@@ -140,32 +142,32 @@ export const SoilTestResultsCard: React.FC<{
               </p>
             </div>
             <div>
-              <h5 className="font-neue mb-4 text-lg font-semibold">
+              <h5 className="font-neue mb-4 text-xl font-semibold">
                 AI recommendations
               </h5>
               {!isLoadingRecommendations ? (
                 <>
-                  <div className="mb-5">
-                    <h6 className="text-sm text-[#615C74]">Summary</h6>
+                  <div className="mb-5 space-y-1">
+                    <h6 className="text-[#615C74]">Summary</h6>
                     <p className="text-sm text-[#615C74]">
                       {recommendations?.summary}
                     </p>
                   </div>
-                  <div className="mb-5">
-                    <h6 className="text-sm text-[#615C74]">Recommendation</h6>
+                  <div className="mb-5 space-y-1">
+                    <h6 className="text-[#615C74]">Recommendation</h6>
                     <p className="text-sm text-[#615C74]">
                       {recommendations?.recommendation}
                     </p>
                   </div>
-                  <div className="mb-5">
-                    <h6 className="text-sm text-[#615C74]">Suitable crops</h6>
-                    <p className="text-sm text-[#615C74]">
+                  <div className="mb-5 space-y-1">
+                    <h6 className="text-[#615C74]">Suitable crops</h6>
+                    <p className="text-base text-[#615C74]">
                       {recommendations?.suitable_crops}
                     </p>
                   </div>
                 </>
               ) : (
-                <LoaderCircle className="mx-auto animate-spin text-[#0A814A]" />
+                <LoaderCircle className="mx-auto my-10 animate-spin text-[#0A814A]" />
               )}
             </div>
           </section>
