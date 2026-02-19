@@ -255,7 +255,7 @@ export const MapMeasurementCard: React.FC<{
 
   return (
     <section className="size-full overflow-y-auto px-7">
-      <header className="mb-10 flex items-center gap-3.5 pt-7">
+      <header className="mb-10 flex items-center gap-3.5 pt-7 bg-red-50">
         <button
           onClick={onClose}
           className="grid size-fit place-items-center rounded-full bg-[#E8E8E8] p-1"

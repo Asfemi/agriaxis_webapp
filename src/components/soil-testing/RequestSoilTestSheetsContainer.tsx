@@ -21,10 +21,6 @@ const RequestSoilTestSheetsContainer: React.FC<{
     }
   };
 
-  const handleConfirmSoilTesting = () => {
-    setCurrentView("result");
-  };
-
   return (
     <section
       className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity"
@@ -57,12 +53,12 @@ const RequestSoilTestSheetsContainer: React.FC<{
         <MapMeasurementCard
           isOpen={currentView === "leaflet_map"}
           onClose={() => setCurrentView("google_measurement")}
-          onConfirm={handleConfirmSoilTesting}
+          onConfirm={() => setCurrentView("result")}
         />
         <ManualMeasurementCard
           isOpen={currentView === "manual_measurement"}
           onClose={() => setCurrentView("measurement_method")}
-          onConfirm={handleConfirmSoilTesting}
+          onConfirm={() => setCurrentView("result")}
         />
         <SoilTestResultsCard
           isOpen={currentView === "result"}

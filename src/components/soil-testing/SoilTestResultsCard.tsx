@@ -10,25 +10,27 @@ export const SoilTestResultsCard: React.FC<{
 }> = ({ isOpen, onClose }) => {
   const { result } = useSoilTestingResultStore();
   const { formData: coordinatesStoreData } = useCoordinatesStore();
-
   const coordinatesList = useMemo(() => {
     const keys = ["point_1", "point_2", "point_3", "point_4"] as const;
 
     return keys
-      .map((key, index) => {
-        const val = coordinatesStoreData[key];
-        if (!val) return null;
+    .map((key, index) => {
+      const val = coordinatesStoreData[key];
+      if (!val) return null;
 
-        const [lat, lng] = val.split(":");
+      const [lat, lng] = val.split(":");
 
-        return {
-          label: `point ${index + 1}`,
-          value1: lat ? `${lat}°N` : "—",
-          value2: lng ? `${lng}°E` : "—",
-        };
-      })
-      .filter(Boolean);
+      return {
+        label: `point ${index + 1}`,
+        value1: lat ? `${lat}°N` : "—",
+        value2: lng ? `${lng}°E` : "—",
+      };
+    })
+    .filter(Boolean);
   }, [coordinatesStoreData]);
+
+  const { data: recommendations, isLoading: isLoadingRecommendations } =
+    useSoilTestingRecommendation(Number(result?.id));
 
   if (!isOpen) return null;
 
@@ -41,8 +43,6 @@ export const SoilTestResultsCard: React.FC<{
       </div>
     );
 
-  const { data: recommendations, isLoading: isLoadingRecommendations } =
-    useSoilTestingRecommendation(result.id);
 
   return (
     <section className="size-full">
