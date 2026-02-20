@@ -6,6 +6,8 @@ import { LoaderCircle } from "lucide-react";
 import { useUserStore } from "@/stores/useUserStore";
 import { useEffect } from "react";
 import { saveOrgId } from "@/lib/utils";
+import { useLogout } from "@/api/auth";
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 
 function DesktopOnlyOverlay() {
   return (
@@ -20,7 +22,39 @@ function DesktopOnlyOverlay() {
           Please use an authorized tablet or computer to access the application.
         </p>
       </div>
-      <Toaster />
+    </div>
+  );
+}
+
+function RootErrorFallback({ error }: FallbackProps) {
+  const { mutate: logout } = useLogout();
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  return (
+    <div className="flex h-screen w-screen flex-col items-center justify-center gap-4 bg-white">
+      <h1 className="text-xl font-semibold text-red-500">
+        Something went wrong
+      </h1>
+      <p className="text-sm text-gray-500">
+        {error instanceof Error
+          ? error.message
+          : "An unexpected error occurred"}
+      </p>
+      <button
+        className="bg-primary rounded px-4 py-2 text-white"
+        onClick={() => window.location.reload()}
+      >
+        Reload Application
+      </button>
+      <button
+        className="rounded bg-red-500 px-4 py-2 text-white"
+        onClick={handleLogout}
+      >
+        Log Out
+      </button>
     </div>
   );
 }
@@ -36,15 +70,20 @@ function App() {
     }
   }, [user, setUser]);
 
-  if (isLoading) return <LoaderCircle className="mx-auto animate-spin" />;
+  if (isLoading)
+    return (
+      <LoaderCircle className="mx-auto mt-48 mb-14 animate-spin text-green-700" />
+    );
 
   return (
     <>
-      <HeadContent />
-      <DesktopOnlyOverlay />
-      <Toaster position="top-right" richColors />
-      <Outlet />
-      <TanStackRouterDevtools />
+      <ErrorBoundary FallbackComponent={RootErrorFallback}>
+        <HeadContent />
+        <DesktopOnlyOverlay />
+        <Toaster position="top-right" richColors />
+        <Outlet />
+        <TanStackRouterDevtools />
+      </ErrorBoundary>
     </>
   );
 }

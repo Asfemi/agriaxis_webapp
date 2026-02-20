@@ -178,12 +178,26 @@ export const ManualMeasurementCard: React.FC<{
                           toast.success("Soil test run successfully!");
                           onConfirm();
                         },
+                        onError: (error) => {
+                          toast.error(error.message);
+                          toast.error(
+                            "Failed to run soil test. Please try again!",
+                          );
+                        },
                       },
                     );
+                  },
+                  onError: (error) => {
+                    toast.error(error.message);
+                    toast.error("Failed to run soil test. Please try again!");
                   },
                 },
               );
             },
+            onError: (error) => {
+              toast.error(error.message);
+              toast.error("Failed to confirm payment. Please try again!");
+            }
           },
         );
 
@@ -229,7 +243,7 @@ export const ManualMeasurementCard: React.FC<{
                     Manual measurement
                   </h5>
                   <h6 className="w-4/5 text-[#423C59]">
-                    You can move any of the points on the next map to get
+                    You can view any of the points on the next map to get
                     accurate farm measurement
                   </h6>
                 </div>

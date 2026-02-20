@@ -39,14 +39,11 @@ export const fetchMe = async () => {
   return data.user;
 };
 
-// 2. Define Query Options (Best practice for sharing logic)
 export const meQueryOptions = () => queryOptions({
   queryKey: ["me"],
   queryFn: fetchMe,
-  staleTime: 1000 * 60 * 5, // 5 minutes
 });
 
-// 3. Keep your hook for components
 export const useMe = () => {
   return useQuery(meQueryOptions());
 };
@@ -60,7 +57,7 @@ export const useLogout = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries();
-      localStorage.removeItem("auth_token");
+      localStorage.clear();
       window.location.href = "/signin";
     },
   });
