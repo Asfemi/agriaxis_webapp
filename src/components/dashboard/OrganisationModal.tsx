@@ -51,7 +51,6 @@ export function OrganisationModal({
             toast.success("Organisation created successfully!");
           } catch (error) {
             toast.error("Failed to create organisation. Please try again.");
-            // console.error(error);
           }
         } else {
           try {
@@ -62,7 +61,6 @@ export function OrganisationModal({
             toast.success("Organisation updated successfully!");
           } catch (error) {
             toast.error("Failed to update organisation. Please try again.");
-            // console.error(error);
           }
         }
       } else {

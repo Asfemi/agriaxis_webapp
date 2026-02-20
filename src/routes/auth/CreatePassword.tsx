@@ -9,6 +9,7 @@ import {
 import { Eye, EyeOff, LoaderCircle, Check } from "lucide-react"; 
 import { useState, useMemo } from "react";
 import { useRegisterUser } from "@/api/auth";
+import { toast } from "sonner";
 
 interface PasswordFormData {
   password: string;
@@ -64,6 +65,9 @@ function CreatePassword() {
       onSuccess: () => {
         navigate({ to: "/otp-verification" });
       },
+      onError: (error) => {
+        toast.error(error.message);
+      }
     });
   };
 
