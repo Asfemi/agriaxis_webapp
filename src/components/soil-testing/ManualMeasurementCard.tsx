@@ -243,7 +243,7 @@ export const ManualMeasurementCard: React.FC<{
                     Manual measurement
                   </h5>
                   <h6 className="w-4/5 text-[#423C59]">
-                    You can move any of the points on the next map to get
+                    You can view any of the points on the next map to get
                     accurate farm measurement
                   </h6>
                 </div>
