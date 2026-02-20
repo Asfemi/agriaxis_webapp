@@ -178,12 +178,26 @@ export const ManualMeasurementCard: React.FC<{
                           toast.success("Soil test run successfully!");
                           onConfirm();
                         },
+                        onError: (error) => {
+                          toast.error(error.message);
+                          toast.error(
+                            "Failed to run soil test. Please try again!",
+                          );
+                        },
                       },
                     );
+                  },
+                  onError: (error) => {
+                    toast.error(error.message);
+                    toast.error("Failed to run soil test. Please try again!");
                   },
                 },
               );
             },
+            onError: (error) => {
+              toast.error(error.message);
+              toast.error("Failed to confirm payment. Please try again!");
+            }
           },
         );
 
