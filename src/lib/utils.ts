@@ -13,7 +13,7 @@ export function saveOrgId(orgId: string) {
   localStorage.setItem('org_id', orgId)
 }
 
-export function getOrgId() {
+export function getOrgId(): string | null {
   return localStorage.getItem('org_id')
 }
 

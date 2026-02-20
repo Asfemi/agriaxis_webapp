@@ -13,29 +13,30 @@ import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provi
 import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
 
-import App from "./App.tsx";
-import AuthLayoutRoute from "./routes/auth/AuthLayout.tsx";
-import GetStartedRoute from "./routes/auth/GetStartedCard.tsx";
-import SelectCountryRoute from "./routes/auth/SelectCountryCard.tsx";
-import FarmTypeRoute from "./routes/auth/FarmTypeCard.tsx";
-import SigninRoute from "./routes/auth/Signin.tsx";
-import ForgotPasswordRoute from "./routes/auth/ForgotPassword.tsx";
-import OtpVerificationRoute from "./routes/auth/OtpVerification.tsx";
-import ResetPasswordRoute from "./routes/auth/ResetPassword.tsx";
-import SignupRoute from "./routes/auth/Signup.tsx";
-import DashboardLayoutRoute from "./routes/dashboard/DashboardLayout.tsx";
-import DashboardIndexRoute from "./routes/dashboard/DashboardIndex.tsx";
-import SoilTestingRoute from "./routes/dashboard/SoilTesting.tsx";
-import CropInformationRoute from "./routes/dashboard/CropInformation.tsx";
-import CropMonitoringRoute from "./routes/dashboard/CropMonitoring.tsx";
-import CreatePasswordRoute from "./routes/auth/CreatePassword.tsx";
-import RolesRoute from "./routes/dashboard/Roles.tsx";
-import UsersRoute from "./routes/dashboard/Users.tsx";
-import ProfileRoute from "./routes/dashboard/Profile.tsx";
-import ResetPasswordOTPRoute from "./routes/auth/ResetPasswordOTP.tsx";
-import FarmsListRoute from "./routes/dashboard/farms/list.tsx";
-import FarmDetailsRoute from "./routes/dashboard/farms/details.tsx";
-import PaymentSuccessRoute from "./routes/payment/success.tsx";
+import App from "@/App.tsx";
+import AuthLayoutRoute from "@/routes/auth/AuthLayout.tsx";
+import GetStartedRoute from "@/routes/auth/GetStartedCard.tsx";
+import SelectCountryRoute from "@/routes/auth/SelectCountryCard.tsx";
+import FarmTypeRoute from "@/routes/auth/FarmTypeCard.tsx";
+import SigninRoute from "@/routes/auth/Signin.tsx";
+import ForgotPasswordRoute from "@/routes/auth/ForgotPassword.tsx";
+import OtpVerificationRoute from "@/routes/auth/OtpVerification.tsx";
+import ResetPasswordRoute from "@/routes/auth/ResetPassword.tsx";
+import SignupRoute from "@/routes/auth/Signup.tsx";
+import DashboardLayoutRoute from "@/routes/dashboard/DashboardLayout.tsx";
+import DashboardIndexRoute from "@/routes/dashboard/DashboardIndex.tsx";
+import SoilTestingRoute from "@/routes/dashboard/SoilTesting.tsx";
+import CropInformationRoute from "@/routes/dashboard/CropInformation.tsx";
+import CropMonitoringRoute from "@/routes/dashboard/CropMonitoring.tsx";
+import CreatePasswordRoute from "@/routes/auth/CreatePassword.tsx";
+import RolesRoute from "@/routes/dashboard/Roles.tsx";
+import UsersRoute from "@/routes/dashboard/Users.tsx";
+import ProfileRoute from "@/routes/dashboard/Profile.tsx";
+import ResetPasswordOTPRoute from "@/routes/auth/ResetPasswordOTP.tsx";
+import FarmsListRoute from "@/routes/dashboard/farms/list.tsx";
+import FarmDetailsRoute from "@/routes/dashboard/farms/details.tsx";
+import PaymentSuccessRoute from "@/routes/payment/success.tsx";
+import OrganisationRoute from "@/routes/auth/Organisation.tsx";
 import type { QueryClient } from "@tanstack/react-query";
 
 interface MyRouterContext {
@@ -96,6 +97,7 @@ const routeTree = rootRoute.addChildren([
     ResetPasswordRoute(authRoute),
     SignupRoute(authRoute),
     ResetPasswordOTPRoute(authRoute),
+    OrganisationRoute(authRoute),
   ]),
   dashboardLayoutRoute.addChildren([
     dashboardHomeRoute,

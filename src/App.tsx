@@ -4,7 +4,7 @@ import { Toaster } from "sonner";
 import { useMe } from "@/api/auth";
 import { LoaderCircle } from "lucide-react";
 import { useUserStore } from "@/stores/useUserStore";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { saveOrgId } from "@/lib/utils";
 import { useLogout } from "@/api/auth";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
@@ -60,20 +60,23 @@ function RootErrorFallback({ error }: FallbackProps) {
 }
 
 function App() {
-  const { data: user, isLoading } = useMe();
+  const { data: user, isLoading, isPending } = useMe();
   const { setUser } = useUserStore();
 
   useEffect(() => {
     if (user) {
       setUser(user);
-      saveOrgId(user.organisations[0].id.toString());
+      if (user.organisations.length > 0) {
+        saveOrgId(user.organisations[0].id.toString());
+      }
     }
   }, [user, setUser]);
 
-  if (isLoading)
+  if (isLoading || isPending) {
     return (
       <LoaderCircle className="mx-auto mt-48 mb-14 animate-spin text-green-700" />
     );
+  }
 
   return (
     <>
@@ -81,7 +84,13 @@ function App() {
         <HeadContent />
         <DesktopOnlyOverlay />
         <Toaster position="top-right" richColors />
-        <Outlet />
+        <Suspense
+          fallback={
+            <LoaderCircle className="mx-auto mt-48 mb-14 animate-spin text-green-700" />
+          }
+        >
+          <Outlet />
+        </Suspense>
         <TanStackRouterDevtools />
       </ErrorBoundary>
     </>
