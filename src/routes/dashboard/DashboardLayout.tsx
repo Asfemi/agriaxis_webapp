@@ -8,7 +8,7 @@ import {
   redirect,
   type AnyRoute,
 } from "@tanstack/react-router";
-import { userToken } from "@/lib/utils";
+import { getOrgId, userToken } from "@/lib/utils";
 import { useIsFetching, useIsMutating } from "@tanstack/react-query";
 import { LoaderCircle, SquaresExclude } from "lucide-react";
 import { meQueryOptions } from "@/api/auth";
@@ -84,9 +84,15 @@ export default (parentRoute: AnyRoute) =>
     getParentRoute: () => parentRoute,
     errorComponent: DashboardError,
     beforeLoad: async ({ context }) => {
-      if (!userToken()) {
+      const token = userToken();
+      const orgId = getOrgId();
+      if (!token) {
         throw redirect({ to: "/signin", replace: true });
       }
+
+      if (!orgId) {
+        throw redirect({ to: "/organisation" });
+      } 
 
       try {
         await context.queryClient.ensureQueryData(meQueryOptions());

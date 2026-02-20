@@ -2,16 +2,19 @@ import OrganisationAddressForm from "@/components/auth/OrganisationAddressForm";
 import { LoaderCircle } from "lucide-react";
 import OrganisationProfileForm from "@/components/auth/OrganisationProfileForm";
 import { Button } from "@/components/Button";
-import { createRoute, type AnyRoute } from "@tanstack/react-router";
+import { createRoute, redirect, useNavigate, type AnyRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useOrganisationStore } from "@/stores/useOrganisationStore";
 import { useCreateOrganisationMutation } from "@/api/organisation";
 import { toast } from "sonner";
+import fullLogo from "/assets/icons/full-logo.svg";
+import { getOrgId } from "@/lib/utils";
 
 function Organisation() {
   const [step, setStep] = useState<"profile" | "address">("profile");
   const { formData, validateStep } = useOrganisationStore();
   const createOrganisation = useCreateOrganisationMutation();
+  const navigate = useNavigate();
 
   const handleContinue = async () => {
     if (step === "profile") {
@@ -37,7 +40,7 @@ function Organisation() {
 
       if (isValid) {
         try {
-          await createOrganisation.mutateAsync(formData);
+          await createOrganisation.mutateAsync(formData, { onSuccess: () => navigate({ to: "/dashboard" }) });
           toast.success("Organisation created successfully!");
         } catch (error) {
           toast.error("Failed to create organisation. Please try again.");
@@ -91,10 +94,26 @@ function Organisation() {
   );
 }
 
+function OrganisationLayout() {
+  return (
+    <main className="relative grid h-screen w-screen place-items-center bg-[#E7F2ED]">
+      <img src={fullLogo} width={183} height={49} className="absolute top-20 left-20" />
+      <div className="z-5">
+        <Organisation />
+      </div>
+    </main>
+  );
+}
+
 export default (parentRoute: AnyRoute) =>
   createRoute({
     path: "organisation",
-    component: Organisation,
+    component: OrganisationLayout,
     getParentRoute: () => parentRoute,
+    beforeLoad: () => {
+      const orgId = getOrgId();
+      if (orgId) {
+        throw redirect({ to: "/signin" });
+      }
+    }
   });
-

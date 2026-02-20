@@ -36,7 +36,7 @@ import ResetPasswordOTPRoute from "@/routes/auth/ResetPasswordOTP.tsx";
 import FarmsListRoute from "@/routes/dashboard/farms/list.tsx";
 import FarmDetailsRoute from "@/routes/dashboard/farms/details.tsx";
 import PaymentSuccessRoute from "@/routes/payment/success.tsx";
-import OrganisationRoute from "@/routes/auth/Organisation.tsx";
+import OrganisationLayoutRoute from "@/routes/auth/Organisation.tsx";
 import type { QueryClient } from "@tanstack/react-query";
 
 interface MyRouterContext {
@@ -97,7 +97,6 @@ const routeTree = rootRoute.addChildren([
     ResetPasswordRoute(authRoute),
     SignupRoute(authRoute),
     ResetPasswordOTPRoute(authRoute),
-    OrganisationRoute(authRoute),
   ]),
   dashboardLayoutRoute.addChildren([
     dashboardHomeRoute,
@@ -111,6 +110,7 @@ const routeTree = rootRoute.addChildren([
     FarmsListRoute(dashboardLayoutRoute),
     FarmDetailsRoute(dashboardLayoutRoute),
   ]),
+  OrganisationLayoutRoute(rootRoute),
   PaymentSuccessRoute(rootRoute),
 ]);
 
