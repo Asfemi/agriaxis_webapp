@@ -93,7 +93,7 @@ const FarmHealthCard: React.FC<FarmHealthCardProps> = ({
     <div className="relative w-full rounded-lg border border-gray-200 p-5 shadow-md">
       <header className="font-neue mb-8">
         <h5 className="text-lg font-semibold text-[#130B30]">Farm health</h5>
-        <h6 className="text-[#615C74]">over of all farm health status</h6>
+        <h6 className="text-[#615C74]">Overall farm health status</h6>
       </header>
 
       <div className="flex items-center">
