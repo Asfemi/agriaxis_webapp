@@ -17,7 +17,7 @@ function DashboardIndex({ farmListPath = "farms" }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-6">
+      <div className="flex items-center justify-center p-10">
         <p className="text-gray-500">Loading...</p>
       </div>
     );
@@ -92,6 +92,11 @@ function DashboardIndex({ farmListPath = "farms" }) {
               </h1>
             </header>
             <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+              {data.farm_lists.length === 0 && (
+                <div className="col-span-full">
+                  No farms yet... Please add a farm to see the status
+                </div>
+              )}
               {data.farm_lists.map((entry, index) => (
                 <FarmStatusCard
                   key={index}

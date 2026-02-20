@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, Bell, ChevronsRight } from "lucide-react";
+import { Search, Bell, ChevronsRight, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import NotificationPermissionModal from "@/components/dashboard/NotificationPermissionModal";
 import LocationPermissionModal from "@/components/dashboard/LocationPermissionModal";
@@ -24,7 +24,10 @@ const IconButton: React.FC<IconButtonProps> = ({ children, badge = false }) => (
 const ProfileButton: React.FC<{ profilePath: string }> = ({ profilePath }) => {
   const { data: user, isLoading } = useMe();
 
-  if (isLoading) return null;
+  if (isLoading)
+    return (
+      <LoaderCircle className="mx-auto mt-48 mb-14 animate-spin text-green-700" />
+    );
 
   return (
     <button className="flex items-center space-x-2 rounded-full border border-gray-200 bg-white p-1 pr-3 pl-1 transition duration-150 ease-in-out hover:shadow-md">
