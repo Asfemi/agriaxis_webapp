@@ -42,6 +42,7 @@
     "lucide-react": "^0.544.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-error-boundary": "^6.1.1",
     "react-hook-form": "^7.71.1",
     "react-leaflet": "^5.0.0",
     "recharts": "^3.5.1",
