@@ -60,7 +60,7 @@ function RootErrorFallback({ error }: FallbackProps) {
 }
 
 function App() {
-  const { data: user, isLoading, isPending } = useMe();
+  const { data: user, isLoading, isPending, isError, error } = useMe();
   const { setUser } = useUserStore();
 
   useEffect(() => {
@@ -75,6 +75,15 @@ function App() {
   if (isLoading || isPending) {
     return (
       <LoaderCircle className="mx-auto mt-48 mb-14 animate-spin text-green-700" />
+    );
+  }
+
+  if (isError) {
+    return (
+      <RootErrorFallback
+        error={error as Error}
+        resetErrorBoundary={() => window.location.reload()}
+      />
     );
   }
 
