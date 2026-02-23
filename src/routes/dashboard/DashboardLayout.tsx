@@ -6,6 +6,7 @@ import {
   createRoute,
   Outlet,
   redirect,
+  useRouteContext,
   type AnyRoute,
 } from "@tanstack/react-router";
 import { getOrgId, userToken } from "@/lib/utils";
@@ -13,12 +14,20 @@ import { useIsFetching, useIsMutating } from "@tanstack/react-query";
 import { LoaderCircle, SquaresExclude } from "lucide-react";
 import { meQueryOptions } from "@/api/auth";
 import { DashboardError } from "@/components/dashboard/DashboardError";
+import { useUserStore } from "@/stores/useUserStore";
+import { saveOrgId } from "@/lib/utils";
 
 function DashboardLayoutContent() {
   const { isOpen, close } = useSidebar();
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
   const isGlobalLoading = isFetching > 0 || isMutating > 0;
+  const { user } = useRouteContext({ from: "/dashboard" });
+  const { setUser } = useUserStore();
+
+  useEffect(() => {
+    if (user) setUser(user);
+  }, [user, setUser]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -85,17 +94,26 @@ export default (parentRoute: AnyRoute) =>
     errorComponent: DashboardError,
     beforeLoad: async ({ context }) => {
       const token = userToken();
-      const orgId = getOrgId();
       if (!token) {
         throw redirect({ to: "/signin", replace: true });
       }
 
-      if (!orgId) {
-        throw redirect({ to: "/organisation" });
-      } 
-
       try {
-        await context.queryClient.ensureQueryData(meQueryOptions());
+        const user =
+          await context.queryClient.ensureQueryData(meQueryOptions());
+
+        let orgId = getOrgId();
+
+        if (!orgId && user.organisations?.length > 0) {
+          orgId = String(user.organisations[0].id);
+          saveOrgId(orgId);
+        }
+
+        if (!orgId) {
+          throw redirect({ to: "/organisation", replace: true });
+        }
+
+        return { user };
       } catch (error) {
         throw redirect({ to: "/signin", replace: true });
       }

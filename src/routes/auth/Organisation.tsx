@@ -13,7 +13,7 @@ import { getOrgId } from "@/lib/utils";
 function Organisation() {
   const [step, setStep] = useState<"profile" | "address">("profile");
   const { formData, validateStep } = useOrganisationStore();
-  const createOrganisation = useCreateOrganisationMutation();
+  const { mutate: createOrganisation, isPending } = useCreateOrganisationMutation();
   const navigate = useNavigate();
 
   const handleContinue = async () => {
@@ -39,12 +39,16 @@ function Organisation() {
       ]);
 
       if (isValid) {
-        try {
-          await createOrganisation.mutateAsync(formData, { onSuccess: () => navigate({ to: "/dashboard" }) });
-          toast.success("Organisation created successfully!");
-        } catch (error) {
-          toast.error("Failed to create organisation. Please try again.");
-        }
+        createOrganisation(formData, {
+          onSuccess: () => {
+            toast.success("Organisation created successfully!");
+            navigate({ to: "/dashboard" });
+          },
+          onError: (error: any) => {
+            const errorMessage = error.response?.data?.message || "Something went wrong";
+            toast.error(errorMessage);
+          }
+        })
       } else {
         toast.error("Please fill in all required fields correctly");
       }
@@ -70,7 +74,7 @@ function Organisation() {
           <Button
             variant="tertiary"
             onClick={() => setStep("profile")}
-            disabled={createOrganisation.isPending}
+            disabled={isPending}
           >
             Back
           </Button>
@@ -78,10 +82,10 @@ function Organisation() {
         <Button
           variant="primary"
           onClick={handleContinue}
-          disabled={createOrganisation.isPending}
+          disabled={isPending}
           className="flex-1"
         >
-          {createOrganisation.isPending ? (
+          {isPending ? (
             <LoaderCircle className="mx-auto animate-spin" />
           ) : step === "profile" ? (
             "Continue"

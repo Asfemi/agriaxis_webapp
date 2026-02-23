@@ -1,11 +1,8 @@
 import { Outlet, HeadContent } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "sonner";
-import { useMe } from "@/api/auth";
 import { LoaderCircle } from "lucide-react";
-import { useUserStore } from "@/stores/useUserStore";
-import { Suspense, useEffect } from "react";
-import { saveOrgId } from "@/lib/utils";
+import { Suspense } from "react";
 import { useLogout } from "@/api/auth";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 
@@ -60,33 +57,6 @@ function RootErrorFallback({ error }: FallbackProps) {
 }
 
 function App() {
-  const { data: user, isLoading, isPending, isError, error } = useMe();
-  const { setUser } = useUserStore();
-
-  useEffect(() => {
-    if (user) {
-      setUser(user);
-      if (user.organisations.length > 0) {
-        saveOrgId(user.organisations[0].id.toString());
-      }
-    }
-  }, [user, setUser]);
-
-  if (isLoading || isPending) {
-    return (
-      <LoaderCircle className="mx-auto mt-48 mb-14 animate-spin text-green-700" />
-    );
-  }
-
-  if (isError) {
-    return (
-      <RootErrorFallback
-        error={error as Error}
-        resetErrorBoundary={() => window.location.reload()}
-      />
-    );
-  }
-
   return (
     <>
       <ErrorBoundary FallbackComponent={RootErrorFallback}>
