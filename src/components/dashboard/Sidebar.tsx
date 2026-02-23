@@ -122,6 +122,7 @@ const navItems: NavItemType[] = [
       </svg>
     ),
     path: "/dashboard/roles",
+    isDisabled: true,
   },
   {
     label: "Users",
