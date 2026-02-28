@@ -56,7 +56,7 @@ const CROP_TYPE_OPTIONS: { id: number; title: string }[] = [
 ];
 
 const FarmDetailsCard: React.FC<{
-  isOpen?: boolean;
+  isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   requestServiceType?: string;
@@ -206,7 +206,7 @@ const FarmDetailsCard: React.FC<{
             disabled={!formData.farm_id || !formData.crop}
             variant="primary"
           >
-            Add new farm
+            Continue
           </Button>
         </section>
       </form>

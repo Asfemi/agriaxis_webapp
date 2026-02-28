@@ -3,10 +3,12 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 
 export const ViewSoilTestResultSheet: React.FC<{
-  onClose: () => void;
+  onClose?: () => void;
   isOpen: boolean;
   test: FarmTest;
-}> = ({ onClose, test }) => {
+}> = ({ onClose, test, isOpen }) => {
+  if (!isOpen) return null;
+
   return (
     <section
       className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity"
@@ -27,7 +29,7 @@ export const ViewSoilTestResultSheet: React.FC<{
             <h5 className="font-neue text-xl font-bold text-[#130B30]">
               {test.testID}
             </h5>
-            <h6 className="text-[#423C59]">Your soil test result is ready</h6>
+            <h6 className="text-[#423C59]">Your result is ready</h6>
           </div>
         </header>
         <section className="relative mx-10 h-11/12 pb-5">
@@ -91,8 +93,8 @@ export const ViewSoilTestResultSheet: React.FC<{
               />
             </section>
           </div>
-          <Button variant="primary" className="sticky bottom-0 mt-8">
-            Download Result
+          <Button onClick={onClose} variant="primary" className="sticky bottom-0 mt-8">
+            Confirm
           </Button>
         </section>
       </section>

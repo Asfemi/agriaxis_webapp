@@ -97,7 +97,7 @@ export const PreviousLandMeasurementCard: React.FC<{
 
         <div className="mx-20">
           <Button onClick={onConfirm} variant="primary">
-            Proceed to payment
+            Proceed to scan crop
           </Button>
         </div>
       </div>

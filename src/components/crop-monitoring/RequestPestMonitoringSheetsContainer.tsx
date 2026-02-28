@@ -7,7 +7,7 @@ import { ManualMeasurementCard } from "@/components/soil-testing/ManualMeasureme
 import { MapMeasurementCard } from "@/components/soil-testing/MapMeasurementCard";
 import { SoilTestResultsCard } from "@/components/soil-testing/SoilTestResultsCard";
 
-const RequestSoilTestSheetsContainer: React.FC<{
+const RequestPestMonitoringSheetsContainer: React.FC<{
   isOpen: boolean;
   onClose: () => void;
 }> = ({ isOpen, onClose }) => {
@@ -69,4 +69,5 @@ const RequestSoilTestSheetsContainer: React.FC<{
   );
 };
 
-export { RequestSoilTestSheetsContainer };
+export { RequestPestMonitoringSheetsContainer };
+
