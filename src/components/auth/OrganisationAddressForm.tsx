@@ -4,26 +4,10 @@ import {
   OrganisationSchema,
   type OrganisationFormData,
 } from "@/models/organisation.model";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useOrganisationStore } from "@/stores/useOrganisationStore";
-import { SelectDropdown, type SelectOption } from "@/components/SelectDropdown";
-
-const state_options: SelectOption[] = [
-  { label: "Abuja", value: "abuja" },
-  { label: "Lagos", value: "lagos" },
-  { label: "Kaduna", value: "kaduna" },
-  { label: "Sokoto", value: "sokoto" },
-];
-
-const city_options: SelectOption[] = [
-  { label: "Aba", value: "aba" },
-  { label: "Abeokuta", value: "abeokuta" },
-  { label: "Ado-Ekiti", value: "ado-ekiti" },
-  { label: "Akoko", value: "akoko" },
-  { label: "Akure", value: "akure" },
-  { label: "Amuwo-Odofin", value: "amuwo-odofin" },
-  { label: "Enugu", value: "enugu" },
-];
+import { SelectDropdown } from "@/components/SelectDropdown";
+import { useLocations } from "@/api/locations";
 
 export default function OrganisationAddressForm() {
   const {
@@ -42,6 +26,29 @@ export default function OrganisationAddressForm() {
     mode: "onChange",
     defaultValues: formData,
   });
+
+  const { data: locations } = useLocations();
+  const selectedStateName = watch("state");
+
+  const state_options = useMemo(() => {
+    return (
+      locations?.map((loc) => ({
+        label: loc.name,
+        value: loc.name,
+      })) || []
+    );
+  }, [locations]);
+
+  const city_options = useMemo(() => {
+    if (!selectedStateName || !locations) return [];
+
+    const stateMatch = locations.find((loc) => loc.name === selectedStateName);
+
+    return stateMatch
+      ? stateMatch.cities.map((city) => ({ label: city, value: city }))
+      : [];
+  }, [selectedStateName, locations]);
+
 
   useEffect(() => {
     const subscription = watch((value) => {
