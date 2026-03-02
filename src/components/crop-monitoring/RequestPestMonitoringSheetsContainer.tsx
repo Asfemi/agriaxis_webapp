@@ -13,11 +13,10 @@ import { ViewSoilTestResultSheet } from "@/components/dashboard/ViewSoilTestResu
 import type { FarmTest } from "@/models/farm.model";
 import { generateFarmTest } from "@/data/farm.data";
 
-export const RequestCropInformationSheetsContainer: React.FC<{
+export const RequestPestMonitoringSheetsContainer: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  serviceType: string;
-}> = ({ isOpen, onClose, serviceType }) => {
+}> = ({ isOpen, onClose  }) => {
   if (!isOpen) return null;
   const [currentView, setCurrentView] = useState("details");
   const [result, setResult] = useState<FarmTest | null>(null);
@@ -69,7 +68,7 @@ export const RequestCropInformationSheetsContainer: React.FC<{
           isOpen={currentView === "details"}
           onClose={onClose}
           onConfirm={() => setCurrentView("existing_measurement")}
-          requestServiceType={serviceType}
+          requestServiceType={"Crop Health"}
         />
         <Activity mode={currentView === "measurement" ? "visible" : "hidden"}>
           <FarmMeasurementSelectionCard
@@ -77,7 +76,7 @@ export const RequestCropInformationSheetsContainer: React.FC<{
             onConfirm={(selection) =>
               handleMeasurementMethodSelection(selection)
             }
-            serviceType={serviceType}
+            serviceType={"Crop Health"}
           />
         </Activity>
         {currentView === "existing_measurement" && (
@@ -127,3 +126,4 @@ export const RequestCropInformationSheetsContainer: React.FC<{
     </section>
   );
 };
+

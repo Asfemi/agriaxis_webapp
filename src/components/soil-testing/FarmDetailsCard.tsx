@@ -56,12 +56,13 @@ const CROP_TYPE_OPTIONS: { id: number; title: string }[] = [
 ];
 
 const FarmDetailsCard: React.FC<{
-  isOpen?: boolean;
+  isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   requestServiceType?: string;
 }> = ({ isOpen, onClose, onConfirm, requestServiceType }) => {
   if (!isOpen) return null;
+  const [isNoFarms, setIsNoFarms] = useState(false);
   const [farm_options, setFarmOptions] = useState<SelectOption[]>([]);
   const { data: farms, isPending, isError } = useGetAllFarms();
   const {
@@ -104,6 +105,7 @@ const FarmDetailsCard: React.FC<{
       value: farm.id,
     }));
     setFarmOptions(options);
+    setIsNoFarms(farmsData?.length === 0);
   }, [farms, isPending, isError]);
 
   const onSubmit = (data: SoilTestingFormData) => {
@@ -136,25 +138,42 @@ const FarmDetailsCard: React.FC<{
             <h6 className="text-lg font-semibold text-[#939397]">Details</h6>
           </header>
           <div>
-            <Controller
-              name="farm_id"
-              control={control}
-              render={({ field }) => (
-                <SelectDropdown
-                  mode="single"
-                  label="Farm name"
-                  options={farm_options}
-                  placeholder="Select your farm"
-                  headerTitle="Select farm"
-                  value={field.value || null}
-                  onChange={(value) => field.onChange(value)}
+            {isNoFarms ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm text-[#423C59]">
+                  You don't have any farms yet. Please create a farm first.
+                </p>
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={() => onClose()}
+                >
+                  Close
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Controller
+                  name="farm_id"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectDropdown
+                      mode="single"
+                      label="Farm name"
+                      options={farm_options}
+                      placeholder="Select your farm"
+                      headerTitle="Select farm"
+                      value={field.value || null}
+                      onChange={(value) => field.onChange(value)}
+                    />
+                  )}
                 />
-              )}
-            />
-            {(errors.farm_id || storeErrors.farm_id) && (
-              <p className="mt-1 text-xs text-red-600">
-                {errors.farm_id?.message || storeErrors.farm_id}
-              </p>
+                {(errors.farm_id || storeErrors.farm_id) && (
+                  <p className="mt-1 text-xs text-red-600">
+                    {errors.farm_id?.message || storeErrors.farm_id}
+                  </p>
+                )}
+              </>
             )}
           </div>
           <div>
@@ -206,7 +225,7 @@ const FarmDetailsCard: React.FC<{
             disabled={!formData.farm_id || !formData.crop}
             variant="primary"
           >
-            Add new farm
+            Continue
           </Button>
         </section>
       </form>

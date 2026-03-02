@@ -7,19 +7,20 @@ import testingIconGrey from "/assets/icons/testing-grey.svg";
 import testingIcon from "/assets/icons/testing.svg";
 import { useState } from "react";
 import { CropMonitoringServicePage } from "@/components/crop-monitoring/CropMonitoringServicePage";
-import { RequestCropInformationSheetsContainer } from "@/components/crop-monitoring/RequestCropInformationSheetsContainer";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
+import { RequestPestMonitoringSheetsContainer } from "@/components/crop-monitoring/RequestPestMonitoringSheetsContainer";
+import { RequestCropHealthSheetsContainer } from "@/components/crop-monitoring/RequestCropHealthSheetsContainer";
 
 const SERVICES = [
-  {
-    title: "Pest/Disease monitoring",
-    sub: "Click here to get your pest management result",
-    icon: monitoringIcon,
-  },
   {
     title: "Crop health",
     sub: "Click here to get your crop health result",
     icon: healthIcon,
+  },
+  {
+    title: "Pest/Disease monitoring",
+    sub: "Click here to get your pest management result",
+    icon: monitoringIcon,
   },
 ];
 
@@ -28,11 +29,20 @@ type DASHBOARD_VIEW = "overview" | "service";
 function CropMonitoring() {
   const [currentView, setCurrentView] = useState<DASHBOARD_VIEW>("overview");
   const [selectedServiceTitle, setSelectedServiceTitle] = useState("");
-  const [showRequestSheet, setShowRequestSheet] = useState(false);
+  const [showRequestHealthSheet, setShowRequestHealthSheet] = useState(false);
+  const [showRequestPestSheet, setShowRequestPestSheet] = useState(false);
 
   const handleServiceClick = (title: string) => {
     setCurrentView("service");
     setSelectedServiceTitle(title);
+  };
+
+  const handleRequestInformationClick = (type: string) => {
+    if (type === "Crop health") {
+      setShowRequestHealthSheet(true);
+    } else {
+      setShowRequestPestSheet(true);
+    }
   };
 
   return (
@@ -109,16 +119,30 @@ function CropMonitoring() {
           <CropMonitoringServicePage
             title={selectedServiceTitle}
             onClose={() => setCurrentView("overview")}
-            onRequestInformation={() => setShowRequestSheet(true)}
-          />
-          <RequestCropInformationSheetsContainer
-            serviceType={
-              selectedServiceTitle.toLowerCase() === "crop health"
-                ? "crop health"
-                : "pest & disease monitoring"
+            onRequestInformation={() =>
+              handleRequestInformationClick(selectedServiceTitle)
             }
-            isOpen={showRequestSheet}
-            onClose={() => setShowRequestSheet(false)}
+          />
+          {/**
+             <>
+             <RequestCropInformationSheetsContainer
+             serviceType={
+             selectedServiceTitle.toLowerCase() === "crop health"
+               ? "crop health"
+               : "pest & disease monitoring"
+               }
+               isOpen={showRequestPestSheet}
+               onClose={() => setShowRequestPestSheet(false)}
+               />
+               </>
+            */}
+          <RequestCropHealthSheetsContainer
+            isOpen={showRequestHealthSheet}
+            onClose={() => setShowRequestHealthSheet(false)}
+          />
+          <RequestPestMonitoringSheetsContainer
+            isOpen={showRequestPestSheet}
+            onClose={() => setShowRequestPestSheet(false)}
           />
         </>
       )}

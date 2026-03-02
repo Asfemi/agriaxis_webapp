@@ -4,6 +4,7 @@ import { useSidebar, SidebarProvider } from "@/contexts/SidebarContext";
 import { Suspense, useEffect } from "react";
 import {
   createRoute,
+  isRedirect,
   Outlet,
   redirect,
   useRouteContext,
@@ -115,6 +116,7 @@ export default (parentRoute: AnyRoute) =>
 
         return { user };
       } catch (error) {
+        if(isRedirect(error)) throw error;
         throw redirect({ to: "/signin", replace: true });
       }
     },

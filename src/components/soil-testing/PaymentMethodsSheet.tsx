@@ -34,7 +34,8 @@ const paymentMethods: PaymentMethod[] = [
 const PaymentMethodsSheet: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose }) => {
+  onConfirm: () => void;
+}> = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
   const [selectedId, setSelectedId] = useState<string | null>(
     paymentMethods[0].id,
@@ -84,7 +85,7 @@ const PaymentMethodsSheet: React.FC<{
             ))}
           </section>
 
-          <Button onClick={onClose} variant="primary">
+          <Button onClick={onConfirm} variant="primary">
             Continue
           </Button>
         </section>

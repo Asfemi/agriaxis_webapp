@@ -4,8 +4,8 @@ import { FarmSizeForMeasurementCard } from "@/components/soil-testing/FarmSizeFo
 import { FarmMeasurementMethodCard } from "@/components/soil-testing/FarmMeasurementMethodCard";
 import { GoogleMeasurementCard } from "@/components/soil-testing/GoogleMeasurementCard";
 import { ManualMeasurementCard } from "@/components/soil-testing/ManualMeasurementCard";
-import { MapMeasurementCard } from "./MapMeasurementCard";
-import { SoilTestResultsCard } from "./SoilTestResultsCard";
+import { MapMeasurementCard } from "@/components/soil-testing/MapMeasurementCard";
+import { SoilTestResultsCard } from "@/components/soil-testing/SoilTestResultsCard";
 
 const RequestSoilTestSheetsContainer: React.FC<{
   isOpen: boolean;

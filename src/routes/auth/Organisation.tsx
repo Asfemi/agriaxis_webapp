@@ -2,7 +2,7 @@ import OrganisationAddressForm from "@/components/auth/OrganisationAddressForm";
 import { LoaderCircle } from "lucide-react";
 import OrganisationProfileForm from "@/components/auth/OrganisationProfileForm";
 import { Button } from "@/components/Button";
-import { createRoute, redirect, useNavigate, type AnyRoute } from "@tanstack/react-router";
+import { createRoute, redirect, type AnyRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useOrganisationStore } from "@/stores/useOrganisationStore";
 import { useCreateOrganisationMutation } from "@/api/organisation";
@@ -14,7 +14,6 @@ function Organisation() {
   const [step, setStep] = useState<"profile" | "address">("profile");
   const { formData, validateStep } = useOrganisationStore();
   const { mutate: createOrganisation, isPending } = useCreateOrganisationMutation();
-  const navigate = useNavigate();
 
   const handleContinue = async () => {
     if (step === "profile") {
@@ -42,7 +41,7 @@ function Organisation() {
         createOrganisation(formData, {
           onSuccess: () => {
             toast.success("Organisation created successfully!");
-            navigate({ to: "/dashboard" });
+            window.location.href = "/dashboard";
           },
           onError: (error: any) => {
             const errorMessage = error.response?.data?.message || "Something went wrong";
