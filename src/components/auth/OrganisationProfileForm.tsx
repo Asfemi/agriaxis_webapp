@@ -62,7 +62,14 @@ export default function OrganisationProfileForm() {
               <SelectDropdown
                 mode="single"
                 label="Organisation Type"
-                options={[{ label: "Cooperative", value: "cooperative" }]}
+                options={[
+                  { label: "Cooperative", value: "cooperative" },
+                  { label: "Agric Business", value: "agric_business" },
+                  { label: "Financial Institution", value: "financial_institution" },
+                  { label: "Non Governmental Organisation", value: "non_governmental_organisation" },
+                  { label: "Governmental Organisation", value: "governmental_organisation" },
+                  { label: "others", value: "others" }
+                ]}
                 placeholder="Select Organisation type"
                 headerTitle="Select Organisation Type"
                 value={field.value || null}

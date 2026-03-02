@@ -7,7 +7,6 @@ import testingIconGrey from "/assets/icons/testing-grey.svg";
 import testingIcon from "/assets/icons/testing.svg";
 import { useState } from "react";
 import { CropMonitoringServicePage } from "@/components/crop-monitoring/CropMonitoringServicePage";
-import { RequestCropInformationSheetsContainer } from "@/components/crop-monitoring/RequestCropInformationSheetsContainer";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
 import { RequestPestMonitoringSheetsContainer } from "@/components/crop-monitoring/RequestPestMonitoringSheetsContainer";
 import { RequestCropHealthSheetsContainer } from "@/components/crop-monitoring/RequestCropHealthSheetsContainer";

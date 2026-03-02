@@ -1,6 +1,6 @@
 import { FarmMeasurementSelectionCard } from "@/components/dashboard/FarmMeasurementSelectionCard";
 import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
-import { Activity, useEffect, useState } from "react";
+import { Activity, useState } from "react";
 import { PreviousLandMeasurementCard } from "@/components/crop-monitoring/PreviousLandMeasurementCard";
 import { PaymentMethodsSheet } from "@/components/soil-testing/PaymentMethodsSheet";
 import { FarmMeasurementMethodCard } from "@/components/soil-testing/FarmMeasurementMethodCard";
@@ -9,9 +9,7 @@ import { ManualMeasurementCard } from "@/components/soil-testing/ManualMeasureme
 import { CropImageCard } from "@/components/crop-monitoring/CropImageCard";
 import { toast } from "sonner";
 import { ProcessingResultCard } from "@/components/crop-monitoring/ProcessingResultCard";
-import { ViewSoilTestResultSheet } from "@/components/dashboard/ViewSoilTestResultSheet";
-import type { FarmTest } from "@/models/farm.model";
-import { generateFarmTest } from "@/data/farm.data";
+import { CropHealthResultSheet } from "./CropHealthResultSheet";
 
 export const RequestCropHealthSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -19,10 +17,6 @@ export const RequestCropHealthSheetsContainer: React.FC<{
 }> = ({ isOpen, onClose  }) => {
   if (!isOpen) return null;
   const [currentView, setCurrentView] = useState("details");
-  const [result, setResult] = useState<FarmTest | null>(null);
-  useEffect(() => {
-    setResult(generateFarmTest());
-  }, []);
   const handleMeasurementMethodSelection = (selection: "existing" | "new") => {
     if (selection === "existing") {
       setCurrentView("existing_measurement");
@@ -32,9 +26,6 @@ export const RequestCropHealthSheetsContainer: React.FC<{
   };
   const handleProceedToPayment = () => {
     setCurrentView("payment");
-  };
-  const handleProceedToScan = () => {
-    setCurrentView("image_upload");
   };
 
   const handleMeasurementMapMethodSelection = (
@@ -64,7 +55,6 @@ export const RequestCropHealthSheetsContainer: React.FC<{
         className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl"
         onClick={(e) => e.stopPropagation()}
       >
-      Crop health
         <FarmDetailsCard
           isOpen={currentView === "details"}
           onClose={onClose}
@@ -83,7 +73,7 @@ export const RequestCropHealthSheetsContainer: React.FC<{
         {currentView === "existing_measurement" && (
           <PreviousLandMeasurementCard
             onClose={() => setCurrentView("details")}
-            onConfirm={handleProceedToScan}
+            onConfirm={handleProceedToPayment}
           />
         )}
         <FarmMeasurementMethodCard
@@ -113,14 +103,13 @@ export const RequestCropHealthSheetsContainer: React.FC<{
         <Activity mode={currentView === "payment" ? "visible" : "hidden"}>
           <PaymentMethodsSheet
             isOpen={true}
-            onClose={() => setCurrentView("measurement_method")}
+            onClose={() => setCurrentView("existing_measurement")}
             onConfirm={handleConfirm}
           />
         </Activity>
         <ProcessingResultCard isOpen={currentView === "processing"} />
-        <ViewSoilTestResultSheet
+        <CropHealthResultSheet
           isOpen={currentView === "result"}
-          test={result!}
           onClose={onClose}
         />
       </section>

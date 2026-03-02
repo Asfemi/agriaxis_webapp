@@ -1,24 +1,58 @@
+import { FarmMeasurementSelectionCard } from "@/components/dashboard/FarmMeasurementSelectionCard";
 import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
-import { useState } from "react";
-import { FarmSizeForMeasurementCard } from "@/components/soil-testing/FarmSizeForMeasurementCard";
+import { Activity, useEffect, useState } from "react";
+import { PreviousLandMeasurementCard } from "@/components/crop-monitoring/PreviousLandMeasurementCard";
+import { PaymentMethodsSheet } from "@/components/soil-testing/PaymentMethodsSheet";
 import { FarmMeasurementMethodCard } from "@/components/soil-testing/FarmMeasurementMethodCard";
-import { GoogleMeasurementCard } from "@/components/soil-testing/GoogleMeasurementCard";
-import { ManualMeasurementCard } from "@/components/soil-testing/ManualMeasurementCard";
 import { MapMeasurementCard } from "@/components/soil-testing/MapMeasurementCard";
-import { SoilTestResultsCard } from "@/components/soil-testing/SoilTestResultsCard";
+import { ManualMeasurementCard } from "@/components/soil-testing/ManualMeasurementCard";
+import { CropImageCard } from "@/components/crop-monitoring/CropImageCard";
+import { toast } from "sonner";
+import { ProcessingResultCard } from "@/components/crop-monitoring/ProcessingResultCard";
+import { ViewSoilTestResultSheet } from "@/components/dashboard/ViewSoilTestResultSheet";
+import type { FarmTest } from "@/models/farm.model";
+import { generateFarmTest } from "@/data/farm.data";
 
-const RequestPestMonitoringSheetsContainer: React.FC<{
+export const RequestPestMonitoringSheetsContainer: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose }) => {
+}> = ({ isOpen, onClose  }) => {
   if (!isOpen) return null;
   const [currentView, setCurrentView] = useState("details");
-  const handleMeasurementMethodSelection = (selection: "google" | "manual") => {
+  const [result, setResult] = useState<FarmTest | null>(null);
+  useEffect(() => {
+    setResult(generateFarmTest());
+  }, []);
+  const handleMeasurementMethodSelection = (selection: "existing" | "new") => {
+    if (selection === "existing") {
+      setCurrentView("existing_measurement");
+    } else {
+      setCurrentView("measurement_method");
+    }
+  };
+  const handleProceedToPayment = () => {
+    setCurrentView("payment");
+  };
+  const handleProceedToScan = () => {
+    setCurrentView("image_upload");
+  };
+
+  const handleMeasurementMapMethodSelection = (
+    selection: "google" | "manual",
+  ) => {
     if (selection === "google") {
       setCurrentView("google_measurement");
     } else {
       setCurrentView("manual_measurement");
     }
+  };
+
+  const handleConfirm = () => {
+    toast.success("Crop scanned successfully!");
+    setCurrentView("processing");
+    setTimeout(() => {
+      setCurrentView("result");
+    }, 2e3);
   };
 
   return (
@@ -30,45 +64,66 @@ const RequestPestMonitoringSheetsContainer: React.FC<{
         className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl"
         onClick={(e) => e.stopPropagation()}
       >
-      Pest monitoring
         <FarmDetailsCard
           isOpen={currentView === "details"}
           onClose={onClose}
-          onConfirm={() => setCurrentView("size")}
+          onConfirm={() => setCurrentView("existing_measurement")}
+          requestServiceType={"Crop Health"}
         />
-        <FarmSizeForMeasurementCard
-          isOpen={currentView === "size"}
-          onClose={() => setCurrentView("details")}
-          onConfirm={() => setCurrentView("measurement_method")}
-        />
+        <Activity mode={currentView === "measurement" ? "visible" : "hidden"}>
+          <FarmMeasurementSelectionCard
+            onClose={() => setCurrentView("details")}
+            onConfirm={(selection) =>
+              handleMeasurementMethodSelection(selection)
+            }
+            serviceType={"Crop Health"}
+          />
+        </Activity>
+        {currentView === "existing_measurement" && (
+          <PreviousLandMeasurementCard
+            onClose={() => setCurrentView("details")}
+            onConfirm={handleProceedToScan}
+          />
+        )}
         <FarmMeasurementMethodCard
           isOpen={currentView === "measurement_method"}
-          onClose={() => setCurrentView("size")}
-          onConfirm={handleMeasurementMethodSelection}
+          onClose={() => setCurrentView("measurement")}
+          onConfirm={handleMeasurementMapMethodSelection}
         />
-        <GoogleMeasurementCard
-          isOpen={currentView === "google_measurement"}
-          onClose={() => setCurrentView("measurement_method")}
-          onConfirm={() => setCurrentView("leaflet_map")}
+        <CropImageCard
+          isOpen={currentView === "image_upload"}
+          onClose={() => setCurrentView("existing_measurement")}
+          onConfirm={(imageData) => {
+            console.log("Image ready for processing:", imageData);
+            handleProceedToPayment();
+            // Move to next step, e.g., setCurrentView("analyzing")
+          }}
         />
         <MapMeasurementCard
-          isOpen={currentView === "leaflet_map"}
-          onClose={() => setCurrentView("google_measurement")}
-          onConfirm={() => setCurrentView("result")}
+          isOpen={currentView === "google_measurement"}
+          onClose={() => setCurrentView("measurement_method")}
+          onConfirm={() => setCurrentView("image_upload")}
         />
         <ManualMeasurementCard
           isOpen={currentView === "manual_measurement"}
           onClose={() => setCurrentView("measurement_method")}
-          onConfirm={() => setCurrentView("result")}
+          onConfirm={() => setCurrentView("image_upload")}
         />
-        <SoilTestResultsCard
+        <Activity mode={currentView === "payment" ? "visible" : "hidden"}>
+          <PaymentMethodsSheet
+            isOpen={true}
+            onClose={() => setCurrentView("measurement_method")}
+            onConfirm={handleConfirm}
+          />
+        </Activity>
+        <ProcessingResultCard isOpen={currentView === "processing"} />
+        <ViewSoilTestResultSheet
           isOpen={currentView === "result"}
-          onClose={() => setCurrentView("measurement_method")}
+          test={result!}
+          onClose={onClose}
         />
       </section>
     </section>
   );
 };
-
-export { RequestPestMonitoringSheetsContainer };
 
