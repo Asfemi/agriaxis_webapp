@@ -30,6 +30,7 @@ const RequestPestMonitoringSheetsContainer: React.FC<{
         className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl"
         onClick={(e) => e.stopPropagation()}
       >
+      Pest monitoring
         <FarmDetailsCard
           isOpen={currentView === "details"}
           onClose={onClose}
