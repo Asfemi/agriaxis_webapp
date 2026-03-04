@@ -64,11 +64,11 @@ export default function OrganisationProfileForm() {
                 label="Organisation Type"
                 options={[
                   { label: "Cooperative", value: "cooperative" },
-                  { label: "Agric Business", value: "agric_business" },
-                  { label: "Financial Institution", value: "financial_institution" },
-                  { label: "Non Governmental Organisation", value: "non_governmental_organisation" },
-                  { label: "Governmental Organisation", value: "governmental_organisation" },
-                  { label: "others", value: "others" }
+                  { label: "Agric Business", value: "agribusiness" },
+                  { label: "Financial Institution", value: "bank" },
+                  { label: "Non Governmental Organisation", value: "ngo" },
+                  { label: "Governmental Organisation", value: "go" },
+                  { label: "others", value: "extension_service" }
                 ]}
                 placeholder="Select Organisation type"
                 headerTitle="Select Organisation Type"

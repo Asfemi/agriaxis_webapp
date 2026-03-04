@@ -8,7 +8,7 @@ export const FarmMeasurementMethodCard: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <section className="size-full">
+    <section className="size-full overflow-y-auto">
       <div className="flex h-full flex-col justify-between overflow-y-auto pb-10">
         <div>
           <header className="mb-10 flex items-start gap-3.5 pt-7 pl-6">

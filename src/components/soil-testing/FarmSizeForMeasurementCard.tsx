@@ -49,7 +49,7 @@ export const FarmSizeForMeasurementCard: React.FC<{
   };
 
   return (
-    <section className="size-full">
+    <section className="size-full overflow-y-auto">
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="flex h-full flex-col justify-between overflow-y-auto pb-10">
           <div>
