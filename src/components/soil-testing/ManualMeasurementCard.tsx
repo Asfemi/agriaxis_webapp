@@ -1,7 +1,7 @@
 import { ChevronLeft, X } from "lucide-react";
 import { Button } from "@/components/Button";
 import React, { useState } from "react";
-import { ManualMeasurementCoordinateEntryCard } from "./ManualMeasurementCoordinateEntryCard";
+import { ManualMeasurementCoordinateEntryCard } from "@/components/soil-testing/ManualMeasurementCoordinateEntryCard";
 import "@geoman-io/leaflet-geoman-free";
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import "leaflet/dist/leaflet.css";
