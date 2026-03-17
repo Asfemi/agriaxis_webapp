@@ -9,7 +9,7 @@ export const useLogin = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: LoginFormData) => {
-      const response = await apiClient.post("/login", data);
+      const response = await apiClient.post("/auth/login", data);
       return response.data;
     },
     onSuccess: (data: LoginResponse) => {
@@ -25,7 +25,7 @@ export const useRegisterUser = () => {
   return useMutation({
     mutationFn: async (data: RegistrationFormData) => {
       const payload = { ...data, name: `${data.first_name} ${data.last_name}` };
-      const response = await apiClient.post("/register", payload);
+      const response = await apiClient.post("/auth/register", payload);
       return response.data;
     },
     onSuccess: () => {
@@ -35,7 +35,7 @@ export const useRegisterUser = () => {
 };
 
 export const fetchMe = async () => {
-  const { data } = await apiClient.get<{ user: User }>("/me");
+  const { data } = await apiClient.get<{ user: User }>("/auth/me");
   return data.user;
 };
 
@@ -52,7 +52,7 @@ export const useLogout = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const reponse = await apiClient.post("/logout");
+      const reponse = await apiClient.post("/auth/logout");
       return reponse.data;
     },
     onSuccess: () => {
@@ -67,7 +67,7 @@ export const useForgotPassword = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: { email?: string; phone?: string }) => {
-      const response = await apiClient.post("/forgot-password", data);
+      const response = await apiClient.post("/auth/forgot-password", data);
       return response.data;
     },
     onSuccess: () => {
@@ -80,7 +80,7 @@ export const useVerifyOtpMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: { otp: string; email: string }) => {
-      const response = await apiClient.post("/verify-otp", data);
+      const response = await apiClient.post("/auth/verify-otp", data);
       return response.data;
     },
     onSuccess: () => {
@@ -94,7 +94,7 @@ export const useForgotPasswordOTPMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: { otp: string; email: string }) => {
-      const response = await apiClient.post("/verify-otp", data);
+      const response = await apiClient.post("/auth/verify-otp", data);
       return response.data;
     },
     onSuccess: () => {
@@ -107,7 +107,7 @@ export const useResetPasswordMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: ForgotPasswordFormData) => {
-      const response = await apiClient.post("/reset-password", data);
+      const response = await apiClient.post("/auth/reset-password", data);
       return response.data;
     },
     onSuccess: () => {
