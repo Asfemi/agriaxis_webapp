@@ -23,6 +23,7 @@ export interface FarmTest {
 
 export const NewFarmSchema = z.object({
   name: z.string().optional(),
+  coordinatesCsv: z.string(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   state: z.string().optional(),
