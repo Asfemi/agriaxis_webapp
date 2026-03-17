@@ -23,7 +23,7 @@ export interface FarmTest {
 
 export const NewFarmSchema = z.object({
   name: z.string().optional(),
-  coordinatesCsv: z.string(),
+  coordinatesCsv: z.string().optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   state: z.string().optional(),
@@ -36,7 +36,7 @@ export const NewFarmSchema = z.object({
   expected_harvest_date: z.string().optional(),
   status: z.string().optional(),
   health_status: z.string().optional(),
-  user_id: z.number().optional(),
+  user_id: z.string().optional(),
   notes: z.string().optional(),
 });
 

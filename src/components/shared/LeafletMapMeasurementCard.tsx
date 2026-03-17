@@ -82,13 +82,10 @@ const GeomanController: React.FC<{
   return null;
 };
 
-export const MapMeasurementCard: React.FC<{
-  isOpen?: boolean;
+export const LeafletMapMeasurementCard: React.FC<{
   onClose: () => void;
   onConfirm: (coordinates: string) => void;
-}> = ({ onClose, isOpen, onConfirm }) => {
-  if (!isOpen) return null;
-
+}> = ({ onClose, onConfirm }) => {
   const [coordinates, setCoordinates] = useState<Coordinate[]>([]);
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const { updateFormData: updateCoordinatesFormData } = useCoordinatesStore();
@@ -117,12 +114,11 @@ export const MapMeasurementCard: React.FC<{
     const result = coordinates
       .map((coord) => `${coord.lat.toFixed(4)}:${coord.lng.toFixed(4)}`)
       .join(",");
-    console.log('leaflet coordinates', result);
     onConfirm(result);
   };
 
   return (
-    <section className="size-full overflow-y-auto px-7">
+    <section className="size-full overflow-y-auto rounded-[1.25rem] bg-white px-7 lg:max-w-xl z-50 ml-auto">
       <header className="mb-10 flex items-center gap-3.5 pt-7">
         <button
           onClick={onClose}
@@ -154,10 +150,9 @@ export const MapMeasurementCard: React.FC<{
       </div>
       <div className="flex flex-col gap-4 pb-5">
         <Button type="button" variant="primary" onClick={handleSave}>
-          Save GPS coordinate
+          Save GPS coordinates
         </Button>
       </div>
     </section>
   );
 };
-

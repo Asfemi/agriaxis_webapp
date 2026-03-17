@@ -27,11 +27,11 @@ export const CropMonitoringServicePage: React.FC<{
   const columnDefinition: ColumnDef<CropMonitoringAnalysis>[] = [
     {
       accessorKey: "id",
-      header: "Test ID",
+      header: "ID",
     },
     {
       accessorKey: "farm_name",
-      header: "Test ID",
+      header: "Farm name",
     },
     {
       id: "status",
@@ -104,7 +104,7 @@ export const CropMonitoringServicePage: React.FC<{
                 <img src={testingIconGreen} width={17.5} height={15.64} />
               </div>
             }
-            title="Total Soil Tests"
+            title="Total Tests"
             value="15"
           />
           <StatCard
@@ -113,7 +113,7 @@ export const CropMonitoringServicePage: React.FC<{
                 <img src={testingIcon} width={20} height={20} />
               </div>
             }
-            title="Pending Tests"
+            title="Pending Farms"
             value="2"
           />
           <StatCard
@@ -122,7 +122,7 @@ export const CropMonitoringServicePage: React.FC<{
                 <img src={testingIconGrey} width={20} height={20} />
               </div>
             }
-            title="Completed Tests"
+            title="Completed Farms monitored"
             value="10"
           />
           <StatCard

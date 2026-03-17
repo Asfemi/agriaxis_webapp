@@ -14,11 +14,9 @@ const MEASUREMENT_STEPS = [
 ];
 
 export const ManualMapMeasurementCard: React.FC<{
-  isOpen?: boolean;
   onClose: () => void;
   onConfirm: (coordinates: string) => void;
-}> = ({ isOpen, onClose, onConfirm }) => {
-  if (!isOpen) return null;
+}> = ({ onClose, onConfirm }) => {
   const [openCoordinatesSelection, setOpenCoordinatesSelection] =
     useState(false);
   const { formData, updateFormData } = useCoordinatesStore();
@@ -76,14 +74,14 @@ export const ManualMapMeasurementCard: React.FC<{
    */
   const handleConfirm = () => {
     const result = points.map((coord) => coord.coordinate).join(",");
-    console.log('manual coordinates', result);
+    console.log("manual coordinates", result);
     onConfirm(result);
   };
 
   return (
     <>
       {!openCoordinatesSelection ? (
-        <section className="size-full">
+        <section className="z-50 ml-auto size-full overflow-y-auto rounded-[1.25rem] bg-white px-7 lg:max-w-xl">
           <div className="flex h-full flex-col justify-between overflow-y-auto pb-10">
             <div>
               <header className="mb-10 flex items-start gap-3.5 pt-7 pl-6">
@@ -245,19 +243,20 @@ export const ManualMapMeasurementCard: React.FC<{
                   !formData.point_4
                 }
               >
-                Done
+                Done. Save coordinates
               </Button>
             </div>
           </div>
         </section>
       ) : (
-        <ManualMeasurementCoordinateEntryCard
-          isOpen={openCoordinatesSelection}
-          onClose={() => setOpenCoordinatesSelection(false)}
-          onConfirm={() => setOpenCoordinatesSelection(false)}
-        />
+        <div className="z-50 ml-auto size-full overflow-y-auto rounded-[1.25rem] bg-white px-7 lg:max-w-xl">
+          <ManualMeasurementCoordinateEntryCard
+            isOpen={openCoordinatesSelection}
+            onClose={() => setOpenCoordinatesSelection(false)}
+            onConfirm={() => setOpenCoordinatesSelection(false)}
+          />
+        </div>
       )}
     </>
   );
 };
-

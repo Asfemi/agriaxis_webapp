@@ -16,7 +16,7 @@ export const useGetAllFarms = () => {
   return useQuery({
     queryKey: ["farms"],
     queryFn: async () => {
-      const { data } = await apiClient.get<GetAllFarmResponse>("/org/farms");
+      const { data } = await apiClient.get<GetAllFarmResponse>("/farms");
       return data;
     },
   });
@@ -26,7 +26,7 @@ export const useCreateFarm = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (farm: NewFarmFormData) => {
-      const { data } = await apiClient.post("/org/farms", farm);
+      const { data } = await apiClient.post("/farms", farm);
       return data;
     },
     onSuccess: () => {
