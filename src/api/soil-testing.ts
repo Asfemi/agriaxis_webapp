@@ -42,6 +42,10 @@ export const useSoilTestingCost = (hectares: number) => {
   });
 };
 
+/**
+ * @deprecated
+ * @returns 
+ */
 export const useSoilTestingPaymentInitialise = () => {
   return useMutation({
     mutationFn: async (request: SoilTestingPaymentInitialiseRequest) => {
@@ -55,6 +59,10 @@ export const useSoilTestingPaymentInitialise = () => {
   });
 };
 
+/**
+ * @deprecated
+ * @returns 
+ */
 export const useSoilTestingPayment = () => {
   const queryClient = useQueryClient();
 
