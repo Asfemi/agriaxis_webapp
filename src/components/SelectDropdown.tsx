@@ -24,7 +24,7 @@ interface SingleSelectProps extends BaseProps {
 
 interface MultiSelectProps extends BaseProps {
   mode: "multiple";
-  value: string[];
+  value: string[] | null;
   onChange: (value: string[]) => void;
   footerPlaceholder?: string;
   onCreateOption?: (value: string) => void;
@@ -59,7 +59,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = (props) => {
   const isMulti = props.mode === "multiple";
 
   const selectedValues = isMulti
-    ? props.value
+    ? (props.value ?? [])
     : props.value
       ? [props.value]
       : [];
@@ -76,10 +76,11 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = (props) => {
       props.onChange(val);
       setOpen(false);
     } else {
+      const current = props.value ?? [];
       props.onChange(
-        props.value.includes(val)
-          ? props.value.filter((v) => v !== val)
-          : [...props.value, val],
+        current.includes(val)
+          ? current.filter((v) => v !== val)
+          : [...current, val],
       );
     }
   };
@@ -134,7 +135,6 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = (props) => {
               return (
                 <label
                   key={option.value}
-                  onClick={() => !isDisabled && toggleValue(option.value)}
                   className="flex items-center gap-3 text-sm text-gray-700"
                 >
                   {isMulti ? (

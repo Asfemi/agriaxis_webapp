@@ -8,13 +8,12 @@ import { NewFarmSchema, type NewFarmFormData } from "@/models/farm.model";
 import { useLocations } from "@/api/locations";
 import { useCreateFarm } from "@/api/farms";
 import { toast } from "sonner";
-import { useUserStore } from "@/stores/useUserStore";
 import { LeafletMapMeasurementCard } from "@/components/shared/LeafletMapMeasurementCard";
 import { ManualMapMeasurementCard } from "@/components/shared/ManualMapMeasurementCard";
 
 const farm_size_options: SelectOption[] = [
-  { label: "Acre", value: "acre", disabled: true },
-  { label: "Hectare", value: "hectare" },
+  { label: "Acres", value: "acres", disabled: true },
+  { label: "Hectares", value: "hectares" },
 ];
 
 const crop_type_options: SelectOption[] = [
@@ -43,6 +42,9 @@ const NewFarmForm: React.FC<{
   } = useForm<NewFarmFormData>({
     resolver: zodResolver(NewFarmSchema),
     mode: "onChange",
+    defaultValues: {
+      crop_type: []
+    }
   });
 
   const { data: locations } = useLocations();
@@ -68,8 +70,24 @@ const NewFarmForm: React.FC<{
       : [];
   }, [selectedStateName, locations]);
 
+  const city_options = useMemo(() => {
+    if (!selectedStateName || !locations) return [];
+
+    const stateMatch = locations.find((loc) => loc.name === selectedStateName);
+    return stateMatch
+      ? stateMatch.cities.map((city) => ({ label: city, value: city }))
+      : [];
+  }, [selectedStateName, locations]);
+
   const onSubmit = (data: NewFarmFormData) => {
-    onConfirm(data);
+    const formattedData = {
+      ...data,
+      farm_size:
+        data.size_hectares && data.size_unit
+          ? `${data.size_hectares} ${data.size_unit}`
+          : undefined,
+    };
+    onConfirm(formattedData);
   };
 
   return (
@@ -103,16 +121,16 @@ const NewFarmForm: React.FC<{
               </label>
               <div className="rounded-lg bg-[#F3F6F8] p-3.5">
                 <input
-                  {...register("name")}
+                  {...register("farm_name")}
                   id="farm_name"
                   type="text"
                   className="w-full border-none text-sm text-[#423C59] outline-0 placeholder:text-sm placeholder:text-[#423C59] placeholder:opacity-70"
                   placeholder="Enter farm name"
                 />
               </div>
-              {errors.name && (
+              {errors.farm_name && (
                 <p className="mt-1 text-xs text-red-600">
-                  {errors.name?.message}
+                  {errors.farm_name?.message}
                 </p>
               )}
             </div>
@@ -164,12 +182,12 @@ const NewFarmForm: React.FC<{
                 control={control}
                 render={({ field }) => (
                   <SelectDropdown
-                    mode="single"
+                    mode="multiple"
                     label="Crop type"
                     options={crop_type_options}
                     placeholder="Select crop you have"
                     headerTitle="Select crops"
-                    value={field.value || null}
+                    value={field.value ?? []}
                     onChange={(value) => field.onChange(value)}
                   />
                 )}
@@ -231,6 +249,28 @@ const NewFarmForm: React.FC<{
                 </p>
               )}
             </div>
+            <div>
+              <Controller
+                name="city"
+                control={control}
+                render={({ field }) => (
+                  <SelectDropdown
+                    mode="single"
+                    label="City"
+                    options={city_options}
+                    placeholder="Select city"
+                    headerTitle="Select city"
+                    value={field.value || null}
+                    onChange={(value) => field.onChange(value)}
+                  />
+                )}
+              />
+              {errors.city && (
+                <p className="mt-1 text-xs text-red-600">
+                  {errors.city?.message}
+                </p>
+              )}
+            </div>
             <div className="mb-20">
               <label
                 htmlFor="address"
@@ -241,15 +281,15 @@ const NewFarmForm: React.FC<{
               <div className="rounded-lg bg-[#F3F6F8] p-3.5">
                 <input
                   id="address"
-                  {...register("physical_address")}
+                  {...register("address")}
                   type="text"
                   className="w-full border-none text-sm text-[#423C59] outline-0 placeholder:text-sm placeholder:text-[#423C59] placeholder:opacity-70"
                   placeholder="Enter address"
                 />
               </div>
-              {errors.physical_address && (
+              {errors.address && (
                 <p className="mt-1 text-xs text-red-600">
-                  {errors.physical_address?.message}
+                  {errors.address?.message}
                 </p>
               )}
             </div>
@@ -330,12 +370,10 @@ const AddNewFarmSheet: React.FC<{ onClose: () => void; isOpen: boolean }> = ({
 
   type IView = "form" | "selection" | "leaflet" | "manual";
   const { mutate } = useCreateFarm();
-  const user = useUserStore((state) => state.user);
   const [currentView, setCurrentView] = useState<IView>("form");
   const [formData, setFormData] = useState<NewFarmFormData | null>(null);
 
   const onSubmit = (data: NewFarmFormData) => {
-    data.user_id = user?.id;
     mutate(data, {
       onSuccess: () => {
         toast.success("Farm created successfully!");

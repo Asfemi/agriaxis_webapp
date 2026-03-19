@@ -26,11 +26,12 @@ export const useCreateFarm = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (farm: NewFarmFormData) => {
-      const { data } = await apiClient.post("/farms", farm);
+      const { data } = await apiClient.post("/farms/simple", farm);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["farms"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
