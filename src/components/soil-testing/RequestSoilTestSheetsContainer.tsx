@@ -35,7 +35,6 @@ const RequestSoilTestSheetsContainer: React.FC<{
         name: user?.name ?? "",
         phonenumber: user?.phone ?? "",
       },
-      // redirect_url: "https://agriaxis-webapp.vercel.app",
     };
 
     initialisePayment(request, {
