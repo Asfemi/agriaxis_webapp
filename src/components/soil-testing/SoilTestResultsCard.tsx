@@ -7,11 +7,62 @@ import { useCoordinatesStore } from "@/stores/useCoordinatesStore";
 import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
 import { ChevronLeft, LoaderCircle, TicketPercent } from "lucide-react";
 import { useMemo } from "react";
+import { Button } from "@/components/Button";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { useRef } from "react";
+import { toPng } from "html-to-image";
 
 export const SoilTestResultsCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;
 }> = ({ isOpen, onClose }) => {
+  const reportRef = useRef<HTMLDivElement>(null);
+  const handleDownload = async () => {
+    if (!reportRef.current) return;
+    const imgData = await toPng(reportRef.current, {
+      pixelRatio: 2,
+      canvasWidth: 800, // constrain capture width
+      style: {
+        width: "800px",
+        margin: "0",
+      },
+    });
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    const img = new Image();
+    img.src = imgData;
+    await new Promise((res) => (img.onload = res));
+
+    const imgHeightMm = (img.height * pdfWidth) / img.width;
+
+    let remainingHeight = imgHeightMm;
+    let yOffset = 0;
+
+    while (remainingHeight > 0) {
+      const margin = 10; // mm
+      const contentWidth = pdfWidth - margin * 2;
+      const imgHeightMm = (img.height * contentWidth) / img.width;
+      pdf.addImage(imgData, "PNG", margin, -yOffset, contentWidth, imgHeightMm);
+      // pdf.addImage(imgData, "PNG", 0, -yOffset, pdfWidth, imgHeightMm);
+      remainingHeight -= pdfHeight;
+      if (remainingHeight > 0) {
+        pdf.addPage();
+        yOffset += pdfHeight;
+      }
+    }
+
+    pdf.save(`${result?.name ?? "soil-test"}-result.pdf`);
+  };
+
   const { result } = useSoilTestingResultStore();
   const {
     data: resultData,
@@ -73,7 +124,7 @@ export const SoilTestResultsCard: React.FC<{
               <h6 className="text-[#423C59]">Your soil test result</h6>
             </div>
           </header>
-          <section className="mx-20 space-y-6 pb-10">
+          <section ref={reportRef} className="mx-20 space-y-6 pb-10">
             <div className="mb-6 flex items-center justify-between">
               <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
                 <TicketPercent size={20} className="text-[#0A814A]" />
@@ -265,6 +316,11 @@ export const SoilTestResultsCard: React.FC<{
                   </div>
                 </>
               )}
+            </div>
+            <div className="py-5">
+              <Button variant="primary" onClick={() => handleDownload()}>
+                Download Result
+              </Button>
             </div>
           </section>
         </div>

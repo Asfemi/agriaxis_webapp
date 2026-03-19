@@ -30,7 +30,7 @@ export const CropMonitoringServicePage: React.FC<{
 }> = ({ onClose, title, onRequestInformation, data }) => {
   const columnDefinition: ColumnDef<CropMonitoringAnalysis>[] = [
     {
-      accessorKey: "id",
+      accessorKey: "test_id",
       header: "ID",
     },
     {
@@ -50,11 +50,12 @@ export const CropMonitoringServicePage: React.FC<{
     {
       accessorKey: "payment",
       header: "Payment",
-      cell: ({ row }) => <span>₦{row.original.payment.toLocaleString()}</span>,
+      cell: ({ row }) => <span>₦{ row.original.payment ? row.original.payment.toLocaleString() : 0}</span>,
     },
     {
       accessorKey: "date",
       header: "Date",
+      cell: ({ row }) => <span className="capitalize">{row.original.date}</span>
     },
     {
       id: "actions",
@@ -67,6 +68,8 @@ export const CropMonitoringServicePage: React.FC<{
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Action</DropdownMenuLabel>
+              <DropdownMenuItem>View</DropdownMenuItem>
+              <DropdownMenuItem>Rename</DropdownMenuItem>
               <DropdownMenuItem>
                 <span className="text-[#E61504CC]">Delete analysis</span>
               </DropdownMenuItem>

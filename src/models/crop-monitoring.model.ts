@@ -1,8 +1,8 @@
 export interface CropMonitoringAnalysis {
-  id: string;
+  test_id: string;
   farm_name: string;
   status: "processing" | "completed";
-  payment: number;
+  payment: number | null;
   date: string;
 }
 
@@ -27,4 +27,20 @@ export interface PestMonitoringDashboard {
   pending_farms_to_be_monitored: number;
   completed_farm_monitoring: number;
   analytics_history: CropMonitoringAnalysis[];
+}
+
+export interface CropMonitoringDiseaseDetectResponse {
+  images: string[];
+  predictions: {
+    id: string;
+    name: string;
+    scientific_name: string;
+    probability: number;
+    common_names: [];
+    type: string;
+    description: string;
+    severity: string;
+    spreading: string;
+    treatment: [];
+  }[];
 }
