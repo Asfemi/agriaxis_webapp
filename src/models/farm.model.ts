@@ -64,32 +64,33 @@ export interface GetAllFarmResponse {
 }
 
 export interface FarmDetails {
-  id: number;
-  name: string;
-  location: {
-    latitude: null | number;
-    longitude: null | number;
-    state: string;
-    lga: string;
-    physical_address: string;
-  };
-  size_hectares: string;
-  crop_type: string;
-  planting_date: null | string;
-  expected_harvest_date: null | string;
+  farm_name: string;
+  size: string;
+  location: string;
   status: string;
-  health_status: string;
-  notes: null | string;
-  farmer: {
-    id: number;
-    name: string;
-    email: string;
-    phone: null | string;
+  result_summation: {
+    soil_ph: 0;
+    moisture: string;
+    nutrient: string;
+    total_no_of_tests: number;
   };
-  organisation: {
-    id: number;
-    name: string;
-  };
-  created_at: string;
-  updated_at: string;
+  list_test_results: any[];
+
+  // crop_type: string;
+  // planting_date: null | string;
+  // expected_harvest_date: null | string;
+  // health_status: string;
+  // notes: null | string;
+  // farmer: {
+  //   id: number;
+  //   name: string;
+  //   email: string;
+  //   phone: null | string;
+  // };
+  // organisation: {
+  //   id: number;
+  //   name: string;
+  // };
+  // created_at: string;
+  // updated_at: string;
 }

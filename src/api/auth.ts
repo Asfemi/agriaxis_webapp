@@ -34,7 +34,7 @@ export const useRegisterUser = () => {
   });
 };
 
-export const fetchMe = async () => {
+const fetchMe = async () => {
   const { data } = await apiClient.get<{ user: User }>("/auth/me");
   return data.user;
 };

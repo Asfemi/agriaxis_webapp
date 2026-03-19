@@ -48,12 +48,18 @@ export const useGetDashboard = () => {
 
 export const useGetFarm = (id: number) => {
   return useSuspenseQuery({
-    queryKey: ["farm", id], 
+    queryKey: ["farm", id],
     queryFn: async () => {
-      const { data } = await apiClient.get<{ data: FarmDetails }>(
-        `/org/farms/${id}`,
-      );
-      return data.data; 
+      try {
+        const { data } = await apiClient.get<FarmDetails>(`/farms/${id}`);
+        return data;
+      } catch (error: any) {
+        const serverMessage = error.response?.data?.message;
+        if (serverMessage) {
+          throw new Error(serverMessage);
+        }
+        throw error;
+      }
     },
   });
 };

@@ -21,7 +21,7 @@ export const FarmDetailsContainer = ({
 }) => {
   const { id } = useParams({ from: "/dashboard/dashboard/farms/details/$id" });
 
-  const { data: farmData } = useGetFarm(Number(id));
+  const { data: farmData, isLoading, isError } = useGetFarm(Number(id));
   const testColumns: ColumnDef<FarmTest>[] = [
     {
       accessorKey: "testID",
@@ -79,6 +79,10 @@ export const FarmDetailsContainer = ({
   const [viewSoilTestResult, setViewSoilTestResult] = useState(false);
   const [showRenameResultModal, setShowRenameResultModal] = useState(false);
 
+  if (isLoading) return <div>Loading farm data...</div>
+
+  if (isError) return <div>Failed to load farm data...</div>
+
   return (
     <>
       <main className="rounded-[1.25rem] bg-white p-6 pb-9">
@@ -91,12 +95,12 @@ export const FarmDetailsContainer = ({
           <div className="mb-6">
             <div className="mb-2 flex items-center gap-6">
               <h6 className="font-neue text-2xl font-bold text-[#0F172A]">
-                {`${farmData.name}, ${farmData.location.state}`}
+                {`${farmData?.farm_name}, ${farmData?.location}`}
               </h6>
               <StatusBadge<Farm["status"]>
-                status={farmData.health_status}
+                status={farmData?.status ?? ''}
                 variant={
-                  farmData.health_status === "healthy" ? "success" : "warning"
+                  farmData?.status === "healthy" ? "success" : "warning"
                 }
               />
             </div>
@@ -113,7 +117,7 @@ export const FarmDetailsContainer = ({
                   fill="#939397"
                 />
               </svg>
-              <span className="font-neue text-lg font-semibold text-[#434449]">{`${farmData.size_hectares} Hectares`}</span>
+              <span className="font-neue text-lg font-semibold text-[#434449]">{farmData?.size}</span>
             </div>
           </div>
           <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
@@ -155,7 +159,7 @@ export const FarmDetailsContainer = ({
           <DataTable title="Test performed" columns={columns} data={data} />
         </header>
       </main>
-      <ViewSoilTestResultSheet
+      {/* <ViewSoilTestResultSheet
         onClose={() => setViewSoilTestResult(false)}
         isOpen={viewSoilTestResult}
         test={data[0]}
@@ -166,7 +170,7 @@ export const FarmDetailsContainer = ({
         value={"1"}
         onSave={() => setShowRenameResultModal(false)}
         onClose={() => setShowRenameResultModal(false)}
-      />
+      /> */}
     </>
   );
 };
