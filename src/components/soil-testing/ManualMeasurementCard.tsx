@@ -24,6 +24,11 @@ const MEASUREMENT_STEPS = [
   "Record 4 points for your farm land",
 ];
 
+/**
+ * @deprecated
+ * @param param0 
+ * @returns 
+ */
 export const ManualMeasurementCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;

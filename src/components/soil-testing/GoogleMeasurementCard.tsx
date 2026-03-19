@@ -7,6 +7,11 @@ const MEASUREMENT_STEPS = [
   "Click done to start measurement",
 ];
 
+/**
+ * @deprecated
+ * @param param0 
+ * @returns 
+ */
 export const GoogleMeasurementCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;

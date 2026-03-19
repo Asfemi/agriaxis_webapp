@@ -126,7 +126,7 @@ export const FarmDetailsContainer = ({
                 Soil PH <span className="text-[#64748B]">(from last test)</span>
               </span>
               <span className="font-neue text-3xl font-bold text-[#0A814A]">
-                {0}
+                {farmData.result_summation.soil_ph}
               </span>
             </div>
             <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F3F6F8] p-4">
@@ -135,7 +135,7 @@ export const FarmDetailsContainer = ({
                 <span className="text-[#64748B]">(from last test)</span>
               </span>
               <span className="font-neue text-3xl font-bold text-[#D9A728]">
-                {0}%
+                {farmData.result_summation.moisture}
               </span>
             </div>
             <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F3F6F8] p-4">
@@ -144,7 +144,7 @@ export const FarmDetailsContainer = ({
                 <span className="text-[#64748B]">(from last test)</span>
               </span>
               <span className="font-neue text-3xl font-bold text-[#0A814A] capitalize">
-                {0}
+                {farmData.result_summation.nutrient}
               </span>
             </div>
             <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F3F6F8] p-4">
@@ -152,7 +152,7 @@ export const FarmDetailsContainer = ({
                 Total no. of test
               </span>
               <span className="font-neue text-3xl font-bold text-[#130B30]">
-                {0}
+                {farmData.result_summation.total_no_of_tests}
               </span>
             </div>
           </div>

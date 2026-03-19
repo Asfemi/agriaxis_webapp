@@ -12,56 +12,11 @@ import {
   type SoilTestingFormData,
 } from "@/models/soil-testing.model";
 
-const CROP_TYPE_OPTIONS: { id: number; title: string }[] = [
-  {
-    id: 1,
-    title: "cocoa",
-  },
-  {
-    id: 2,
-    title: "rice",
-  },
-  {
-    id: 3,
-    title: "maize",
-  },
-  {
-    id: 4,
-    title: "beans",
-  },
-  {
-    id: 5,
-    title: "yam",
-  },
-  {
-    id: 6,
-    title: "cassava",
-  },
-  {
-    id: 7,
-    title: "barley",
-  },
-  {
-    id: 8,
-    title: "quinoa",
-  },
-  {
-    id: 10,
-    title: "oats",
-  },
-  {
-    id: 11,
-    title: "millet",
-  },
-];
-
-const FarmDetailsCard: React.FC<{
-  isOpen: boolean;
+export const FarmInformationCard: React.FC<{
   onClose: () => void;
   onConfirm: () => void;
   requestServiceType?: string;
-}> = ({ isOpen, onClose, onConfirm, requestServiceType }) => {
-  if (!isOpen) return null;
+}> = ({ onClose, onConfirm, requestServiceType }) => {
   const [isNoFarms, setIsNoFarms] = useState(false);
   const [farm_options, setFarmOptions] = useState<SelectOption[]>([]);
   const { data: farms, isPending, isError } = useGetAllFarms();
@@ -232,5 +187,3 @@ const FarmDetailsCard: React.FC<{
     </section>
   );
 };
-
-export { FarmDetailsCard };

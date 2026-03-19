@@ -2,8 +2,8 @@ export interface PaymentInitialiseRequest {
   farmId: string;
   amount: number;
   currency: string;
-  country: string;
-  redirect_url: string
+  country?: string;
+  redirect_url?: string
   customer: {
     email: string;
     name: string;

@@ -28,6 +28,11 @@ export const useSoilTestingDashboard = () => {
   });
 };
 
+/**
+ * @deprecated
+ * @param hectares 
+ * @returns 
+ */
 export const useSoilTestingCost = (hectares: number) => {
   return useQuery({
     queryKey: ["soil-testing-cost", hectares],

@@ -1,4 +1,5 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { toast } from 'sonner';
 
 export function getContext() {
   const queryClient = new QueryClient({
@@ -12,7 +13,12 @@ export function getContext() {
           console.error('Error in mutation:', err)
         },
       }
-    }
+    },
+    queryCache: new QueryCache({
+    onError: (error) => {
+      toast.error(error.message || "Something went wrong");
+    },
+  }),
   })
   return {
     queryClient,

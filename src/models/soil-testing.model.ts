@@ -72,7 +72,7 @@ export interface SoilTestingPaymentInitialiseResponse {
 }
 
 export interface SoilTestingUploadRequest {
-  coordinatesCsv: string;
+  coordinatesCsv?: string;
   farmId: string;
 }
 

@@ -1,6 +1,6 @@
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft, LoaderCircle } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import { SelectDropdown, type SelectOption } from "@/components/SelectDropdown";
 import { useMemo, useState } from "react";
