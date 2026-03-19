@@ -52,6 +52,7 @@ export const FarmsListContainer = () => {
     {
       accessorKey: "date",
       header: "Date created",
+      cell: ({ row }) => (<div className="capitalize">{row.getValue('date')}</div>)
     },
     {
       id: "actions",
