@@ -1,7 +1,30 @@
 export interface CropMonitoringAnalysis {
-    id: string;
-    farm_name: string;
-    status: 'processing' | 'completed';
-    payment: number;
-    date: string;
+  id: string;
+  farm_name: string;
+  status: "processing" | "completed";
+  payment: number;
+  date: string;
+}
+
+export interface CropMonitoringDashboardResponse {
+  total_farms_monitored: number;
+  pending_farms: number;
+  completed_farms: number;
+  pest_disease_monitoring: PestMonitoringDashboard;
+  crop_health: CropHealthDashboard;
+  pagination: number;
+}
+
+export interface CropHealthDashboard {
+  total_no_of_crop_tests: number;
+  pending_crop_tests: number;
+  completed_crop_tests: number;
+  analytics_history: CropMonitoringAnalysis[];
+}
+
+export interface PestMonitoringDashboard {
+  total_no_of_farms_monitored: number;
+  pending_farms_to_be_monitored: number;
+  completed_farm_monitoring: number;
+  analytics_history: CropMonitoringAnalysis[];
 }

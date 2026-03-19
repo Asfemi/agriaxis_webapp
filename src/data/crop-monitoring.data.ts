@@ -3,6 +3,11 @@ import type { CropMonitoringAnalysis } from "@/models/crop-monitoring.model";
 
 const STATUSES: Array<'processing' | 'completed'> = ['processing', 'completed'];
 
+/**
+ * @deprecated
+ * @param count 
+ * @returns 
+ */
 export const generateCropMonitoringAnalysis = (count = 5): CropMonitoringAnalysis[] => {
   return Array.from({ length: count }, () => ({
     id: `R/${faker.string.alphanumeric(5).toUpperCase()}`,

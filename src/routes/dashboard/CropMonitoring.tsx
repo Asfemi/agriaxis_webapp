@@ -10,6 +10,8 @@ import { CropMonitoringServicePage } from "@/components/crop-monitoring/CropMoni
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
 import { RequestPestMonitoringSheetsContainer } from "@/components/crop-monitoring/RequestPestMonitoringSheetsContainer";
 import { RequestCropHealthSheetsContainer } from "@/components/crop-monitoring/RequestCropHealthSheetsContainer";
+import { useGetCropMonitoringDashboard } from "@/api/crop-monitoring";
+import { cn } from "@/lib/utils";
 
 const SERVICES = [
   {
@@ -22,6 +24,12 @@ const SERVICES = [
     sub: "Click here to get your pest management result",
     icon: monitoringIcon,
   },
+  {
+    title: "Yield estimation",
+    sub: "Click here to get your expected yield estimation result",
+    icon: monitoringIcon,
+    isDisabled: true,
+  },
 ];
 
 type DASHBOARD_VIEW = "overview" | "service";
@@ -31,6 +39,8 @@ function CropMonitoring() {
   const [selectedServiceTitle, setSelectedServiceTitle] = useState("");
   const [showRequestHealthSheet, setShowRequestHealthSheet] = useState(false);
   const [showRequestPestSheet, setShowRequestPestSheet] = useState(false);
+
+  const { data: dashboardData, isLoading } = useGetCropMonitoringDashboard();
 
   const handleServiceClick = (title: string) => {
     setCurrentView("service");
@@ -44,6 +54,14 @@ function CropMonitoring() {
       setShowRequestPestSheet(true);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-10">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -67,7 +85,7 @@ function CropMonitoring() {
                   </div>
                 }
                 title="Total farms monitored"
-                value="0"
+                value={dashboardData?.total_farms_monitored ?? 0}
               />
               <StatCard
                 icon={
@@ -75,8 +93,8 @@ function CropMonitoring() {
                     <img src={testingIcon} width={20} height={20} />
                   </div>
                 }
-                title="Pending Tests"
-                value="0"
+                title="Pending Farms"
+                value={dashboardData?.pending_farms ?? 0}
               />
               <StatCard
                 icon={
@@ -84,8 +102,8 @@ function CropMonitoring() {
                     <img src={testingIconGrey} width={20} height={20} />
                   </div>
                 }
-                title="Completed Tests"
-                value="0"
+                title="Completed Farms"
+                value={dashboardData?.completed_farms ?? 0}
               />
             </div>
           </section>
@@ -99,15 +117,36 @@ function CropMonitoring() {
               {SERVICES.map((entry) => (
                 <ServiceCard
                   key={entry.title}
-                  className="cursor-pointer"
-                  onClick={() => handleServiceClick(entry.title)}
+                  className={cn(
+                    "transition-all",
+                    entry.isDisabled
+                      ? "cursor-not-allowed opacity-50 grayscale-[0.5]"
+                      : "cursor-pointer hover:bg-gray-50",
+                  )}
+                  onClick={() => {
+                    if (!entry.isDisabled) {
+                      handleServiceClick(entry.title);
+                    }
+                  }}
                   icon={
-                    <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
-                      <img src={entry.icon} width={20} height={20} />
+                    <div
+                      className={cn(
+                        "grid size-9.5 place-items-center rounded-[0.375rem] border",
+                        entry.isDisabled
+                          ? "border-gray-300 bg-gray-100"
+                          : "border-[#0A814A] bg-[#E7F2ED]",
+                      )}
+                    >
+                      <img
+                        src={entry.icon}
+                        width={20}
+                        height={20}
+                        alt={entry.title}
+                      />
                     </div>
                   }
                   title={entry.title}
-                  value={entry.sub}
+                  value={entry.isDisabled ? "Coming Soon" : entry.sub}
                 />
               ))}
             </div>
@@ -119,6 +158,7 @@ function CropMonitoring() {
           <CropMonitoringServicePage
             title={selectedServiceTitle}
             onClose={() => setCurrentView("overview")}
+            data={dashboardData}
             onRequestInformation={() =>
               handleRequestInformationClick(selectedServiceTitle)
             }

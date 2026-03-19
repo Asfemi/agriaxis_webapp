@@ -1,5 +1,5 @@
 import { Button } from "@/components/Button";
-import { ChevronLeft, MoreVertical } from "lucide-react";
+import { ChevronLeft, LoaderCircle, MoreVertical } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
@@ -15,15 +15,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { CropMonitoringAnalysis } from "@/models/crop-monitoring.model";
+import type {
+  CropMonitoringAnalysis,
+  CropMonitoringDashboardResponse,
+} from "@/models/crop-monitoring.model";
 import StatusBadge from "@/components/StatusBadge";
-import { generateCropMonitoringAnalysis } from "@/data/crop-monitoring.data";
+import { useGetCost } from "@/api/payments";
 
 export const CropMonitoringServicePage: React.FC<{
   onClose: () => void;
   title: string;
   onRequestInformation: () => void;
-}> = ({ onClose, title, onRequestInformation }) => {
+  data: CropMonitoringDashboardResponse | undefined;
+}> = ({ onClose, title, onRequestInformation, data }) => {
   const columnDefinition: ColumnDef<CropMonitoringAnalysis>[] = [
     {
       accessorKey: "id",
@@ -72,9 +76,37 @@ export const CropMonitoringServicePage: React.FC<{
       ),
     },
   ];
-
   const columns = useMemo(() => columnDefinition, []);
-  const [data] = useState(() => generateCropMonitoringAnalysis());
+
+  const { data: cost, isLoading: isLoadingCost } = useGetCost(
+    "crop-monitoring",
+    1,
+  );
+
+  const displayData = (() => {
+    if (!data) {
+      return { total: 0, pending: 0, completed: 0, history: [] };
+    }
+
+    // 2. Use the title to pick the correct branch and extract values
+    if (title === "Crop health") {
+      const ch = data.crop_health;
+      return {
+        total: ch.total_no_of_crop_tests,
+        pending: ch.pending_crop_tests,
+        completed: ch.completed_crop_tests,
+        history: ch.analytics_history,
+      };
+    } else {
+      const pm = data.pest_disease_monitoring;
+      return {
+        total: pm.total_no_of_farms_monitored,
+        pending: pm.pending_farms_to_be_monitored,
+        completed: pm.completed_farm_monitoring,
+        history: pm.analytics_history,
+      };
+    }
+  })();
 
   return (
     <main className="rounded-[1.25rem] bg-white p-6 pb-9">
@@ -92,12 +124,16 @@ export const CropMonitoringServicePage: React.FC<{
         </div>
         <div>
           <Button variant="primary" onClick={() => onRequestInformation()}>
-            Request Information ₦25,000
+            {isLoadingCost ? (
+              <LoaderCircle className="mx-auto animate-spin" />
+            ) : (
+              `Request Information ₦${cost?.amount ?? 0}`
+            )}
           </Button>
         </div>
       </header>
       <section>
-        <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           <StatCard
             icon={
               <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
@@ -105,7 +141,7 @@ export const CropMonitoringServicePage: React.FC<{
               </div>
             }
             title="Total Tests"
-            value="15"
+            value={displayData.total}
           />
           <StatCard
             icon={
@@ -114,29 +150,34 @@ export const CropMonitoringServicePage: React.FC<{
               </div>
             }
             title="Pending Farms"
-            value="2"
+            value={displayData.pending}
           />
           <StatCard
+          className="col-span-2 lg:col-auto"
             icon={
               <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#423C59] bg-[#E7E7EA]">
                 <img src={testingIconGrey} width={20} height={20} />
               </div>
             }
             title="Completed Farms monitored"
-            value="10"
+            value={displayData.completed}
           />
-          <StatCard
+          {/* <StatCard
             icon={
               <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#4F3824] bg-[#EDEBE9]">
                 <img src={processingIcon} width={20} height={20} />
               </div>
             }
             title="Average turnaround time"
-            value="1.5 mins"
-          />
+            value="0"
+          /> */}
         </div>
         <div>
-          <DataTable title="Analysis history" columns={columns} data={data} />
+          <DataTable
+            title="Analysis history"
+            columns={columns}
+            data={displayData.history}
+          />
         </div>
       </section>
     </main>

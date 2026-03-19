@@ -91,9 +91,9 @@ export const FarmSizeForMeasurementCard: React.FC<{
                     <p className="text-sm text-[#615C74]">Total price</p>
                     <p className="font-medium text-[#615C74]">
                       {isLoadingCost ? (
-                        <div>
+                        <span>
                           <LoaderCircle className="animate-spin" />
-                        </div>
+                        </span>
                       ) : (
                         <>₦{cost?.amount ?? 0}</>
                       )}
