@@ -125,6 +125,6 @@ export default (parentRoute: AnyRoute) =>
     component: SoilTesting,
     getParentRoute: () => parentRoute,
     staticData: {
-      title: "Soil Testing",
+      title: "Soil Health",
     },
   });
