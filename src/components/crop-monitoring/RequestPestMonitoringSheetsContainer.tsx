@@ -15,31 +15,42 @@ import { generateFarmTest } from "@/data/farm.data";
 import { useCropMonitoringDiseaseDetect } from "@/api/crop-monitoring";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { faker } from "@faker-js/faker";
+import { DiseaseDetectResultSheet } from "@/components/crop-monitoring/DiseaseDetectResultSheet";
+import type { CropMonitoringDiseaseDetectResponse } from "@/models/crop-monitoring.model";
 
 export const RequestPestMonitoringSheetsContainer: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose  }) => {
+}> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   const [currentView, setCurrentView] = useState("details");
-  const [result, setResult] = useState<FarmTest | null>(null);
+  const [result, setResult] =
+    useState<CropMonitoringDiseaseDetectResponse | null>(null);
   const { formData } = useSoilTestingFormStore();
-  const { mutate } = useCropMonitoringDiseaseDetect()
-  useEffect(() => {
-    setResult(generateFarmTest());
-  }, []);
+  const { mutate } = useCropMonitoringDiseaseDetect();
 
   const handleProceedToPayment = () => {
     setCurrentView("payment");
   };
 
   const handleConfirm = (image: File) => {
-    // toast.success("Crop scanned successfully!");
-    mutate({ name: `F/${faker.string.alphanumeric(5).toUpperCase()}`, image: image, farmId: formData.farm_id ?? ''})
-    setCurrentView("processing");
-    setTimeout(() => {
-      setCurrentView("result");
-    }, 2e3);
+    mutate(
+      {
+        name: `F/${faker.string.alphanumeric(5).toUpperCase()}`,
+        image: image,
+        farmId: formData.farm_id ?? "",
+      },
+      {
+        onSuccess: (data) => {
+          setResult(data);
+          toast.success("Crop scanned successfully!");
+          setCurrentView("processing");
+          setTimeout(() => {
+            setCurrentView("result");
+          }, 2e3);
+        },
+      },
+    );
   };
 
   return (
@@ -66,13 +77,12 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
           }}
         />
         <ProcessingResultCard isOpen={currentView === "processing"} />
-        <ViewSoilTestResultSheet
+        <DiseaseDetectResultSheet
           isOpen={currentView === "result"}
-          test={result!}
+          result={result!}
           onClose={onClose}
         />
       </section>
     </section>
   );
 };
-

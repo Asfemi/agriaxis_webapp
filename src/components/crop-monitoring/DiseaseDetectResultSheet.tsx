@@ -1,17 +1,18 @@
-import type { FarmTest } from "@/models/farm.model";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
+import type { CropMonitoringDiseaseDetectResponse } from "@/models/crop-monitoring.model";
 
-export const ViewSoilTestResultSheet: React.FC<{
+export const DiseaseDetectResultSheet: React.FC<{
   onClose?: () => void;
   isOpen: boolean;
-  test: FarmTest;
-}> = ({ onClose, test, isOpen }) => {
+  result: CropMonitoringDiseaseDetectResponse;
+}> = ({ onClose, result, isOpen }) => {
   if (!isOpen) return null;
 
   return (
     <section
       className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity"
+      onClick={onClose}
     >
       <section
         className="z-50 ml-auto h-full w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-white p-8"
@@ -26,9 +27,9 @@ export const ViewSoilTestResultSheet: React.FC<{
           </button>
           <div className="flex flex-col gap-2">
             <h5 className="font-neue text-xl font-bold text-[#130B30]">
-              {test.testID}
+              Result
             </h5>
-            <h6 className="text-[#423C59]">Your result is ready</h6>
+            <h6 className="text-[#423C59]">-</h6>
           </div>
         </header>
         <section className="relative mx-10 h-11/12 pb-5">
@@ -62,37 +63,98 @@ export const ViewSoilTestResultSheet: React.FC<{
               />
             </svg>
 
-            <span className="text-sm text-[#423C59]">{test.date}</span>
+            <span className="text-sm text-[#423C59]">-</span>
           </div>
           <img
-            src="/assets/images/farm.png"
+            src={result.images[0]}
             width={400}
             height={140}
             className="mb-4 w-full"
           />
           <div>
             <h6 className="mb-4 text-sm font-medium text-[#130B30]">
-              {`Planting date: ${test.plantingDate}`}
+              {`Planting date: -`}
             </h6>
             <section className="space-y-2">
-              <PhenologyCard
-                title="Germination"
-                phenophase="0-5 (0)"
-                acquisition="Oct 14"
-                actual="0.28"
-                expected="0.25"
-              />
-
-              <PhenologyCard
-                title="Emergence"
-                phenophase="6-14 (10)"
-                acquisition="Oct 24"
-                actual="0.35"
-                expected="0.40"
-              />
+              {result.predictions.map((entry) => (
+                <div className="w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="mb-4">
+                    <h2 className="font-neue text-sm font-semibold text-[#130B30]">
+                      Name
+                    </h2>
+                    <p className="text-sm text-[#615C74]">{entry.name}</p>
+                  </div>
+                  <div className="mb-4">
+                    <h2 className="font-neue text-sm font-semibold text-[#130B30]">
+                      Scientific Name
+                    </h2>
+                    <p className="text-sm text-[#615C74]">
+                      {entry.scientific_name}
+                    </p>
+                  </div>
+                  <div className="mb-4">
+                    <h2 className="font-neue text-sm font-semibold text-[#130B30]">
+                      Probability
+                    </h2>
+                    <p className="text-sm text-[#615C74]">
+                      {entry.probability}%
+                    </p>
+                  </div>
+                  <div className="mb-4">
+                    <h2 className="font-neue text-sm font-semibold text-[#130B30]">
+                      Common names
+                    </h2>
+                    <ul className="list-disc">
+                      {entry.common_names.map((name) => (
+                        <li>{name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="mb-4">
+                    <h2 className="font-neue text-sm font-semibold text-[#130B30]">
+                      Type
+                    </h2>
+                    <p className="text-sm text-[#615C74]">{entry.type}</p>
+                  </div>
+                  <div className="mb-4">
+                    <h2 className="font-neue text-sm font-semibold text-[#130B30]">
+                      Description
+                    </h2>
+                    <p className="text-sm text-[#615C74]">
+                      {entry.description}
+                    </p>
+                  </div>
+                  <div className="mb-4">
+                    <h2 className="font-neue text-sm font-semibold text-[#130B30]">
+                      Severity
+                    </h2>
+                    <p className="text-sm text-[#615C74]">{entry.severity}</p>
+                  </div>
+                  <div className="mb-4">
+                    <h2 className="font-neue text-sm font-semibold text-[#130B30]">
+                      Spreading
+                    </h2>
+                    <p className="text-sm text-[#615C74]">{entry.spreading}</p>
+                  </div>
+                  <div className="mb-4">
+                    <h2 className="font-neue text-sm font-semibold text-[#130B30]">
+                      Treatment
+                    </h2>
+                    <ul className="list-disc">
+                      {entry.treatment.map((treatment) => (
+                        <li>{treatment}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
             </section>
           </div>
-          <Button onClick={onClose} variant="primary" className="sticky bottom-0 mt-8">
+          <Button
+            onClick={onClose}
+            variant="primary"
+            className="sticky bottom-0 mt-8"
+          >
             Confirm
           </Button>
         </section>
@@ -100,45 +162,3 @@ export const ViewSoilTestResultSheet: React.FC<{
     </section>
   );
 };
-
-const PhenologyCard: React.FC<{
-  title: string;
-  phenophase: string;
-  acquisition: string;
-  actual: string;
-  expected: string;
-}> = ({ title, phenophase, acquisition, actual, expected }) => {
-  return (
-    <div className="w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="mb-4">
-        <h2 className="font-neue text-sm font-semibold text-[#130B30]">
-          {title}
-        </h2>
-        <p className="text-sm text-[#615C74]">Index: Nil</p>
-      </div>
-
-      <div className="grid grid-cols-4 gap-4 text-sm">
-        <div className="text-sm">
-          <p className="font-neue font-semibold text-[#423C59]">Phenophase</p>
-          <p className="text-[#615C74]">{phenophase}</p>
-        </div>
-
-        <div className="text-sm">
-          <p className="font-neue font-semibold text-[#423C59]">Acquisition</p>
-          <p className="text-sm text-[#615C74]">{acquisition}</p>
-        </div>
-
-        <div className="text-sm">
-          <p className="font-neue font-semibold text-[#423C59]">Actual</p>
-          <p className="text-sm text-[#615C74]">{actual}</p>
-        </div>
-
-        <div className="text-sm">
-          <p className="font-neue font-semibold text-[#423C59]">Expected</p>
-          <p className="text-[#615C74]">{expected}</p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
