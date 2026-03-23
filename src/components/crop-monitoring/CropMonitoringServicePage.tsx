@@ -165,15 +165,6 @@ export const CropMonitoringServicePage: React.FC<{
             title="Completed Farms monitored"
             value={displayData.completed}
           />
-          {/* <StatCard
-            icon={
-              <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#4F3824] bg-[#EDEBE9]">
-                <img src={processingIcon} width={20} height={20} />
-              </div>
-            }
-            title="Average turnaround time"
-            value="0"
-          /> */}
         </div>
         <div>
           <DataTable
