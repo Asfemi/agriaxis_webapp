@@ -5,7 +5,6 @@ import { Button } from "@/components/Button";
 interface RenameResultModalProps {
   isOpen: boolean;
   value: string;
-  //   onChange: (value: string) => void;
   onSave: (value: string) => void;
   onClose: () => void;
 }
@@ -13,7 +12,6 @@ interface RenameResultModalProps {
 export const RenameResultModal: React.FC<RenameResultModalProps> = ({
   isOpen,
   value,
-  //   onChange,
   onSave,
   onClose,
 }) => {

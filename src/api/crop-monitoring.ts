@@ -3,6 +3,7 @@ import apiClient from "@/api/api-client";
 import type {
   CropMonitoringDashboardResponse,
   CropMonitoringDiseaseDetectResponse,
+  DiseaseDetectionHistory,
 } from "@/models/crop-monitoring.model";
 
 export const useGetCropMonitoringDashboard = () => {
@@ -95,7 +96,7 @@ export const useGetDiseaseDetectionHistory = () => {
   return useQuery({
     queryKey: ["crop-monitoring-disease-detect-history"],
     queryFn: async () => {
-      const { data } = await apiClient.get("/crop-monitoring/disease/history");
+      const { data } = await apiClient.get<DiseaseDetectionHistory[]>("/crop-monitoring/disease/history");
       return data;
     },
   });

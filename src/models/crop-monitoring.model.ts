@@ -29,7 +29,7 @@ export interface PestMonitoringDashboard {
   analytics_history: CropMonitoringAnalysis[];
 }
 
-export interface CropMonitoringDiseaseDetectResponse {
+export type CropMonitoringDiseaseDetectResponse = {
   images: string[];
   predictions: {
     id: string;
@@ -43,4 +43,17 @@ export interface CropMonitoringDiseaseDetectResponse {
     spreading: string;
     treatment: [];
   }[];
-}
+};
+
+export type DiseaseDetectionHistory = {
+  id: string;
+  user_id: string;
+  organisation_id: number;
+  org_farm_id: number;
+  farm_name: string;
+  status: "processing" | "completed";
+  payment: number | null;
+  name: string;
+  datetime: string;
+  data: CropMonitoringDiseaseDetectResponse
+};

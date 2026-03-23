@@ -71,24 +71,26 @@ export const DiseaseDetectResultSheet: React.FC<{
             height={140}
             className="mb-4 w-full"
           />
-          <div>
+          <div className="pb-8">
             <h6 className="mb-4 text-sm font-medium text-[#130B30]">
               {`Planting date: -`}
             </h6>
-            <section className="space-y-2">
+            <section className="space-y-4">
               {result.predictions.map((entry) => (
                 <div className="w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                   <div className="mb-4">
                     <h2 className="font-neue text-sm font-semibold text-[#130B30]">
                       Name
                     </h2>
-                    <p className="text-sm text-[#615C74]">{entry.name}</p>
+                    <p className="text-sm text-[#615C74] capitalize">
+                      {entry.name}
+                    </p>
                   </div>
                   <div className="mb-4">
                     <h2 className="font-neue text-sm font-semibold text-[#130B30]">
                       Scientific Name
                     </h2>
-                    <p className="text-sm text-[#615C74]">
+                    <p className="text-sm text-[#615C74] capitalize">
                       {entry.scientific_name}
                     </p>
                   </div>
@@ -105,45 +107,59 @@ export const DiseaseDetectResultSheet: React.FC<{
                       Common names
                     </h2>
                     <ul className="list-disc">
-                      {entry.common_names.map((name) => (
-                        <li>{name}</li>
-                      ))}
+                      {entry.common_names.length < 1 ? (
+                        <p className="text-sm text-[#615C74]">
+                          No common names found
+                        </p>
+                      ) : (
+                        entry.common_names.map((name) => <li>{name}</li>)
+                      )}
                     </ul>
                   </div>
                   <div className="mb-4">
                     <h2 className="font-neue text-sm font-semibold text-[#130B30]">
                       Type
                     </h2>
-                    <p className="text-sm text-[#615C74]">{entry.type}</p>
+                    <p className="text-sm text-[#615C74] capitalize">
+                      {entry.type || "-"}
+                    </p>
                   </div>
                   <div className="mb-4">
                     <h2 className="font-neue text-sm font-semibold text-[#130B30]">
                       Description
                     </h2>
-                    <p className="text-sm text-[#615C74]">
-                      {entry.description}
+                    <p className="text-sm text-[#615C74] capitalize">
+                      {entry.description || "-"}
                     </p>
                   </div>
                   <div className="mb-4">
                     <h2 className="font-neue text-sm font-semibold text-[#130B30]">
                       Severity
                     </h2>
-                    <p className="text-sm text-[#615C74]">{entry.severity}</p>
+                    <p className="text-sm text-[#615C74] capitalize">
+                      {entry.severity || "-"}
+                    </p>
                   </div>
                   <div className="mb-4">
                     <h2 className="font-neue text-sm font-semibold text-[#130B30]">
                       Spreading
                     </h2>
-                    <p className="text-sm text-[#615C74]">{entry.spreading}</p>
+                    <p className="text-sm text-[#615C74] capitalize">
+                      {entry.spreading || "-"}
+                    </p>
                   </div>
                   <div className="mb-4">
                     <h2 className="font-neue text-sm font-semibold text-[#130B30]">
                       Treatment
                     </h2>
                     <ul className="list-disc">
-                      {entry.treatment.map((treatment) => (
-                        <li>{treatment}</li>
-                      ))}
+                      {entry.treatment.length < 1 ? (
+                        <p className="text-sm text-[#615C74]">
+                          No treatment found
+                        </p>
+                      ) : (
+                        entry.treatment.map((treatment) => <li>{treatment}</li>)
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -155,7 +171,7 @@ export const DiseaseDetectResultSheet: React.FC<{
             variant="primary"
             className="sticky bottom-0 mt-8"
           >
-            Confirm
+            Done
           </Button>
         </section>
       </section>

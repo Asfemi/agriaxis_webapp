@@ -4,7 +4,6 @@ import StatCard from "@/components/dashboard/StatCard";
 import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
-import processingIcon from "/assets/icons/processing.svg";
 import { DataTable } from "@/components/DataTable";
 import {
   DropdownMenu,
@@ -13,7 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type {
   CropMonitoringAnalysis,
@@ -21,6 +20,7 @@ import type {
 } from "@/models/crop-monitoring.model";
 import StatusBadge from "@/components/StatusBadge";
 import { useGetCost } from "@/api/payments";
+import { DiseaseDetectionHistoryTable } from "./DiseaseDetectionHistoryTable";
 
 export const CropMonitoringServicePage: React.FC<{
   onClose: () => void;
@@ -50,12 +50,18 @@ export const CropMonitoringServicePage: React.FC<{
     {
       accessorKey: "payment",
       header: "Payment",
-      cell: ({ row }) => <span>₦{ row.original.payment ? row.original.payment.toLocaleString() : 0}</span>,
+      cell: ({ row }) => (
+        <span>
+          ₦{row.original.payment ? row.original.payment.toLocaleString() : 0}
+        </span>
+      ),
     },
     {
       accessorKey: "date",
       header: "Date",
-      cell: ({ row }) => <span className="capitalize">{row.original.date}</span>
+      cell: ({ row }) => (
+        <span className="capitalize">{row.original.date}</span>
+      ),
     },
     {
       id: "actions",
@@ -156,7 +162,7 @@ export const CropMonitoringServicePage: React.FC<{
             value={displayData.pending}
           />
           <StatCard
-          className="col-span-2 lg:col-auto"
+            className="col-span-2 lg:col-auto"
             icon={
               <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#423C59] bg-[#E7E7EA]">
                 <img src={testingIconGrey} width={20} height={20} />
@@ -166,13 +172,7 @@ export const CropMonitoringServicePage: React.FC<{
             value={displayData.completed}
           />
         </div>
-        <div>
-          <DataTable
-            title="Analysis history"
-            columns={columns}
-            data={displayData.history}
-          />
-        </div>
+        <div>{title !== "Crop health" && <DiseaseDetectionHistoryTable />}</div>
       </section>
     </main>
   );
