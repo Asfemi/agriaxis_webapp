@@ -10,6 +10,8 @@ import { CropImageCard } from "@/components/crop-monitoring/CropImageCard";
 import { toast } from "sonner";
 import { ProcessingResultCard } from "@/components/crop-monitoring/ProcessingResultCard";
 import { CropHealthResultSheet } from "./CropHealthResultSheet";
+import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
+import { useCropHealth } from "@/api/crop-monitoring";
 
 export const RequestCropHealthSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -17,6 +19,8 @@ export const RequestCropHealthSheetsContainer: React.FC<{
 }> = ({ isOpen, onClose  }) => {
   if (!isOpen) return null;
   const [currentView, setCurrentView] = useState("details");
+  const { formData } = useSoilTestingFormStore();
+  const { mutate } = useCropHealth()
   const handleMeasurementMethodSelection = (selection: "existing" | "new") => {
     if (selection === "existing") {
       setCurrentView("existing_measurement");
@@ -39,6 +43,7 @@ export const RequestCropHealthSheetsContainer: React.FC<{
   };
 
   const handleConfirm = () => {
+    mutate(formData.farm_id ?? '')
     toast.success("Crop scanned successfully!");
     setCurrentView("processing");
     setTimeout(() => {
@@ -58,7 +63,7 @@ export const RequestCropHealthSheetsContainer: React.FC<{
         <FarmDetailsCard
           isOpen={currentView === "details"}
           onClose={onClose}
-          onConfirm={() => setCurrentView("existing_measurement")}
+          onConfirm={() => handleConfirm()}
           requestServiceType={"Crop Health"}
         />
         <ProcessingResultCard isOpen={currentView === "processing"} />

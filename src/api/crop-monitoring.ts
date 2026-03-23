@@ -50,16 +50,19 @@ export const useCropMonitoringDiseaseDetect = () => {
   });
 };
 
-export const useDeleteCropHealthResult = () => {
+export const useCropHealth = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { data } = await apiClient.delete(
-        `/crop-monitoring/crop-health/${id}`,
-      );
-      return data;
+      const { data } = await apiClient.post(`/crop-monitoring/crop-health/${id}`)
+      return data
     },
-  });
-};
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["crop-monitoring-dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["crop-health-history"] })
+    }
+  })
+}
 
 export const useGetCropHealthHistory = () => {
   return useQuery({
@@ -67,6 +70,17 @@ export const useGetCropHealthHistory = () => {
     queryFn: async () => {
       const { data } = await apiClient.get(
         "/crop-monitoring/crop-health/history",
+      );
+      return data;
+    },
+  });
+};
+
+export const useDeleteCropHealthResult = () => {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await apiClient.delete(
+        `/crop-monitoring/crop-health/${id}`,
       );
       return data;
     },

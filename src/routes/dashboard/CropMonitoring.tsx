@@ -18,6 +18,7 @@ const SERVICES = [
     title: "Crop health",
     sub: "Click here to get your crop health result",
     icon: healthIcon,
+    isDisabled: true
   },
   {
     title: "Pest/Disease monitoring",
