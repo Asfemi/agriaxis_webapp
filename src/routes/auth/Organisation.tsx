@@ -118,5 +118,10 @@ export default (parentRoute: AnyRoute) =>
       if (orgId) {
         throw redirect({ to: "/signin" });
       }
-    }
+    },
+    head: () => ({
+      meta: [
+        { title: "Organisation" }
+      ]
+    })
   });

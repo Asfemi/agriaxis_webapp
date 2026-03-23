@@ -50,7 +50,7 @@ const navItems: NavItemType[] = [
     path: "/dashboard/soil-testing",
   },
   {
-    label: "Crop Information",
+    label: "Weather & Climate Information",
     icon: (
       <svg
         width="24"

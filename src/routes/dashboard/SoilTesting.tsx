@@ -127,4 +127,9 @@ export default (parentRoute: AnyRoute) =>
     staticData: {
       title: "Soil Health",
     },
+    head: () => ({
+      meta: [
+        { title: "Soil Health"}
+      ]
+    })
   });

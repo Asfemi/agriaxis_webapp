@@ -105,4 +105,9 @@ export default (parentRoute: AnyRoute) =>
     staticData: {
       title: "User Management",
     },
+    head: () => ({
+      meta: [
+        { title: "User Management" }
+      ]
+    })
   });

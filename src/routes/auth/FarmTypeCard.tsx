@@ -98,5 +98,10 @@ export default (parentRoute: AnyRoute) =>
           replace: true,
         })
       }
-    }
+    },
+    head: () => ({
+      meta: [
+        { title: "Select Farm type" }
+      ]
+    })
   })

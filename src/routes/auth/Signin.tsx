@@ -249,4 +249,9 @@ export default (parentRoute: AnyRoute) =>
     path: "signin",
     component: Signin,
     getParentRoute: () => parentRoute,
+    head: () => ({
+      meta: [
+        { title: "Sign in" }
+      ]
+    })
   });

@@ -259,4 +259,9 @@ export default (parentRoute: AnyRoute) =>
     path: "forgot-password",
     component: ForgotPassword,
     getParentRoute: () => parentRoute,
+    head: () => ({
+      meta: [
+        { title: "Forgot Password" }
+      ]
+    })
   });

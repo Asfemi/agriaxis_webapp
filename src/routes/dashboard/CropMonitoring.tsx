@@ -199,4 +199,9 @@ export default (parentRoute: AnyRoute) =>
     staticData: {
       title: "Crop Monitoring",
     },
+    head: () => ({
+      meta: [
+        { title: "Crop Monitoring" }
+      ]
+    })
   });

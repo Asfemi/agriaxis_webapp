@@ -175,4 +175,9 @@ export default (parentRoute: AnyRoute) =>
         });
       }
     },
+    head: () => ({
+      meta: [
+        { title: "Create Password" }
+      ]
+    })
   });
