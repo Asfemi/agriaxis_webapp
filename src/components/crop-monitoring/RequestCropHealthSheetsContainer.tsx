@@ -61,52 +61,6 @@ export const RequestCropHealthSheetsContainer: React.FC<{
           onConfirm={() => setCurrentView("existing_measurement")}
           requestServiceType={"Crop Health"}
         />
-        <Activity mode={currentView === "measurement" ? "visible" : "hidden"}>
-          <FarmMeasurementSelectionCard
-            onClose={() => setCurrentView("details")}
-            onConfirm={(selection) =>
-              handleMeasurementMethodSelection(selection)
-            }
-            serviceType={"Crop Health"}
-          />
-        </Activity>
-        {currentView === "existing_measurement" && (
-          <PreviousLandMeasurementCard
-            onClose={() => setCurrentView("details")}
-            onConfirm={handleProceedToPayment}
-          />
-        )}
-        <FarmMeasurementMethodCard
-          isOpen={currentView === "measurement_method"}
-          onClose={() => setCurrentView("measurement")}
-          onConfirm={handleMeasurementMapMethodSelection}
-        />
-        <CropImageCard
-          isOpen={currentView === "image_upload"}
-          onClose={() => setCurrentView("existing_measurement")}
-          onConfirm={(imageData) => {
-            console.log("Image ready for processing:", imageData);
-            handleProceedToPayment();
-            // Move to next step, e.g., setCurrentView("analyzing")
-          }}
-        />
-        <MapMeasurementCard
-          isOpen={currentView === "google_measurement"}
-          onClose={() => setCurrentView("measurement_method")}
-          onConfirm={() => setCurrentView("image_upload")}
-        />
-        <ManualMeasurementCard
-          isOpen={currentView === "manual_measurement"}
-          onClose={() => setCurrentView("measurement_method")}
-          onConfirm={() => setCurrentView("image_upload")}
-        />
-        <Activity mode={currentView === "payment" ? "visible" : "hidden"}>
-          <PaymentMethodsSheet
-            isOpen={true}
-            onClose={() => setCurrentView("existing_measurement")}
-            onConfirm={handleConfirm}
-          />
-        </Activity>
         <ProcessingResultCard isOpen={currentView === "processing"} />
         <CropHealthResultSheet
           isOpen={currentView === "result"}

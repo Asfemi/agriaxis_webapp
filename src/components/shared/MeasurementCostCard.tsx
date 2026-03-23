@@ -7,19 +7,20 @@ import { useGetFarm } from "@/api/farms";
 import { useGetCost } from "@/api/payments";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 
-export const FarmSizeForMeasurementCard: React.FC<{
-  isOpen?: boolean;
+export const MeasurementCostCard: React.FC<{
+  service: string;
+  isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-}> = ({ isOpen, onClose, onConfirm }) => {
+}> = ({ isOpen, onClose, onConfirm, service }) => {
   if (!isOpen) return null;
 
   const { formData, updateFormData } = useSoilTestingFormStore();
 
   const { data: farmData } = useGetFarm(formData.farm_id ?? "");
-  const { data: initialCost } = useGetCost("soil-testing", 1);
+  const { data: initialCost } = useGetCost(service, 1);
   const { data: cost, isLoading: isLoadingCost } = useGetCost(
-    "soil-testing",
+    service,
     Number(farmData.size.split(" hectares")[0]),
   );
 
@@ -62,7 +63,7 @@ export const FarmSizeForMeasurementCard: React.FC<{
                 </header>
                 <div className="rounded-xl bg-[#0A814A14] p-4">
                   <h3 className="mb-4 text-sm font-medium text-[#130B30]">
-                    Soil Testing fee
+                    Service fee
                   </h3>
 
                   <div className="grid grid-cols-3 justify-between text-sm">

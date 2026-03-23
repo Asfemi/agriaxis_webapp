@@ -21,7 +21,7 @@ export const FarmDetailsContainer = ({
 }) => {
   const { id } = useParams({ from: "/dashboard/dashboard/farms/details/$id" });
 
-  const { data: farmData, isLoading, isError } = useGetFarm(Number(id));
+  const { data: farmData, isLoading, isError } = useGetFarm(id);
   const testColumns: ColumnDef<FarmTest>[] = [
     {
       accessorKey: "testID",

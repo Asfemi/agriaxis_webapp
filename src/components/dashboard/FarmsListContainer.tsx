@@ -66,7 +66,7 @@ export const FarmsListContainer = () => {
             <DropdownMenuContent>
               <DropdownMenuLabel>Action</DropdownMenuLabel>
               <Link
-                to={`/dashboard/dashboard/farms/details/${parseInt(row.original.id.split("G")[1])}`}
+                to={`/dashboard/dashboard/farms/details/${encodeURIComponent(row.original.id)}`}
               >
                 <DropdownMenuItem>View farm</DropdownMenuItem>
               </Link>
