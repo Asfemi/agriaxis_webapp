@@ -108,7 +108,9 @@ const SoilTestingResultsTable = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Action</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => handleViewResult(row.original)}>View result</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleViewResult(row.original)}>
+                View result
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRenameResult(row.original)}
               >
@@ -144,14 +146,8 @@ const SoilTestingResultsTable = () => {
       />
       <div></div>
       {showResultSheet && (
-        <section
-          className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity"
-          onClick={() => setShowResultSheet(false)}
-        >
-          <section
-            className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
+          <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
             <SoilTestResultsCard
               isOpen={showResultSheet}
               onClose={() => setShowResultSheet(false)}

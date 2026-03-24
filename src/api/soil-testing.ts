@@ -131,12 +131,27 @@ export const useSoilTestingResults = () => {
   });
 };
 
+/**
+ * @deprecated
+ */
 export const useGetSoilTestingResultByName = (name: string) => {
   return useQuery({
     queryKey: ["soil-testing-result", name],
     queryFn: async () => {
       const { data } = await apiClient.get<SoilTestingResult>(
         `/soil-testing/results/by-name/${name}`,
+      );
+      return data;
+    },
+  });
+};
+
+export const useGetSoilTestingResultById = (id: string) => {
+  return useQuery({
+    queryKey: ["soil-testing-result", id],
+    queryFn: async () => {
+      const { data } = await apiClient.get<SoilTestingResult>(
+        `/soil-testing/results/${id}`,
       );
       return data;
     },

@@ -1,5 +1,5 @@
 import {
-  useGetSoilTestingResultByName,
+  useGetSoilTestingResultById,
   useSoilTestingRecommendation,
 } from "@/api/soil-testing";
 import { formatDate } from "@/lib/utils";
@@ -9,7 +9,6 @@ import { ChevronLeft, LoaderCircle, TicketPercent } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/Button";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import { useRef } from "react";
 import { toPng } from "html-to-image";
 
@@ -68,7 +67,7 @@ export const SoilTestResultsCard: React.FC<{
     data: resultData,
     isLoading: isLoadingResult,
     isError: isErrorResult,
-  } = useGetSoilTestingResultByName(result?.name ?? "");
+  } = useGetSoilTestingResultById(String(result?.id) ?? "");
   const { formData: coordinatesStoreData } = useCoordinatesStore();
   const coordinatesList = useMemo(() => {
     const keys = ["point_1", "point_2", "point_3", "point_4"] as const;
