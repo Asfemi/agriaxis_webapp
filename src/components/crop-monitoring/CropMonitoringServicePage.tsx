@@ -1,14 +1,16 @@
 import { Button } from "@/components/Button";
-import { ChevronLeft, LoaderCircle } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
-import type {
-  CropMonitoringDashboardResponse,
-} from "@/models/crop-monitoring.model";
-import { useGetCost } from "@/api/payments";
+import type { CropMonitoringDashboardResponse } from "@/models/crop-monitoring.model";
+import { useGetPaymentSubscriptions, usePaymentSubscribe } from "@/api/payments";
 import { DiseaseDetectionHistoryTable } from "./DiseaseDetectionHistoryTable";
+import { useEffect, useState } from "react";
+import type { PaymentSubscription, PaymentSubscriptionRes } from "@/models/payment.model";
+import { useUserStore } from "@/stores/useUserStore";
+import { toast } from "sonner";
 
 export const CropMonitoringServicePage: React.FC<{
   onClose: () => void;
@@ -16,10 +18,100 @@ export const CropMonitoringServicePage: React.FC<{
   onRequestInformation: () => void;
   data: CropMonitoringDashboardResponse | undefined;
 }> = ({ onClose, title, onRequestInformation, data }) => {
-  const { data: cost, isLoading: isLoadingCost } = useGetCost(
-    "crop-monitoring",
-    1,
-  );
+  const [diseaseSub, setDiseaseSub] = useState<PaymentSubscription>();
+  const { data: subscriptions, isLoading: isLoadingSubscriptions } =
+    useGetPaymentSubscriptions();
+  const { user } = useUserStore()
+  const { mutate: initialiseSubscription } = usePaymentSubscribe()
+
+  useEffect(() => {
+    if (isLoadingSubscriptions) return;
+    const diseaseSub = subscriptions?.find(
+      (sub) => sub.plan_key === "pest_disease",
+    );
+    if (!diseaseSub) return;
+    setDiseaseSub(diseaseSub);
+  }, [subscriptions]);
+
+  const onSubscribeToDisease = () => {
+    if (!diseaseSub) return;
+
+    const request = {
+      plan_key: "pest_disease",
+      redirect_url: "https://agriaxis-webapp.vercel.app",
+      currency: "NGN",
+      country: "NG",
+      customer: {
+        email: user?.email ?? "",
+        name: user?.name ?? "",
+        phonenumber: "",
+      },
+    };
+
+    initialiseSubscription(request, {
+      onSuccess: (data) => {
+        toast.success("Payment initiated successfully!");
+
+        openPaymentModal(data);
+      },
+      onError: (error) =>
+        toast.error(
+          error.message ?? "Failed to initiate payment. Please try again.",
+        ),
+          
+    })
+  };
+
+  const openPaymentModal = (paymentData: PaymentSubscriptionRes) => {
+    const { payment_link } = paymentData;
+
+    const popup = window.open(
+      payment_link,
+      "flutterwave_payment",
+      "width=800,height=600,scrollbars=yes,resizable=yes,left=200,top=100",
+    );
+
+    if (!popup) {
+      toast.error("Popup blocked! Please allow popups and try again.");
+      return;
+    }
+
+    let messageReceived = false;
+
+    const handleMessage = (event: MessageEvent) => {
+      const allowedOrigins = [
+        window.location.origin,
+        "https://agriaxis-webapp.vercel.app",
+      ];
+
+      if (!allowedOrigins.includes(event.origin)) return;
+
+      if (event.data?.type === "PAYMENT_COMPLETE") {
+        messageReceived = true;
+
+        cleanup();
+      }
+    };
+
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        if (!messageReceived) {
+          setTimeout(() => {
+            if (!messageReceived) cleanup();
+          }, 500);
+        } else {
+          cleanup();
+        }
+      }
+    }, 1e3);
+
+    const cleanup = () => {
+      clearInterval(checkClosed);
+      window.removeEventListener("message", handleMessage);
+    };
+
+    window.addEventListener("message", handleMessage);
+  };
 
   const displayData = (() => {
     if (!data) {
@@ -61,13 +153,15 @@ export const CropMonitoringServicePage: React.FC<{
           </h5>
         </div>
         <div>
-          <Button variant="primary" onClick={() => onRequestInformation()}>
-            {isLoadingCost ? (
-              <LoaderCircle className="mx-auto animate-spin" />
-            ) : (
-              `Request Information ₦${cost?.amount ?? 0}`
-            )}
-          </Button>
+          {(!diseaseSub || diseaseSub.status !== 'active') ? (
+            <Button variant="primary" onClick={() => onSubscribeToDisease()}>
+              Subscribe to Pest Disease Monitoring ₦5,000
+            </Button>
+          ) : (
+            <Button variant="primary" onClick={() => onRequestInformation()}>
+              Request Information
+            </Button>
+          )}
         </div>
       </header>
       <section>

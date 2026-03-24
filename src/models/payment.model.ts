@@ -31,8 +31,8 @@ export interface PaymentVerifyRequest {
 
 export type PaymentSubscription = {
   id: string;
-  plan_key: "pest_disease" | "crop_health";
-  status: "canceled" | "grace_period" | "past_due" | "active" | "trialing";
+  plan_key: string 
+  status: string
   entitled: boolean;
   customer_email: string;
   tx_ref: string;
@@ -49,7 +49,7 @@ export type PaymentSubscription = {
 };
 
 export type PaymentSubscriptionReq = {
-  plan_key: "pest_disease" | "crop_health";
+  plan_key: string
   redirect_url: string;
   currency: string;
   country: string;
@@ -64,7 +64,7 @@ export type PaymentSubscriptionRes = {
   payment_link: string
   tx_ref: string
   subscription_id: string
-  plan_key: "pest_disease" | "crop_health"
+  plan_key: string;
   amount: number;
   currency: string
 };

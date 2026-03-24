@@ -26,7 +26,10 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
 
   const handleUploadImage = (image: File) => {
     setImageFile(image);
-    setCurrentView("cost");
+    // setCurrentView("cost");
+    setTimeout(() => {
+      handleConfirm()
+    }, 4e2)
   };
 
   const handleProceedToPayment = () => {

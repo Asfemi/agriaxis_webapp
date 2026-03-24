@@ -73,7 +73,7 @@ export const usePaymentSubscribe = () => {
   });
 };
 
-export const useGetPaymentsSubscriptions = () => {
+export const useGetPaymentSubscriptions = () => {
   return useQuery({
     queryKey: ["payments-subscriptions"],
     queryFn: async () => {
