@@ -11,8 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/DataTable";
-import { ViewSoilTestResultSheet } from "@/components/dashboard/ViewSoilTestResultSheet";
-import { RenameResultModal } from "@/components/dashboard/RenameResultModal";
 import { Link, useParams } from "@tanstack/react-router";
 import { useGetFarm } from "@/api/farms";
 
@@ -57,10 +55,10 @@ export const FarmDetailsContainer = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Action</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setViewSoilTestResult(true)}>
+              <DropdownMenuItem>
                 View result
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowRenameResultModal(true)}>
+              <DropdownMenuItem>
                 Rename result
               </DropdownMenuItem>
               <DropdownMenuItem>Download result</DropdownMenuItem>
@@ -76,8 +74,6 @@ export const FarmDetailsContainer = ({
 
   const columns = useMemo(() => testColumns, []);
   const [data] = useState(() => []);
-  const [viewSoilTestResult, setViewSoilTestResult] = useState(false);
-  const [showRenameResultModal, setShowRenameResultModal] = useState(false);
 
   if (isLoading) return <div>Loading farm data...</div>
 
@@ -159,18 +155,6 @@ export const FarmDetailsContainer = ({
           <DataTable title="Test performed" columns={columns} data={data} />
         </header>
       </main>
-      {/* <ViewSoilTestResultSheet
-        onClose={() => setViewSoilTestResult(false)}
-        isOpen={viewSoilTestResult}
-        test={data[0]}
-      />
-      <RenameResultModal
-        isOpen={showRenameResultModal}
-        // value={data[0].testID}
-        value={"1"}
-        onSave={() => setShowRenameResultModal(false)}
-        onClose={() => setShowRenameResultModal(false)}
-      /> */}
     </>
   );
 };

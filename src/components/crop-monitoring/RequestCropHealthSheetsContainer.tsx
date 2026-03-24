@@ -1,12 +1,5 @@
-import { FarmMeasurementSelectionCard } from "@/components/dashboard/FarmMeasurementSelectionCard";
 import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
-import { Activity, useState } from "react";
-import { PreviousLandMeasurementCard } from "@/components/crop-monitoring/PreviousLandMeasurementCard";
-import { PaymentMethodsSheet } from "@/components/soil-testing/PaymentMethodsSheet";
-import { FarmMeasurementMethodCard } from "@/components/soil-testing/FarmMeasurementMethodCard";
-import { MapMeasurementCard } from "@/components/soil-testing/MapMeasurementCard";
-import { ManualMeasurementCard } from "@/components/soil-testing/ManualMeasurementCard";
-import { CropImageCard } from "@/components/crop-monitoring/CropImageCard";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ProcessingResultCard } from "@/components/crop-monitoring/ProcessingResultCard";
 import { CropHealthResultSheet } from "./CropHealthResultSheet";
@@ -21,26 +14,6 @@ export const RequestCropHealthSheetsContainer: React.FC<{
   const [currentView, setCurrentView] = useState("details");
   const { formData } = useSoilTestingFormStore();
   const { mutate } = useCropHealth()
-  const handleMeasurementMethodSelection = (selection: "existing" | "new") => {
-    if (selection === "existing") {
-      setCurrentView("existing_measurement");
-    } else {
-      setCurrentView("measurement_method");
-    }
-  };
-  const handleProceedToPayment = () => {
-    setCurrentView("payment");
-  };
-
-  const handleMeasurementMapMethodSelection = (
-    selection: "google" | "manual",
-  ) => {
-    if (selection === "google") {
-      setCurrentView("google_measurement");
-    } else {
-      setCurrentView("manual_measurement");
-    }
-  };
 
   const handleConfirm = () => {
     mutate(formData.farm_id ?? '')
