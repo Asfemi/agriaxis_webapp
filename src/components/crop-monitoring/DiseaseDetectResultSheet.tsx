@@ -1,11 +1,12 @@
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
-import type { CropMonitoringDiseaseDetectResponse } from "@/models/crop-monitoring.model";
+import type { DiseaseDetectionHistory } from "@/models/crop-monitoring.model";
+import { formatDate } from "@/lib/utils";
 
 export const DiseaseDetectResultSheet: React.FC<{
   onClose?: () => void;
   isOpen: boolean;
-  result: CropMonitoringDiseaseDetectResponse;
+  result: DiseaseDetectionHistory;
 }> = ({ onClose, result, isOpen }) => {
   if (!isOpen) return null;
 
@@ -29,7 +30,7 @@ export const DiseaseDetectResultSheet: React.FC<{
             <h5 className="font-neue text-xl font-bold text-[#130B30]">
               Result
             </h5>
-            <h6 className="text-[#423C59]">-</h6>
+            <h6 className="text-[#423C59]">{result.name}</h6>
           </div>
         </header>
         <section className="relative mx-10 h-11/12 pb-5">
@@ -63,20 +64,20 @@ export const DiseaseDetectResultSheet: React.FC<{
               />
             </svg>
 
-            <span className="text-sm text-[#423C59]">-</span>
+            <span className="text-sm text-[#423C59]">
+              {formatDate(result.datetime)}
+            </span>
           </div>
-          <img
-            src={result.images[0]}
-            width={400}
-            height={140}
-            className="mb-4 w-full"
-          />
+          <div
+            className="h-40 w-full bg-cover mb-4"
+            style={{ backgroundImage: `url(${result.data.images[0]})` }}
+          ></div>
           <div className="pb-8">
             <h6 className="mb-4 text-sm font-medium text-[#130B30]">
-              {`Planting date: -`}
+              {`Planting date: - ${formatDate(result.datetime)}`}
             </h6>
             <section className="space-y-4">
-              {result.predictions.map((entry) => (
+              {result.data.predictions.map((entry) => (
                 <div className="w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                   <div className="mb-4">
                     <h2 className="font-neue text-sm font-semibold text-[#130B30]">

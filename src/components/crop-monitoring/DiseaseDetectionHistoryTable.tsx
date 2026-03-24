@@ -149,7 +149,7 @@ export const DiseaseDetectionHistoryTable = () => {
           >
             <DiseaseDetectResultSheet
               isOpen={true}
-              result={selectedResult!.data}
+              result={selectedResult!}
               onClose={() => setShowResultSheet(false)}
             />
           </section>

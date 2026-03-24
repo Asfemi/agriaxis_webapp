@@ -6,8 +6,6 @@ import { ProcessingResultCard } from "@/components/crop-monitoring/ProcessingRes
 import { useCropMonitoringDiseaseDetect } from "@/api/crop-monitoring";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { faker } from "@faker-js/faker";
-import { DiseaseDetectResultSheet } from "@/components/crop-monitoring/DiseaseDetectResultSheet";
-import type { CropMonitoringDiseaseDetectResponse } from "@/models/crop-monitoring.model";
 import { MeasurementCostCard } from "@/components/shared/MeasurementCostCard";
 import { useUserStore } from "@/stores/useUserStore";
 import { usePaymentInitialise, usePaymentVerify } from "@/api/payments";
@@ -20,8 +18,6 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
   if (!isOpen) return null;
   const [currentView, setCurrentView] = useState("details");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [result, setResult] =
-    useState<CropMonitoringDiseaseDetectResponse | null>(null);
   const { formData } = useSoilTestingFormStore();
   const { mutate } = useCropMonitoringDiseaseDetect();
   const { user } = useUserStore();
@@ -70,12 +66,11 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
         farmId: formData.farm_id ?? "",
       },
       {
-        onSuccess: (data) => {
-          setResult(data);
-          toast.success("Crop scanned successfully!");
+        onSuccess: () => {
           setCurrentView("processing");
           setTimeout(() => {
-            setCurrentView("result");
+            toast.success("Crop scanned successfully!");
+            onClose();
           }, 2e3);
         },
       },
@@ -179,11 +174,6 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
           onConfirm={() => handleProceedToPayment()}
         />
         <ProcessingResultCard isOpen={currentView === "processing"} />
-        <DiseaseDetectResultSheet
-          isOpen={currentView === "result"}
-          result={result!}
-          onClose={onClose}
-        />
       </section>
     </section>
   );
