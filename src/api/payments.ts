@@ -3,6 +3,9 @@ import apiClient from "./api-client";
 import type {
   PaymentInitialiseRequest,
   PaymentInitialiseResponse,
+  PaymentSubscription,
+  PaymentSubscriptionReq,
+  PaymentSubscriptionRes,
   PaymentVerifyRequest,
 } from "@/models/payment.model";
 
@@ -50,6 +53,34 @@ export const usePaymentVerify = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["soil-testing-dashboard"] });
+    },
+  });
+};
+
+export const usePaymentSubscribe = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (request: PaymentSubscriptionReq) => {
+      const response = await apiClient.post<PaymentSubscriptionRes>(
+        "/payments/subscriptions/flutterwave/initialize",
+        request,
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["payments-subscriptions"] });
+    },
+  });
+};
+
+export const useGetPaymentsSubscriptions = () => {
+  return useQuery({
+    queryKey: ["payments-subscriptions"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<PaymentSubscription[]>(
+        "/payments/subscriptions",
+      );
+      return data;
     },
   });
 };

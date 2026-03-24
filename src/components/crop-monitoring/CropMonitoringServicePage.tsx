@@ -1,24 +1,12 @@
 import { Button } from "@/components/Button";
-import { ChevronLeft, LoaderCircle, MoreVertical } from "lucide-react";
+import { ChevronLeft, LoaderCircle } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
-import { DataTable } from "@/components/DataTable";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useMemo } from "react";
-import type { ColumnDef } from "@tanstack/react-table";
 import type {
-  CropMonitoringAnalysis,
   CropMonitoringDashboardResponse,
 } from "@/models/crop-monitoring.model";
-import StatusBadge from "@/components/StatusBadge";
 import { useGetCost } from "@/api/payments";
 import { DiseaseDetectionHistoryTable } from "./DiseaseDetectionHistoryTable";
 
@@ -28,65 +16,6 @@ export const CropMonitoringServicePage: React.FC<{
   onRequestInformation: () => void;
   data: CropMonitoringDashboardResponse | undefined;
 }> = ({ onClose, title, onRequestInformation, data }) => {
-  const columnDefinition: ColumnDef<CropMonitoringAnalysis>[] = [
-    {
-      accessorKey: "test_id",
-      header: "ID",
-    },
-    {
-      accessorKey: "farm_name",
-      header: "Farm name",
-    },
-    {
-      id: "status",
-      header: "Status",
-      cell: ({ row }) => (
-        <StatusBadge<CropMonitoringAnalysis["status"]>
-          status={row.original.status}
-          variant={row.original.status === "processing" ? "warning" : "success"}
-        />
-      ),
-    },
-    {
-      accessorKey: "payment",
-      header: "Payment",
-      cell: ({ row }) => (
-        <span>
-          ₦{row.original.payment ? row.original.payment.toLocaleString() : 0}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "date",
-      header: "Date",
-      cell: ({ row }) => (
-        <span className="capitalize">{row.original.date}</span>
-      ),
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: () => (
-        <div className="">
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <MoreVertical size={15} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Action</DropdownMenuLabel>
-              <DropdownMenuItem>View</DropdownMenuItem>
-              <DropdownMenuItem>Rename</DropdownMenuItem>
-              <DropdownMenuItem>
-                <span className="text-[#E61504CC]">Delete analysis</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      ),
-    },
-  ];
-  const columns = useMemo(() => columnDefinition, []);
-
   const { data: cost, isLoading: isLoadingCost } = useGetCost(
     "crop-monitoring",
     1,
