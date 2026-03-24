@@ -30,11 +30,16 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem("auth_token");
-
       // window.location.href = "/signin";
     }
+    const serverMessage =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      "An unexpected error occurred";
+    const customError = new Error(serverMessage);
+    (customError as any).status = error.response?.status;
 
-    return Promise.reject(error);
+    return Promise.reject(customError);
   },
 );
 

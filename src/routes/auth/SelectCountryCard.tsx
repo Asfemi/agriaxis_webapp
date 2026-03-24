@@ -136,4 +136,9 @@ export default (parentRoute: AnyRoute) =>
     path: "select-country",
     component: SelectCountryCard,
     getParentRoute: () => parentRoute,
+    head: () => ({
+      meta: [
+        { title: "Select Country" }
+      ]
+    })
   });

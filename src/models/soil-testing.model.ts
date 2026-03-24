@@ -33,6 +33,9 @@ export interface SoilTestingState {
   resetForm: () => void;
 }
 
+/**
+ * @deprecated
+ */
 export interface SoilTestingPaymentRequest {
   farmId: string;
   amount: number;
@@ -43,6 +46,9 @@ export interface SoilTestingPaymentRequest {
   success: boolean;
 }
 
+/**
+ * @deprecated
+ */
 export interface SoilTestingPaymentInitialiseRequest {
   farmId: string;
   amount: number;
@@ -54,6 +60,9 @@ export interface SoilTestingPaymentInitialiseRequest {
   };
 }
 
+/**
+ * @deprecated
+ */
 export interface SoilTestingPaymentInitialiseResponse {
   payment_link: string;
   tx_ref: string;
@@ -63,7 +72,7 @@ export interface SoilTestingPaymentInitialiseResponse {
 }
 
 export interface SoilTestingUploadRequest {
-  coordinatesCsv: string;
+  coordinatesCsv?: string;
   farmId: string;
 }
 

@@ -99,4 +99,9 @@ export default (parentRoute: AnyRoute) =>
         });
       }
     },
+    head: () => ({
+      meta: [
+        { title: "OTP Verification" }
+      ]
+    })
   });

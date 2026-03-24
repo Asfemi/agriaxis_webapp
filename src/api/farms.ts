@@ -16,7 +16,7 @@ export const useGetAllFarms = () => {
   return useQuery({
     queryKey: ["farms"],
     queryFn: async () => {
-      const { data } = await apiClient.get<GetAllFarmResponse>("/org/farms");
+      const { data } = await apiClient.get<GetAllFarmResponse>("/farms");
       return data;
     },
   });
@@ -26,11 +26,12 @@ export const useCreateFarm = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (farm: NewFarmFormData) => {
-      const { data } = await apiClient.post("/org/farms", farm);
+      const { data } = await apiClient.post("/farms/simple", farm);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["farms"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -45,14 +46,12 @@ export const useGetDashboard = () => {
   });
 };
 
-export const useGetFarm = (id: number) => {
+export const useGetFarm = (id: string) => {
   return useSuspenseQuery({
-    queryKey: ["farm", id], 
+    queryKey: ["farm", id],
     queryFn: async () => {
-      const { data } = await apiClient.get<{ data: FarmDetails }>(
-        `/org/farms/${id}`,
-      );
-      return data.data; 
+      const { data } = await apiClient.get<FarmDetails>(`/farms/${id}`);
+      return data;
     },
   });
 };

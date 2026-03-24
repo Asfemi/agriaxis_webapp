@@ -132,6 +132,11 @@ export default (parentRoute: AnyRoute) =>
     staticData: {
       title: "Dashboard",
     },
+    head: () => ({
+      meta: [
+        { title: "Dashboard" }
+      ]
+    })
   });
 
 //TODO: Update load state so app isn't blank while fetching for first time

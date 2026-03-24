@@ -16,7 +16,7 @@ export const useAddUserMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: NewUser) => {
-      const response = await apiClient.post("/add-user", data);
+      const response = await apiClient.post("/users", data);
       return response.data;
     },
     onSuccess: () => {

@@ -105,4 +105,11 @@ export default (parentRoute: AnyRoute) =>
     staticData: {
       title: "Crop Information",
     },
+    head: () => ({
+      meta: [
+        { title: "Crop Information" }
+      ]
+    })
   });
+
+//TODO: Rename to "Weather & Climate Information"

@@ -1,15 +1,10 @@
-import { FarmMeasurementSelectionCard } from "@/components/dashboard/FarmMeasurementSelectionCard";
 import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
-import { Activity, useState } from "react";
-import { PreviousLandMeasurementCard } from "@/components/crop-monitoring/PreviousLandMeasurementCard";
-import { PaymentMethodsSheet } from "@/components/soil-testing/PaymentMethodsSheet";
-import { FarmMeasurementMethodCard } from "@/components/soil-testing/FarmMeasurementMethodCard";
-import { MapMeasurementCard } from "@/components/soil-testing/MapMeasurementCard";
-import { ManualMeasurementCard } from "@/components/soil-testing/ManualMeasurementCard";
-import { CropImageCard } from "@/components/crop-monitoring/CropImageCard";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ProcessingResultCard } from "@/components/crop-monitoring/ProcessingResultCard";
 import { CropHealthResultSheet } from "./CropHealthResultSheet";
+import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
+import { useCropHealth } from "@/api/crop-monitoring";
 
 export const RequestCropHealthSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -17,28 +12,11 @@ export const RequestCropHealthSheetsContainer: React.FC<{
 }> = ({ isOpen, onClose  }) => {
   if (!isOpen) return null;
   const [currentView, setCurrentView] = useState("details");
-  const handleMeasurementMethodSelection = (selection: "existing" | "new") => {
-    if (selection === "existing") {
-      setCurrentView("existing_measurement");
-    } else {
-      setCurrentView("measurement_method");
-    }
-  };
-  const handleProceedToPayment = () => {
-    setCurrentView("payment");
-  };
-
-  const handleMeasurementMapMethodSelection = (
-    selection: "google" | "manual",
-  ) => {
-    if (selection === "google") {
-      setCurrentView("google_measurement");
-    } else {
-      setCurrentView("manual_measurement");
-    }
-  };
+  const { formData } = useSoilTestingFormStore();
+  const { mutate } = useCropHealth()
 
   const handleConfirm = () => {
+    mutate(formData.farm_id ?? '')
     toast.success("Crop scanned successfully!");
     setCurrentView("processing");
     setTimeout(() => {
@@ -58,55 +36,9 @@ export const RequestCropHealthSheetsContainer: React.FC<{
         <FarmDetailsCard
           isOpen={currentView === "details"}
           onClose={onClose}
-          onConfirm={() => setCurrentView("existing_measurement")}
+          onConfirm={() => handleConfirm()}
           requestServiceType={"Crop Health"}
         />
-        <Activity mode={currentView === "measurement" ? "visible" : "hidden"}>
-          <FarmMeasurementSelectionCard
-            onClose={() => setCurrentView("details")}
-            onConfirm={(selection) =>
-              handleMeasurementMethodSelection(selection)
-            }
-            serviceType={"Crop Health"}
-          />
-        </Activity>
-        {currentView === "existing_measurement" && (
-          <PreviousLandMeasurementCard
-            onClose={() => setCurrentView("details")}
-            onConfirm={handleProceedToPayment}
-          />
-        )}
-        <FarmMeasurementMethodCard
-          isOpen={currentView === "measurement_method"}
-          onClose={() => setCurrentView("measurement")}
-          onConfirm={handleMeasurementMapMethodSelection}
-        />
-        <CropImageCard
-          isOpen={currentView === "image_upload"}
-          onClose={() => setCurrentView("existing_measurement")}
-          onConfirm={(imageData) => {
-            console.log("Image ready for processing:", imageData);
-            handleProceedToPayment();
-            // Move to next step, e.g., setCurrentView("analyzing")
-          }}
-        />
-        <MapMeasurementCard
-          isOpen={currentView === "google_measurement"}
-          onClose={() => setCurrentView("measurement_method")}
-          onConfirm={() => setCurrentView("image_upload")}
-        />
-        <ManualMeasurementCard
-          isOpen={currentView === "manual_measurement"}
-          onClose={() => setCurrentView("measurement_method")}
-          onConfirm={() => setCurrentView("image_upload")}
-        />
-        <Activity mode={currentView === "payment" ? "visible" : "hidden"}>
-          <PaymentMethodsSheet
-            isOpen={true}
-            onClose={() => setCurrentView("existing_measurement")}
-            onConfirm={handleConfirm}
-          />
-        </Activity>
         <ProcessingResultCard isOpen={currentView === "processing"} />
         <CropHealthResultSheet
           isOpen={currentView === "result"}

@@ -22,21 +22,16 @@ export interface FarmTest {
 }
 
 export const NewFarmSchema = z.object({
-  name: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  state: z.string().optional(),
-  lga: z.string().optional(),
-  physical_address: z.string().optional(),
+  farm_name: z.string().optional(),
+  farm_size: z.string().optional(),
   size_hectares: z.number().optional(),
   size_unit: z.string().optional(),
-  crop_type: z.string().optional(),
-  planting_date: z.string().optional(),
-  expected_harvest_date: z.string().optional(),
-  status: z.string().optional(),
-  health_status: z.string().optional(),
-  user_id: z.number().optional(),
-  notes: z.string().optional(),
+  coordinatesCsv: z.string().optional(),
+  crop_type: z.array(z.string()).optional(),
+  state: z.string().optional(),
+  city: z.string().optional(),
+  lga: z.string().optional(),
+  address: z.string().optional(),
 });
 
 export type NewFarmFormData = z.infer<typeof NewFarmSchema>;
@@ -69,32 +64,33 @@ export interface GetAllFarmResponse {
 }
 
 export interface FarmDetails {
-  id: number;
-  name: string;
-  location: {
-    latitude: null | number;
-    longitude: null | number;
-    state: string;
-    lga: string;
-    physical_address: string;
-  };
-  size_hectares: string;
-  crop_type: string;
-  planting_date: null | string;
-  expected_harvest_date: null | string;
+  farm_name: string;
+  size: string;
+  location: string;
   status: string;
-  health_status: string;
-  notes: null | string;
-  farmer: {
-    id: number;
-    name: string;
-    email: string;
-    phone: null | string;
+  result_summation: {
+    soil_ph: 0;
+    moisture: string;
+    nutrient: string;
+    total_no_of_tests: number;
   };
-  organisation: {
-    id: number;
-    name: string;
-  };
-  created_at: string;
-  updated_at: string;
+  list_test_results: any[];
+
+  // crop_type: string;
+  // planting_date: null | string;
+  // expected_harvest_date: null | string;
+  // health_status: string;
+  // notes: null | string;
+  // farmer: {
+  //   id: number;
+  //   name: string;
+  //   email: string;
+  //   phone: null | string;
+  // };
+  // organisation: {
+  //   id: number;
+  //   name: string;
+  // };
+  // created_at: string;
+  // updated_at: string;
 }

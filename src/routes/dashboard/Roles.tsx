@@ -91,4 +91,9 @@ export default (parentRoute: AnyRoute) =>
     staticData: {
       title: "Roles & Permissions",
     },
+    head: () => ({
+      meta: [
+        { title: "Roles & Permissions" },
+      ]
+    })
   });

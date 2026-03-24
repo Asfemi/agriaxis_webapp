@@ -92,4 +92,9 @@ export default (parentRoute: AnyRoute) =>
     path: "reset-password-otp",
     component: ResetPasswordOtp,
     getParentRoute: () => parentRoute,
+    head: () => ({
+      meta: [
+        { title: "Enter OTP" }
+      ]
+    })
   });

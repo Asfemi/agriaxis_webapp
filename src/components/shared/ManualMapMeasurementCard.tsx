@@ -5,18 +5,7 @@ import { ManualMeasurementCoordinateEntryCard } from "@/components/soil-testing/
 import "@geoman-io/leaflet-geoman-free";
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import "leaflet/dist/leaflet.css";
-import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
-import { useUserStore } from "@/stores/useUserStore";
-import {
-  useSoilTestingPayment,
-  useSoilTestingPaymentInitialise,
-  useSoilTestingRun,
-  useSoilTestingUpload,
-} from "@/api/soil-testing";
-import { toast } from "sonner";
-import type { SoilTestingPaymentInitialiseResponse } from "@/models/soil-testing.model";
 import { useCoordinatesStore } from "@/stores/useCoordinatesStore";
-import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
 
 const MEASUREMENT_STEPS = [
   "Stand at each corner of your land",
@@ -24,27 +13,13 @@ const MEASUREMENT_STEPS = [
   "Record 4 points for your farm land",
 ];
 
-/**
- * @deprecated
- * @param param0 
- * @returns 
- */
-export const ManualMeasurementCard: React.FC<{
-  isOpen?: boolean;
+export const ManualMapMeasurementCard: React.FC<{
   onClose: () => void;
-  onConfirm: () => void;
-}> = ({ isOpen, onClose, onConfirm }) => {
-  if (!isOpen) return null;
+  onConfirm: (coordinates: string) => void;
+}> = ({ onClose, onConfirm }) => {
   const [openCoordinatesSelection, setOpenCoordinatesSelection] =
     useState(false);
   const { formData, updateFormData } = useCoordinatesStore();
-  const { formData: soilTestingFormData } = useSoilTestingFormStore();
-  const user = useUserStore((state) => state.user);
-  const { mutate: initialisePayment } = useSoilTestingPaymentInitialise();
-  const { mutate: confirmPayment } = useSoilTestingPayment();
-  const { mutate: uploadSoilTest } = useSoilTestingUpload();
-  const { mutate: runSoilTest } = useSoilTestingRun();
-  const { setResult } = useSoilTestingResultStore();
 
   const handleSelectCoordinate = (index: number) => {
     const currentPoint = index + 1;
@@ -95,145 +70,18 @@ export const ManualMeasurementCard: React.FC<{
   ];
 
   /**
-   * @description Handles the confirmation of the soil testing form
+   * @description Handles the confirmation of the coordinates
    */
   const handleConfirm = () => {
     const result = points.map((coord) => coord.coordinate).join(",");
-
-    const request = {
-      farmId: soilTestingFormData.farm_id ?? "",
-      amount: soilTestingFormData.cost ?? 0,
-      currency: "NGN",
-      customer: {
-        email: user?.email ?? "",
-        name: user?.name ?? "",
-        phonenumber: user?.phone ?? "",
-      },
-    };
-
-    initialisePayment(request, {
-      onSuccess: (data) => {
-        toast.success("Payment initiated successfully!");
-
-        openPaymentModal(data, result);
-      },
-      onError: () =>
-        toast.error("Failed to initiate payment. Please try again."),
-    });
-  };
-
-  const openPaymentModal = (
-    paymentData: SoilTestingPaymentInitialiseResponse,
-    coordinates: string,
-  ) => {
-    const { payment_link, tx_ref, amount, currency, farm_id } = paymentData;
-
-    const popup = window.open(
-      payment_link,
-      "flutterwave_payment",
-      "width=800,height=600,scrollbars=yes,resizable=yes,left=200,top=100",
-    );
-
-    if (!popup) {
-      toast.error("Popup blocked! Please allow popups and try again.");
-      return;
-    }
-
-    let messageReceived = false;
-
-    const handleMessage = (event: MessageEvent) => {
-      const allowedOrigins = [
-        window.location.origin,
-        "https://agriaxis-webapp.vercel.app",
-      ];
-
-      if (!allowedOrigins.includes(event.origin)) return;
-
-      if (event.data?.type === "PAYMENT_COMPLETE") {
-        messageReceived = true;
-
-        const { status, transactionId } = event.data;
-        confirmPayment(
-          {
-            farmId: farm_id,
-            amount,
-            currency,
-            txRef: tx_ref,
-            transactionId: String(transactionId) ?? "",
-            status: status ?? "",
-            success: status === "successful" || status === "completed",
-          },
-          {
-            onSuccess: () => {
-              toast.success("Payment confirmed successfully!");
-              uploadSoilTest(
-                { farmId: farm_id, coordinatesCsv: coordinates },
-                {
-                  onSuccess: () => {
-                    toast.success("Soil test uploaded successfully!");
-                    runSoilTest(
-                      {
-                        farmId: farm_id,
-                        crop: soilTestingFormData.crop ?? "",
-                        depth: "0-20",
-                      },
-                      {
-                        onSuccess: (data) => {
-                          setResult(data);
-                          toast.success("Soil test run successfully!");
-                          onConfirm();
-                        },
-                        onError: (error) => {
-                          toast.error(error.message);
-                          toast.error(
-                            "Failed to run soil test. Please try again!",
-                          );
-                        },
-                      },
-                    );
-                  },
-                  onError: (error) => {
-                    toast.error(error.message);
-                    toast.error("Failed to run soil test. Please try again!");
-                  },
-                },
-              );
-            },
-            onError: (error) => {
-              toast.error(error.message);
-              toast.error("Failed to confirm payment. Please try again!");
-            }
-          },
-        );
-
-        cleanup();
-      }
-    };
-
-    const checkClosed = setInterval(() => {
-      if (popup.closed) {
-        if (!messageReceived) {
-          setTimeout(() => {
-            if (!messageReceived) cleanup();
-          }, 500);
-        } else {
-          cleanup();
-        }
-      }
-    }, 1000);
-
-    const cleanup = () => {
-      clearInterval(checkClosed);
-      window.removeEventListener("message", handleMessage);
-    };
-
-    window.addEventListener("message", handleMessage);
+    console.log("manual coordinates", result);
+    onConfirm(result);
   };
 
   return (
     <>
       {!openCoordinatesSelection ? (
-        <section className="size-full">
+        <section className="z-50 ml-auto size-full overflow-y-auto rounded-[1.25rem] bg-white px-7 lg:max-w-xl">
           <div className="flex h-full flex-col justify-between overflow-y-auto pb-10">
             <div>
               <header className="mb-10 flex items-start gap-3.5 pt-7 pl-6">
@@ -395,17 +243,19 @@ export const ManualMeasurementCard: React.FC<{
                   !formData.point_4
                 }
               >
-                Done
+                Done. Save coordinates
               </Button>
             </div>
           </div>
         </section>
       ) : (
-        <ManualMeasurementCoordinateEntryCard
-          isOpen={openCoordinatesSelection}
-          onClose={() => setOpenCoordinatesSelection(false)}
-          onConfirm={() => setOpenCoordinatesSelection(false)}
-        />
+        <div className="z-50 ml-auto size-full overflow-y-auto rounded-[1.25rem] bg-white px-7 lg:max-w-xl">
+          <ManualMeasurementCoordinateEntryCard
+            isOpen={openCoordinatesSelection}
+            onClose={() => setOpenCoordinatesSelection(false)}
+            onConfirm={() => setOpenCoordinatesSelection(false)}
+          />
+        </div>
       )}
     </>
   );

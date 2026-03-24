@@ -35,4 +35,9 @@ export default (parentRoute: AnyRoute) =>
     path: 'get-started',
     component: GetStartedCard,
     getParentRoute: () => parentRoute,
+    head: () => ({
+      meta: [
+        { title: "Get Started" }
+      ]
+    })
   })

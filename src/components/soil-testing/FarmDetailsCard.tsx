@@ -179,9 +179,9 @@ const FarmDetailsCard: React.FC<{
           <div>
             <label className="mb-1.5 text-sm text-[#130B30]">Crop type</label>
             <div className="grid grid-cols-2 gap-2">
-              {CROP_TYPE_OPTIONS.map((entry) => (
+              {CROP_TYPE_OPTIONS.map((entry, index) => (
                 <Controller
-                  key={entry.id}
+                  key={entry.id + index}
                   name="crop"
                   control={control}
                   render={({ field }) => (
@@ -222,7 +222,7 @@ const FarmDetailsCard: React.FC<{
           </div>
           <Button
             type="submit"
-            disabled={!formData.farm_id || !formData.crop}
+            disabled={!formData.farm_id}
             variant="primary"
           >
             Continue

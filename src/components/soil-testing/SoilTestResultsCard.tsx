@@ -1,15 +1,73 @@
-import { useSoilTestingRecommendation } from "@/api/soil-testing";
+import {
+  useGetSoilTestingResultById,
+  useSoilTestingRecommendation,
+} from "@/api/soil-testing";
 import { formatDate } from "@/lib/utils";
 import { useCoordinatesStore } from "@/stores/useCoordinatesStore";
 import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
 import { ChevronLeft, LoaderCircle, TicketPercent } from "lucide-react";
 import { useMemo } from "react";
+import { Button } from "@/components/Button";
+import jsPDF from "jspdf";
+import { useRef } from "react";
+import { toPng } from "html-to-image";
 
 export const SoilTestResultsCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;
 }> = ({ isOpen, onClose }) => {
+  const reportRef = useRef<HTMLDivElement>(null);
+  const handleDownload = async () => {
+    if (!reportRef.current) return;
+    const imgData = await toPng(reportRef.current, {
+      pixelRatio: 2,
+      canvasWidth: 800, // constrain capture width
+      style: {
+        width: "800px",
+        margin: "0",
+      },
+    });
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    const img = new Image();
+    img.src = imgData;
+    await new Promise((res) => (img.onload = res));
+
+    const imgHeightMm = (img.height * pdfWidth) / img.width;
+
+    let remainingHeight = imgHeightMm;
+    let yOffset = 0;
+
+    while (remainingHeight > 0) {
+      const margin = 10; // mm
+      const contentWidth = pdfWidth - margin * 2;
+      const imgHeightMm = (img.height * contentWidth) / img.width;
+      pdf.addImage(imgData, "PNG", margin, -yOffset, contentWidth, imgHeightMm);
+      // pdf.addImage(imgData, "PNG", 0, -yOffset, pdfWidth, imgHeightMm);
+      remainingHeight -= pdfHeight;
+      if (remainingHeight > 0) {
+        pdf.addPage();
+        yOffset += pdfHeight;
+      }
+    }
+
+    pdf.save(`${result?.name ?? "soil-test"}-result.pdf`);
+  };
+
   const { result } = useSoilTestingResultStore();
+  const {
+    data: resultData,
+    isLoading: isLoadingResult,
+    isError: isErrorResult,
+  } = useGetSoilTestingResultById(String(result?.id) ?? "");
   const { formData: coordinatesStoreData } = useCoordinatesStore();
   const coordinatesList = useMemo(() => {
     const keys = ["point_1", "point_2", "point_3", "point_4"] as const;
@@ -38,7 +96,7 @@ export const SoilTestResultsCard: React.FC<{
 
   if (!isOpen) return null;
 
-  if (!result)
+  if (!result || isErrorResult)
     return (
       <div className="flex h-screen items-center justify-center">
         <p className="animate-pulse text-xl font-medium text-gray-500">
@@ -65,7 +123,7 @@ export const SoilTestResultsCard: React.FC<{
               <h6 className="text-[#423C59]">Your soil test result</h6>
             </div>
           </header>
-          <section className="mx-20 space-y-6 pb-10">
+          <section ref={reportRef} className="mx-20 space-y-6 pb-10">
             <div className="mb-6 flex items-center justify-between">
               <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
                 <TicketPercent size={20} className="text-[#0A814A]" />
@@ -108,104 +166,108 @@ export const SoilTestResultsCard: React.FC<{
                 </>
               </div>
             )}
-            <div className="mb-7 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Current pH: {result.ph_level}
-                </p>
+            {isLoadingResult ? (
+              <LoaderCircle className="mx-auto my-10 animate-spin text-[#0A814A]" />
+            ) : (
+              <div className="mb-7 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Current pH: {resultData?.ph_level}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Nitrogen (N): {resultData?.nitrogen}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Phosphorus (P): {resultData?.phosphorus}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Pottasium (K): {resultData?.potassium}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Sulphur: {resultData?.sulphur}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Aluminium: {resultData?.alumunium}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Magnesium: {resultData?.magnesium}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Calcium: {resultData?.calcium}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Zinc: {resultData?.zinc}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Stone: {resultData?.stone}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Clay: {resultData?.clay}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Silt: {resultData?.silt}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Sand: {resultData?.sand}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Salinity: {resultData?.salinity}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Carbon content: {resultData?.carbon_content}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-green-600"></div>
+                  <p className="text-sm text-[#423C59]">
+                    Organic matter: {resultData?.organic_matter}
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Nitrogen (N): {result.nitrogen} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Phosphorus (P): {result.phosphorus} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Pottasium (K): {result.potassium} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Sulphur: {result.sulphur} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Aluminium: {result.alumunium} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Magnesium: {result.magnesium} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Calcium: {result.calcium} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Zinc: {result.zinc} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Stone: {result.stone} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Clay: {result.clay} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Silt: {result.silt} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Sand: {result.sand} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Salinity: {result.salinity} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Carbon content: {result.carbon_content} ppm
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-green-600"></div>
-                <p className="text-sm text-[#423C59]">
-                  Organic matter: {result.organic_matter} ppm
-                </p>
-              </div>
-            </div>
+            )}
             <div>
               <h5 className="font-neue mb-3 text-xl font-semibold">
                 AI recommendations
@@ -253,6 +315,11 @@ export const SoilTestResultsCard: React.FC<{
                   </div>
                 </>
               )}
+            </div>
+            <div className="py-5">
+              <Button variant="primary" onClick={() => handleDownload()}>
+                Download Result
+              </Button>
             </div>
           </section>
         </div>

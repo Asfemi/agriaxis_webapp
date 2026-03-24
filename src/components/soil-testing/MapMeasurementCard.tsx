@@ -93,6 +93,11 @@ const GeomanController: React.FC<{
   return null;
 };
 
+/**
+ * @deprecated
+ * @param param0 
+ * @returns 
+ */
 export const MapMeasurementCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;

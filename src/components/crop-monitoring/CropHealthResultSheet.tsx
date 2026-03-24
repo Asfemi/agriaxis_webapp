@@ -8,15 +8,9 @@ export const CropHealthResultSheet: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <section
-      className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity"
-      onClick={onClose}
-    >
-      <section
-        className="relative z-50 ml-auto h-full w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-white p-8"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <header className="absolute top-12 left-10 flex items-center gap-3.5 z-2">
+    <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
+      <section className="relative z-50 ml-auto h-full w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-white p-8">
+        <header className="absolute top-12 left-10 z-2 flex items-center gap-3.5">
           <button
             onClick={onClose}
             className="grid size-7 place-items-center rounded-full bg-[#E8E8E8]"
@@ -24,9 +18,9 @@ export const CropHealthResultSheet: React.FC<{
             <ChevronLeft size={20} />
           </button>
         </header>
-        <section className="relative flex size-full flex-col justify-between rounded-xl pb-3 bg-[url('/assets/images/crop_health_result.png')] bg-cover bg-center">
+        <section className="relative flex size-full flex-col justify-between rounded-xl bg-[url('/assets/images/crop_health_result.png')] bg-cover bg-center pb-3">
           <div></div>
-          <div className="mx-auto w-[95%] bg-white px-4 py-6 rounded-xl">
+          <div className="mx-auto w-[95%] rounded-xl bg-white px-4 py-6">
             <div className="flex flex-col">
               <div className="mb-5 flex size-10 items-center justify-center">
                 <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">

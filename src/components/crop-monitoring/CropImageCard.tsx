@@ -5,7 +5,7 @@ import { Button } from "@/components/Button";
 interface CropImageCardProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (image: string) => void;
+  onConfirm: (image: File) => void;
 }
 
 export const CropImageCard: React.FC<CropImageCardProps> = ({
@@ -14,6 +14,7 @@ export const CropImageCard: React.FC<CropImageCardProps> = ({
   onConfirm,
 }) => {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,9 +36,10 @@ export const CropImageCard: React.FC<CropImageCardProps> = ({
     onClose();
   };
 
-  const handleConfirm = (image: string) => {
+  const handleConfirm = () => {
+    if (!imageFile) return;
     stopCamera();
-    onConfirm(image);
+    onConfirm(imageFile);
   };
 
   // Initialize Camera
@@ -68,10 +70,20 @@ export const CropImageCard: React.FC<CropImageCardProps> = ({
     const ctx = canvas.getContext("2d");
     ctx?.drawImage(video, 0, 0);
 
-    const dataUrl = canvas.toDataURL("image/png");
-    stopCamera();
-    setCapturedImage(dataUrl);
-    setIsCameraActive(false);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+
+      const file = new File([blob], "captured-image.png", {
+        type: "image/png",
+      });
+
+      const previewUrl = URL.createObjectURL(file);
+
+      setCapturedImage(previewUrl); // for UI preview
+      setImageFile(file); // actual file
+      setIsCameraActive(false);
+      stopCamera();
+    }, "image/png");
   };
 
   // Stop camera immediately when user opens the file picker
@@ -85,11 +97,11 @@ export const CropImageCard: React.FC<CropImageCardProps> = ({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCapturedImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const previewUrl = URL.createObjectURL(file);
+
+      setCapturedImage(previewUrl);
+      setImageFile(file);
+      setIsCameraActive(false);
     }
   };
 
@@ -127,7 +139,7 @@ export const CropImageCard: React.FC<CropImageCardProps> = ({
         </header>
 
         {/* Main Content Area */}
-        <div className="relative h-full w-11/12 mx-auto rounded-xl overflow-hidden">
+        <div className="relative mx-auto h-full w-11/12 overflow-hidden rounded-xl">
           {isCameraActive ? (
             /* CAMERA VIEW */
             <div className="relative h-full w-full">
@@ -182,7 +194,7 @@ export const CropImageCard: React.FC<CropImageCardProps> = ({
               <div className="absolute bottom-0 w-full rounded-xl p-10 pb-12 text-[#130B30]">
                 <div className="space-y-4">
                   <Button
-                    onClick={() => handleConfirm(capturedImage!)}
+                    onClick={handleConfirm}
                     variant="primary"
                     className="w-full text-lg"
                   >

@@ -9,17 +9,18 @@ import testingIcon from "/assets/icons/testing.svg";
 import { useEffect, useState } from "react";
 import { RequestSoilTestSheetsContainer } from "@/components/soil-testing/RequestSoilTestSheetsContainer";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
-import {
-  useSoilTestingCost,
-  useSoilTestingDashboard,
-} from "@/api/soil-testing";
+import { useSoilTestingDashboard } from "@/api/soil-testing";
 import { LoaderCircle } from "lucide-react";
+import { useGetCost } from "@/api/payments";
 
 function SoilTesting() {
   const [showRequestTest, setShowRequestTest] = useState(false);
   const [IS_EMPTY, setIsEmpty] = useState(false);
   const { data } = useSoilTestingDashboard();
-  const { data: cost, isLoading: isLoadingCost } = useSoilTestingCost(1);
+  const { data: cost, isLoading: isLoadingCost } = useGetCost(
+    "soil-testing",
+    1,
+  );
 
   useEffect(() => {
     const isEmpty = Object.values(data).every((value) => value === 0);
@@ -74,7 +75,7 @@ function SoilTesting() {
                 </div>
               }
               title="Total Expense"
-              value={`₦${data.total_revenue.toLocaleString('en-GB', { maximumFractionDigits: 2 })}`}
+              value={`₦${data.total_revenue.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`}
             />
             <StatCard
               icon={
@@ -124,6 +125,11 @@ export default (parentRoute: AnyRoute) =>
     component: SoilTesting,
     getParentRoute: () => parentRoute,
     staticData: {
-      title: "Soil Testing",
+      title: "Soil Health",
     },
+    head: () => ({
+      meta: [
+        { title: "Soil Health"}
+      ]
+    })
   });

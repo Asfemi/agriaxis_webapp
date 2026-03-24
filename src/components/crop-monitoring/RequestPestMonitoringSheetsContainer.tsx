@@ -1,129 +1,183 @@
-import { FarmMeasurementSelectionCard } from "@/components/dashboard/FarmMeasurementSelectionCard";
 import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
-import { Activity, useEffect, useState } from "react";
-import { PreviousLandMeasurementCard } from "@/components/crop-monitoring/PreviousLandMeasurementCard";
-import { PaymentMethodsSheet } from "@/components/soil-testing/PaymentMethodsSheet";
-import { FarmMeasurementMethodCard } from "@/components/soil-testing/FarmMeasurementMethodCard";
-import { MapMeasurementCard } from "@/components/soil-testing/MapMeasurementCard";
-import { ManualMeasurementCard } from "@/components/soil-testing/ManualMeasurementCard";
+import { useState } from "react";
 import { CropImageCard } from "@/components/crop-monitoring/CropImageCard";
 import { toast } from "sonner";
 import { ProcessingResultCard } from "@/components/crop-monitoring/ProcessingResultCard";
-import { ViewSoilTestResultSheet } from "@/components/dashboard/ViewSoilTestResultSheet";
-import type { FarmTest } from "@/models/farm.model";
-import { generateFarmTest } from "@/data/farm.data";
+import { useCropMonitoringDiseaseDetect } from "@/api/crop-monitoring";
+import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
+import { faker } from "@faker-js/faker";
+import { MeasurementCostCard } from "@/components/shared/MeasurementCostCard";
+import { useUserStore } from "@/stores/useUserStore";
+import { usePaymentInitialise, usePaymentVerify } from "@/api/payments";
+import type { PaymentInitialiseResponse } from "@/models/payment.model";
 
 export const RequestPestMonitoringSheetsContainer: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose  }) => {
+}> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   const [currentView, setCurrentView] = useState("details");
-  const [result, setResult] = useState<FarmTest | null>(null);
-  useEffect(() => {
-    setResult(generateFarmTest());
-  }, []);
-  const handleMeasurementMethodSelection = (selection: "existing" | "new") => {
-    if (selection === "existing") {
-      setCurrentView("existing_measurement");
-    } else {
-      setCurrentView("measurement_method");
-    }
-  };
-  const handleProceedToPayment = () => {
-    setCurrentView("payment");
-  };
-  const handleProceedToScan = () => {
-    setCurrentView("image_upload");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const { formData } = useSoilTestingFormStore();
+  const { mutate } = useCropMonitoringDiseaseDetect();
+  const { user } = useUserStore();
+  const { mutate: initialisePayment } = usePaymentInitialise();
+  const { mutate: confirmPayment } = usePaymentVerify();
+
+  const handleUploadImage = (image: File) => {
+    setImageFile(image);
+    // setCurrentView("cost");
+    setTimeout(() => {
+      handleConfirm()
+    }, 4e2)
   };
 
-  const handleMeasurementMapMethodSelection = (
-    selection: "google" | "manual",
-  ) => {
-    if (selection === "google") {
-      setCurrentView("google_measurement");
-    } else {
-      setCurrentView("manual_measurement");
-    }
+  const handleProceedToPayment = () => {
+    const request = {
+      farmId: formData.farm_id ?? "",
+      amount: formData.cost ?? 0,
+      currency: "NGN",
+      customer: {
+        email: user?.email ?? "",
+        name: user?.name ?? "",
+        phonenumber: user?.phone ?? "",
+      },
+    };
+
+    initialisePayment(request, {
+      onSuccess: (data) => {
+        toast.success("Payment initiated successfully!");
+
+        openPaymentModal(data);
+      },
+      onError: (error) =>
+        toast.error(
+          error.message ?? "Failed to initiate payment. Please try again.",
+        ),
+    });
   };
 
   const handleConfirm = () => {
-    toast.success("Crop scanned successfully!");
-    setCurrentView("processing");
-    setTimeout(() => {
-      setCurrentView("result");
-    }, 2e3);
+    if (!imageFile) {
+      toast.error("Please upload an image first!");
+      return;
+    }
+    mutate(
+      {
+        name: `F/${faker.string.alphanumeric(5).toUpperCase()}`,
+        image: imageFile,
+        farmId: formData.farm_id ?? "",
+      },
+      {
+        onSuccess: () => {
+          setCurrentView("processing");
+          setTimeout(() => {
+            toast.success("Crop scanned successfully!");
+            onClose();
+          }, 2e3);
+        },
+      },
+    );
+  };
+
+  const openPaymentModal = (paymentData: PaymentInitialiseResponse) => {
+    const { payment_link, tx_ref, amount, currency, farm_id } = paymentData;
+
+    const popup = window.open(
+      payment_link,
+      "flutterwave_payment",
+      "width=800,height=600,scrollbars=yes,resizable=yes,left=200,top=100",
+    );
+
+    if (!popup) {
+      toast.error("Popup blocked! Please allow popups and try again.");
+      return;
+    }
+
+    let messageReceived = false;
+
+    const handleMessage = (event: MessageEvent) => {
+      const allowedOrigins = [
+        window.location.origin,
+        "https://agriaxis-webapp.vercel.app",
+      ];
+
+      if (!allowedOrigins.includes(event.origin)) return;
+
+      if (event.data?.type === "PAYMENT_COMPLETE") {
+        messageReceived = true;
+
+        const { status, transactionId } = event.data;
+        confirmPayment(
+          {
+            farmId: farm_id,
+            amount,
+            currency,
+            txRef: tx_ref,
+            transactionId: String(transactionId) ?? "",
+            status: status ?? "",
+            success: status === "successful" || status === "completed",
+          },
+          {
+            onSuccess: () => {
+              toast.success("Payment confirmed successfully!");
+              handleConfirm();
+            },
+            onError: (error) => {
+              toast.error(error.message);
+              toast.error("Failed to confirm payment. Please try again!");
+            },
+          },
+        );
+
+        cleanup();
+      }
+    };
+
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        if (!messageReceived) {
+          setTimeout(() => {
+            if (!messageReceived) cleanup();
+          }, 500);
+        } else {
+          cleanup();
+        }
+      }
+    }, 1000);
+
+    const cleanup = () => {
+      clearInterval(checkClosed);
+      window.removeEventListener("message", handleMessage);
+    };
+
+    window.addEventListener("message", handleMessage);
   };
 
   return (
-    <section
-      className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity"
-      onClick={onClose}
-    >
-      <section
-        className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
+      <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
         <FarmDetailsCard
           isOpen={currentView === "details"}
           onClose={onClose}
-          onConfirm={() => setCurrentView("existing_measurement")}
+          onConfirm={() => setCurrentView("image_upload")}
           requestServiceType={"Crop Health"}
-        />
-        <Activity mode={currentView === "measurement" ? "visible" : "hidden"}>
-          <FarmMeasurementSelectionCard
-            onClose={() => setCurrentView("details")}
-            onConfirm={(selection) =>
-              handleMeasurementMethodSelection(selection)
-            }
-            serviceType={"Crop Health"}
-          />
-        </Activity>
-        {currentView === "existing_measurement" && (
-          <PreviousLandMeasurementCard
-            onClose={() => setCurrentView("details")}
-            onConfirm={handleProceedToScan}
-          />
-        )}
-        <FarmMeasurementMethodCard
-          isOpen={currentView === "measurement_method"}
-          onClose={() => setCurrentView("measurement")}
-          onConfirm={handleMeasurementMapMethodSelection}
         />
         <CropImageCard
           isOpen={currentView === "image_upload"}
-          onClose={() => setCurrentView("existing_measurement")}
+          onClose={() => setCurrentView("details")}
           onConfirm={(imageData) => {
-            console.log("Image ready for processing:", imageData);
-            handleProceedToPayment();
-            // Move to next step, e.g., setCurrentView("analyzing")
+            handleUploadImage(imageData);
           }}
         />
-        <MapMeasurementCard
-          isOpen={currentView === "google_measurement"}
-          onClose={() => setCurrentView("measurement_method")}
-          onConfirm={() => setCurrentView("image_upload")}
+        <MeasurementCostCard
+          service="crop-monitoring"
+          isOpen={currentView === "cost"}
+          onClose={() => setCurrentView("details")}
+          onConfirm={() => handleProceedToPayment()}
         />
-        <ManualMeasurementCard
-          isOpen={currentView === "manual_measurement"}
-          onClose={() => setCurrentView("measurement_method")}
-          onConfirm={() => setCurrentView("image_upload")}
-        />
-        <Activity mode={currentView === "payment" ? "visible" : "hidden"}>
-          <PaymentMethodsSheet
-            isOpen={true}
-            onClose={() => setCurrentView("measurement_method")}
-            onConfirm={handleConfirm}
-          />
-        </Activity>
         <ProcessingResultCard isOpen={currentView === "processing"} />
-        <ViewSoilTestResultSheet
-          isOpen={currentView === "result"}
-          test={result!}
-          onClose={onClose}
-        />
       </section>
     </section>
   );
 };
-

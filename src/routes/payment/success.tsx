@@ -48,4 +48,9 @@ export default (parentRoute: AnyRoute) =>
     staticData: {
       title: "Dashboard",
     },
+    head: () => ({
+      meta: [
+        { title: "Payment successful"}
+      ]
+    })
   });

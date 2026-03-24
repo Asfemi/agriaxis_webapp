@@ -174,4 +174,5 @@ export default (parentRoute: AnyRoute) =>
     staticData: {
       title: "Profile",
     },
+
   });

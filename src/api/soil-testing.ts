@@ -28,6 +28,11 @@ export const useSoilTestingDashboard = () => {
   });
 };
 
+/**
+ * @deprecated
+ * @param hectares
+ * @returns
+ */
 export const useSoilTestingCost = (hectares: number) => {
   return useQuery({
     queryKey: ["soil-testing-cost", hectares],
@@ -42,6 +47,10 @@ export const useSoilTestingCost = (hectares: number) => {
   });
 };
 
+/**
+ * @deprecated
+ * @returns
+ */
 export const useSoilTestingPaymentInitialise = () => {
   return useMutation({
     mutationFn: async (request: SoilTestingPaymentInitialiseRequest) => {
@@ -55,6 +64,10 @@ export const useSoilTestingPaymentInitialise = () => {
   });
 };
 
+/**
+ * @deprecated
+ * @returns
+ */
 export const useSoilTestingPayment = () => {
   const queryClient = useQueryClient();
 
@@ -106,13 +119,39 @@ export const useSoilTestingRecommendation = (id: number) => {
   });
 };
 
-export const useSoilTestingResults = (farmId?: string) => {
+export const useSoilTestingResults = () => {
   return useQuery({
-    queryKey: ["soil-testing-results", farmId],
+    queryKey: ["soil-testing-results"],
     queryFn: async () => {
       const { data } = await apiClient.get<SoilTestingResult[]>(
         "/soil-testing/results",
-        { params: { farmId } },
+      );
+      return data;
+    },
+  });
+};
+
+/**
+ * @deprecated
+ */
+export const useGetSoilTestingResultByName = (name: string) => {
+  return useQuery({
+    queryKey: ["soil-testing-result", name],
+    queryFn: async () => {
+      const { data } = await apiClient.get<SoilTestingResult>(
+        `/soil-testing/results/by-name/${name}`,
+      );
+      return data;
+    },
+  });
+};
+
+export const useGetSoilTestingResultById = (id: string) => {
+  return useQuery({
+    queryKey: ["soil-testing-result", id],
+    queryFn: async () => {
+      const { data } = await apiClient.get<SoilTestingResult>(
+        `/soil-testing/results/${id}`,
       );
       return data;
     },

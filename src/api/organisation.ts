@@ -15,7 +15,7 @@ export const useGetOrganisationQuery = () => {
 export const useCreateOrganisationMutation = () => {
   return useMutation({
     mutationFn: async (data: OrganisationFormData) => {
-      const response = await apiClient.post("/setup-organisation", data);
+      const response = await apiClient.post("/organisations-setup", data);
       return response.data;
     },
   });

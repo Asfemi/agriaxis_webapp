@@ -6,7 +6,7 @@ export const useLocations = () => {
   return useQuery({
     queryKey: ["locations"],
     queryFn: async () => {
-      const { data } = await apiClient.get<{ data: Location[] }>("/locations");
+      const { data } = await apiClient.get<{ data: Location[] }>("/locations/nigerian-cities");
       return data.data;
     },
   })

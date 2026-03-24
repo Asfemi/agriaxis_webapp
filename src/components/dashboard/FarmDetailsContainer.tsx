@@ -11,8 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/DataTable";
-import { ViewSoilTestResultSheet } from "@/components/dashboard/ViewSoilTestResultSheet";
-import { RenameResultModal } from "@/components/dashboard/RenameResultModal";
 import { Link, useParams } from "@tanstack/react-router";
 import { useGetFarm } from "@/api/farms";
 
@@ -21,7 +19,7 @@ export const FarmDetailsContainer = ({
 }) => {
   const { id } = useParams({ from: "/dashboard/dashboard/farms/details/$id" });
 
-  const { data: farmData } = useGetFarm(Number(id));
+  const { data: farmData, isLoading, isError } = useGetFarm(id);
   const testColumns: ColumnDef<FarmTest>[] = [
     {
       accessorKey: "testID",
@@ -57,10 +55,10 @@ export const FarmDetailsContainer = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Action</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setViewSoilTestResult(true)}>
+              <DropdownMenuItem>
                 View result
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowRenameResultModal(true)}>
+              <DropdownMenuItem>
                 Rename result
               </DropdownMenuItem>
               <DropdownMenuItem>Download result</DropdownMenuItem>
@@ -76,8 +74,10 @@ export const FarmDetailsContainer = ({
 
   const columns = useMemo(() => testColumns, []);
   const [data] = useState(() => []);
-  const [viewSoilTestResult, setViewSoilTestResult] = useState(false);
-  const [showRenameResultModal, setShowRenameResultModal] = useState(false);
+
+  if (isLoading) return <div>Loading farm data...</div>
+
+  if (isError) return <div>Failed to load farm data...</div>
 
   return (
     <>
@@ -91,12 +91,12 @@ export const FarmDetailsContainer = ({
           <div className="mb-6">
             <div className="mb-2 flex items-center gap-6">
               <h6 className="font-neue text-2xl font-bold text-[#0F172A]">
-                {`${farmData.name}, ${farmData.location.state}`}
+                {`${farmData?.farm_name}, ${farmData?.location}`}
               </h6>
               <StatusBadge<Farm["status"]>
-                status={farmData.health_status}
+                status={farmData?.status ?? ''}
                 variant={
-                  farmData.health_status === "healthy" ? "success" : "warning"
+                  farmData?.status === "healthy" ? "success" : "warning"
                 }
               />
             </div>
@@ -113,7 +113,7 @@ export const FarmDetailsContainer = ({
                   fill="#939397"
                 />
               </svg>
-              <span className="font-neue text-lg font-semibold text-[#434449]">{`${farmData.size_hectares} Hectares`}</span>
+              <span className="font-neue text-lg font-semibold text-[#434449]">{farmData?.size}</span>
             </div>
           </div>
           <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
@@ -122,7 +122,7 @@ export const FarmDetailsContainer = ({
                 Soil PH <span className="text-[#64748B]">(from last test)</span>
               </span>
               <span className="font-neue text-3xl font-bold text-[#0A814A]">
-                {0}
+                {farmData.result_summation.soil_ph}
               </span>
             </div>
             <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F3F6F8] p-4">
@@ -131,7 +131,7 @@ export const FarmDetailsContainer = ({
                 <span className="text-[#64748B]">(from last test)</span>
               </span>
               <span className="font-neue text-3xl font-bold text-[#D9A728]">
-                {0}%
+                {farmData.result_summation.moisture}
               </span>
             </div>
             <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F3F6F8] p-4">
@@ -140,7 +140,7 @@ export const FarmDetailsContainer = ({
                 <span className="text-[#64748B]">(from last test)</span>
               </span>
               <span className="font-neue text-3xl font-bold text-[#0A814A] capitalize">
-                {0}
+                {farmData.result_summation.nutrient}
               </span>
             </div>
             <div className="flex w-full flex-col gap-2 rounded-xl bg-[#F3F6F8] p-4">
@@ -148,25 +148,13 @@ export const FarmDetailsContainer = ({
                 Total no. of test
               </span>
               <span className="font-neue text-3xl font-bold text-[#130B30]">
-                {0}
+                {farmData.result_summation.total_no_of_tests}
               </span>
             </div>
           </div>
           <DataTable title="Test performed" columns={columns} data={data} />
         </header>
       </main>
-      <ViewSoilTestResultSheet
-        onClose={() => setViewSoilTestResult(false)}
-        isOpen={viewSoilTestResult}
-        test={data[0]}
-      />
-      <RenameResultModal
-        isOpen={showRenameResultModal}
-        // value={data[0].testID}
-        value={"1"}
-        onSave={() => setShowRenameResultModal(false)}
-        onClose={() => setShowRenameResultModal(false)}
-      />
     </>
   );
 };

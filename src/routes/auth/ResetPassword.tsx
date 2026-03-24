@@ -141,4 +141,9 @@ export default (parentRoute: AnyRoute) =>
     path: "reset-password",
     component: ResetPassword,
     getParentRoute: () => parentRoute,
+    head: () => ({
+      meta: [
+        { title: "Reset Password" }
+      ]
+    })
   });
