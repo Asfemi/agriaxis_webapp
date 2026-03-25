@@ -111,5 +111,3 @@ export default (parentRoute: AnyRoute) =>
       ]
     })
   });
-
-//TODO: Rename to "Weather & Climate Information"
