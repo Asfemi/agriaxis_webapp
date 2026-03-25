@@ -44,13 +44,13 @@ const RequestSoilTestSheetsContainer: React.FC<{
         openPaymentModal(data);
       },
       onError: (error) =>
-        toast.error(error.message ?? "Failed to initiate payment. Please try again."),
+        toast.error(
+          error.message ?? "Failed to initiate payment. Please try again.",
+        ),
     });
   };
 
-  const openPaymentModal = (
-    paymentData: PaymentInitialiseResponse,
-  ) => {
+  const openPaymentModal = (paymentData: PaymentInitialiseResponse) => {
     const { payment_link, tx_ref, amount, currency, farm_id } = paymentData;
 
     const popup = window.open(
@@ -168,10 +168,11 @@ const RequestSoilTestSheetsContainer: React.FC<{
           onClose={() => setCurrentView("details")}
           onConfirm={() => handleSubmit()}
         />
-        <SoilTestResultsCard
-          isOpen={currentView === "result"}
-          onClose={() => setCurrentView("measurement_method")}
-        />
+        {currentView === "result" && (
+          <SoilTestResultsCard
+            onClose={() => setCurrentView("measurement_method")}
+          />
+        )}
       </section>
     </section>
   );
