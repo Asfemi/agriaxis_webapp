@@ -66,7 +66,6 @@ const navItems: NavItemType[] = [
       </svg>
     ),
     path: "/dashboard/crop-information",
-    isDisabled: true,
   },
   {
     label: "Crop Monitoring",

@@ -17,7 +17,7 @@ import type {
 import { useUserStore } from "@/stores/useUserStore";
 import { toast } from "sonner";
 import { RequestCropHealthSheetsContainer } from "@/components/crop-monitoring/RequestCropHealthSheetsContainer";
-import { CropHealthHistoryTable } from "./CropHealthHistoryTable";
+import { CropHealthHistoryTable } from "@/components/crop-monitoring/CropHealthHistoryTable";
 
 export const CropHealthServicePage: React.FC<{
   onClose: () => void;
