@@ -5,6 +5,7 @@ import { LoaderCircle } from "lucide-react";
 import { Suspense } from "react";
 import { useLogout } from "@/api/auth";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import "leaflet/dist/leaflet.css";
 
 function DesktopOnlyOverlay() {
   return (
