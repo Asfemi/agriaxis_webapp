@@ -55,5 +55,18 @@ export type DiseaseDetectionHistory = {
   payment: number | null;
   name: string;
   datetime: string;
-  data: CropMonitoringDiseaseDetectResponse
+  data: CropMonitoringDiseaseDetectResponse;
+};
+
+export type CropHealthHistory = {
+  id: string;
+  created_at: string;
+  user_id: string;
+  organisation_id: number;
+  org_farm_id: number;
+  name: string;
+  coordinates: string;
+  farm_id: string;
+  image_png: string;
+  image_tiff: string;
 };

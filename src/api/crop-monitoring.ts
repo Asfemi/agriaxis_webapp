@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/api/api-client";
 import type {
+    CropHealthHistory,
   CropMonitoringDashboardResponse,
   CropMonitoringDiseaseDetectResponse,
   DiseaseDetectionHistory,
@@ -68,7 +69,7 @@ export const useGetCropHealthHistory = () => {
   return useQuery({
     queryKey: ["crop-health-history"],
     queryFn: async () => {
-      const { data } = await apiClient.get(
+      const { data } = await apiClient.get<CropHealthHistory[]>(
         "/crop-monitoring/crop-health/history",
       );
       return data;

@@ -12,6 +12,9 @@ import type { PaymentSubscription, PaymentSubscriptionRes } from "@/models/payme
 import { useUserStore } from "@/stores/useUserStore";
 import { toast } from "sonner";
 
+/**
+ * @deprecated
+ */
 export const CropMonitoringServicePage: React.FC<{
   onClose: () => void;
   title: string;
