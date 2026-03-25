@@ -9,7 +9,7 @@ export const CropHealthResultSheet: React.FC<{
 
   return (
     <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
-      <section className="relative z-50 ml-auto h-full w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-white p-8">
+      <section className="relative z-50 ml-auto h-full w-3/4 overflow-y-auto rounded-[1.25rem] bg-white p-8">
         <header className="absolute top-12 left-10 z-2 flex items-center gap-3.5">
           <button
             onClick={onClose}

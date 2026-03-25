@@ -9,14 +9,14 @@ import { useCropHealth } from "@/api/crop-monitoring";
 export const RequestCropHealthSheetsContainer: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose  }) => {
+}> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   const [currentView, setCurrentView] = useState("details");
   const { formData } = useSoilTestingFormStore();
-  const { mutate } = useCropHealth()
+  const { mutate } = useCropHealth();
 
   const handleConfirm = () => {
-    mutate(formData.farm_id ?? '')
+    mutate(formData.farm_id ?? "");
     toast.success("Crop scanned successfully!");
     setCurrentView("processing");
     setTimeout(() => {
@@ -25,27 +25,28 @@ export const RequestCropHealthSheetsContainer: React.FC<{
   };
 
   return (
-    <section
-      className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity"
-      onClick={onClose}
-    >
+    <>
       <section
-        className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity"
+        onClick={onClose}
       >
-        <FarmDetailsCard
-          isOpen={currentView === "details"}
-          onClose={onClose}
-          onConfirm={() => handleConfirm()}
-          requestServiceType={"Crop Health"}
-        />
-        <ProcessingResultCard isOpen={currentView === "processing"} />
-        <CropHealthResultSheet
-          isOpen={currentView === "result"}
-          onClose={onClose}
-        />
+        <section
+          className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <FarmDetailsCard
+            isOpen={currentView === "details"}
+            onClose={onClose}
+            onConfirm={() => handleConfirm()}
+            requestServiceType={"Crop Health"}
+          />
+          <ProcessingResultCard isOpen={currentView === "processing"} />
+        </section>
       </section>
-    </section>
+      <CropHealthResultSheet
+        isOpen={currentView === "result"}
+        onClose={onClose}
+      />
+    </>
   );
 };
-
