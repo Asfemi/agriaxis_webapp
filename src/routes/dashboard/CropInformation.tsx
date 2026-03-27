@@ -9,6 +9,8 @@ import treeIcon from "/assets/icons/tree.svg";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { WeatherServicePage } from "@/components/crop-information/WeatherServicePage";
+import { useGetCropInformationDashboard } from "@/api/crop-information";
+import { X } from "lucide-react";
 
 const SERVICES = [
   {
@@ -34,10 +36,19 @@ const SERVICES = [
 type DASHBOARD_VIEW = "overview" | "weather" | "climate" | "calendar";
 function CropInformation() {
   const [currentView, setCurrentView] = useState<DASHBOARD_VIEW>("overview");
+  const { data: dashboardData, isLoading } = useGetCropInformationDashboard();
 
   const handleServiceClick = (id: string) => {
     setCurrentView(id as DASHBOARD_VIEW);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-10">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -56,8 +67,8 @@ function CropInformation() {
                     <img src={farmIcon} width={17.5} height={15.64} />
                   </div>
                 }
-                title="Total farms monitored"
-                value="0"
+                title="Total tests"
+                value={dashboardData?.total_tests ?? 0}
               />
               <StatCard
                 icon={
@@ -66,7 +77,7 @@ function CropInformation() {
                   </div>
                 }
                 title="Pending Tests"
-                value="0"
+                value={dashboardData?.pending_tests ?? 0}
               />
               <StatCard
                 icon={
@@ -75,7 +86,16 @@ function CropInformation() {
                   </div>
                 }
                 title="Completed Tests"
-                value="0"
+                value={dashboardData?.completed_tests ?? 0}
+              />
+              <StatCard
+                icon={
+                  <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-red-500 bg-[#E7E7EA]">
+                    <X className="text-red-500" />
+                  </div>
+                }
+                title="Failed Tests"
+                value={dashboardData?.failed_tests ?? 0}
               />
             </div>
           </section>
