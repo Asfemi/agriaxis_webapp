@@ -1,76 +1,101 @@
-import { ChevronLeft, Cloud, Droplet, Wind } from "lucide-react";
+import { useGetCropInformationAnalysis } from "@/api/crop-information";
+import {
+  formatDateEpoch,
+  formatTimeEpoch,
+  formatWeekdayEpoch,
+} from "@/lib/utils";
+import type {
+  WeatherAnalysisData,
+  WeatherForecast,
+} from "@/models/crop-information.model";
+import { ChevronLeft, Compass, Droplet, Wind } from "lucide-react";
 
-const hourlyForecast = [
-  { time: "00:00", temparature: 18.2, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/113.png" },
-  { time: "01:00", temparature: 17.5, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/113.png" },
-  { time: "02:00", temparature: 17.1, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/116.png" },
-  { time: "03:00", temparature: 16.8, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/116.png" },
-  { time: "04:00", temparature: 16.5, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/122.png" },
-  { time: "05:00", temparature: 16.2, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/143.png" },
-  { time: "06:00", temparature: 17.0, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/116.png" },
-  { time: "07:00", temparature: 18.5, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/113.png" },
-  { time: "08:00", temparature: 20.1, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/113.png" },
-  { time: "09:00", temparature: 22.4, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/113.png" },
-  { time: "10:00", temparature: 24.8, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/113.png" },
-  { time: "11:00", temparature: 26.5, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/113.png" },
-  { time: "12:00", temparature: 28.2, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/113.png" },
-  { time: "13:00", temparature: 29.5, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/113.png" },
-  { time: "14:00", temparature: 30.1, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/113.png" },
-  { time: "15:00", temparature: 29.8, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/113.png" },
-  { time: "16:00", temparature: 28.4, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/122.png" },
-  { time: "17:00", temparature: 26.7, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/122.png" },
-  { time: "18:00", temparature: 24.5, icon_url: "https://cdn.weatherapi.com/weather/64x64/day/116.png" },
-  { time: "19:00", temparature: 22.1, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/113.png" },
-  { time: "20:00", temparature: 20.8, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/113.png" },
-  { time: "21:00", temparature: 19.9, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/113.png" },
-  { time: "22:00", temparature: 19.2, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/113.png" },
-  { time: "23:00", temparature: 18.7, icon_url: "https://cdn.weatherapi.com/weather/64x64/night/113.png" },
-];
+export const WeatherForecastSheet: React.FC<{
+  id?: string;
+  onClose: () => void;
+  analysisData?: WeatherAnalysisData;
+}> = ({ id, onClose, analysisData }) => {
+  const { data, isLoading } = useGetCropInformationAnalysis(
+    id ?? "",
+    !!analysisData,
+  );
 
-export const WeatherForecastSheet: React.FC<{ onClose: () => void }> = ({
-  onClose,
-}) => {
+  const weatherData: WeatherAnalysisData =
+    analysisData ?? (data as WeatherAnalysisData);
+
+  if (!id && !analysisData) {
+    return (
+      <section className="size-full">
+        <div className="flex h-full flex-col items-center justify-center pb-10">
+          <div>
+            <p className="rounded-xl bg-[#D10000] px-2 py-1.5 text-xs text-white">
+              Failed to pass data
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
-      <section className="z-50 ml-auto h-auto w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-[#F8F4F4]">
-        <section className="p-6 pb-5 space-y-4">
+      <section className="z-50 ml-auto h-auto max-h-[96vh] w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-[#F8F4F4]">
+        <section className="space-y-4 p-6 pb-5">
           <div className="relative h-76.75 rounded-2xl bg-slate-800 p-6">
-            <header className="mb-7.5 flex items-center gap-3.5 justify-between">
+            <header className="mb-7.5 flex items-center justify-between gap-3.5">
               <button
                 onClick={onClose}
                 className="grid size-7 place-items-center rounded-full bg-[#E8E8E871]"
               >
                 <ChevronLeft size={20} className="text-white" />
               </button>
-              <p className="text-sm text-white">Daily</p>
+              <p className="text-sm text-white">Today</p>
             </header>
             <div className="font-neue mx-auto mb-7 text-center text-sm text-white">
-              <p className="mb-1">Perfect day for weeding - No rainfall</p>
-              <p className="text-[3.5rem] font-semibold text-white">24°c</p>
-              <p className="-mt-2">27 March, 2026</p>
+              <p className="mb-1">
+                {weatherData.data.weather_now.condition.text}
+              </p>
+              <p className="text-[3.5rem] font-semibold text-white">
+                {weatherData.data.weather_now.temp_c}°c
+              </p>
+              <p className="-mt-2">
+                {formatDateEpoch(
+                  weatherData.data.weather_now.last_updated_epoch,
+                )}
+              </p>
             </div>
             <div className="mx-auto flex w-fit gap-6 text-sm text-white">
               <div className="flex flex-col items-center">
                 <Wind size={14} />
                 <p>Wind speed</p>
-                <p>12km/h</p>
+                <p>{weatherData.data.weather_now.wind_kph}km/h</p>
               </div>
               <div className="flex flex-col items-center">
-                <Cloud size={14} />
-                <p>Chance of rain</p>
-                <p>12km/h</p>
+                <Compass size={14} />
+                <p>Wind direction</p>
+                <p>{weatherData.data.weather_now.wind_dir}</p>
               </div>
               <div className="flex flex-col items-center">
                 <Droplet size={14} />
                 <p>Humidity</p>
-                <p>70%</p>
+                <p>{Math.floor(weatherData.data.weather_now.humidity)}</p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3 w-full overflow-x-auto hide-scrollbar">
-            {hourlyForecast.map((entry) => (<ForecastTime time={entry.time} temparature={entry.temparature} icon_url={entry.icon_url} />))} 
+          <div className="hide-scrollbar flex w-full items-center gap-3 overflow-x-auto">
+            {weatherData.data.weather_forecast[0].hour.map((entry) => (
+              <ForecastTime
+                time={formatTimeEpoch(entry.time_epoch)}
+                temparature={Math.floor(entry.temp_c)}
+                icon_url={`https:${entry.condition.icon}`}
+              />
+            ))}
           </div>
-          <WeekForecast />
+          <WeekForecast data={weatherData.data.weather_forecast} />
         </section>
       </section>
     </section>
@@ -87,7 +112,7 @@ const ForecastTime = ({
   icon_url: string;
 }) => {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-xl border border-[#E8E8E8] bg-white px-5 pb-4 pt-3 hover:border-[#8EC5AC] hover:bg-[#E7F2ED]">
+    <div className="flex flex-col items-start gap-3 rounded-xl border border-[#E8E8E8] bg-white px-5 pt-3 pb-4 hover:border-[#8EC5AC] hover:bg-[#E7F2ED]">
       <span className="text-sm text-[#615C74]">{time}</span>
       <span className="font-neue text-lg text-[#130B30]">
         {Math.floor(temparature)}°c
@@ -97,20 +122,10 @@ const ForecastTime = ({
   );
 };
 
-const WeekForecast = () => {
-  const forecastData = [
-    { day: "Mon", icon: "cloud", temp: 24, desc: "Cloudy" },
-    { day: "Mon", icon: "cloud", temp: 24, desc: "Cloudy" },
-    { day: "Tue", icon: "moon", temp: 28, desc: "Rainy" },
-    { day: "Wed", icon: "rain", temp: 22, desc: "Sunny" },
-    { day: "Mon", icon: "cloud", temp: 24, desc: "Cloudy" },
-    { day: "Tue", icon: "moon", temp: 28, desc: "Rainy" },
-    { day: "Wed", icon: "rain", temp: 22, desc: "Sunny" },
-  ];
-
+const WeekForecast = ({ data }: { data: WeatherForecast[] }) => {
   return (
     <div className="rounded-xl border border-[#E8E8E8] bg-white px-3 py-4">
-      <h5 className="font-neue mb-3 text-sm text-[#130B30]">
+      <h5 className="font-neue mb-5 text-[#130B30]">
         This week weather forecast
       </h5>
       <table className="w-full text-left">
@@ -123,14 +138,18 @@ const WeekForecast = () => {
           </tr>
         </thead>
         <tbody className="text-sm text-[#130B30]">
-          {forecastData.map((item, index) => (
+          {data.map((item, index) => (
             <tr key={index}>
-              <td className="py-2">{item.day}</td>
+              <td className="py-2">{formatWeekdayEpoch(item.date_epoch)}</td>
               <td className="py-2">
-                <i>{item.icon}</i>
+                <img
+                  src={`https:${item.day.condition.icon}`}
+                  width={32}
+                  height={32}
+                />
               </td>
-              <td className="py-2">{item.temp}°c</td>
-              <td className="py-2">{item.desc}</td>
+              <td className="py-2">{item.day.avgtemp_c}°c</td>
+              <td className="py-2">{item.day.condition.text}</td>
             </tr>
           ))}
         </tbody>

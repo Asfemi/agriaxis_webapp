@@ -9,24 +9,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import type {
-  DiseaseDetectionHistory,
-} from "@/models/crop-monitoring.model";
 import StatusBadge from "@/components/StatusBadge";
 import {
   useDeleteDiseaseDetectionResult,
   useRenameDiseaseDetectionResult,
 } from "@/api/crop-monitoring";
-import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 import { RenameResultModal } from "@/components/dashboard/RenameResultModal";
-import { DiseaseDetectResultSheet } from "@/components/crop-monitoring/DiseaseDetectResultSheet";
+import type { CropInformationAnalytics } from "@/models/crop-information.model";
+import { WeatherForecastSheet } from "./WeatherForecastSheet";
 
-export const WeatherAnalysisHistoryTable = () => {
-  const columnDefinition: Array<ColumnDef<DiseaseDetectionHistory>> = [
+export const WeatherAnalysisHistoryTable: React.FC<{ data: CropInformationAnalytics[] }> = ({ data }) => {
+  const columnDefinition: Array<ColumnDef<CropInformationAnalytics>> = [
     {
-      accessorKey: "name",
+      id: "name",
       header: "Name",
+      accessorKey: "test_id"
     },
     {
       accessorKey: "farm_name",
@@ -36,9 +34,8 @@ export const WeatherAnalysisHistoryTable = () => {
       id: "status",
       header: "Status",
       cell: ({ row }) => (
-        <StatusBadge<DiseaseDetectionHistory["status"]>
+        <StatusBadge<CropInformationAnalytics["status"]>
           status={row.original.status ?? "-"}
-          variant={row.original.status === "processing" ? "warning" : "success"}
         />
       ),
     },
@@ -47,16 +44,13 @@ export const WeatherAnalysisHistoryTable = () => {
       header: "Payment",
       cell: ({ row }) => (
         <span>
-          ₦{row.original.payment ? row.original.payment.toLocaleString() : 0}
+          ₦{row.original.amount_paid ? row.original.amount_paid.toLocaleString() : 0}
         </span>
       ),
     },
     {
       accessorKey: "date",
       header: "Date",
-      cell: ({ row }) => (
-        <span className="capitalize">{formatDate(row.original.datetime)}</span>
-      ),
     },
     {
       id: "actions",
@@ -92,26 +86,26 @@ export const WeatherAnalysisHistoryTable = () => {
   const columns = useMemo(() => columnDefinition, []);
   const [showRenameResultModal, setShowRenameResultModal] = useState(false);
   const [selectedResult, setSelectedResult] =
-    useState<DiseaseDetectionHistory>();
-  const history = [] as DiseaseDetectionHistory[];
+    useState<CropInformationAnalytics>();
+  const history = data;
   const [showResultSheet, setShowResultSheet] = useState(false);
 
   const { mutate: deleteResult } = useDeleteDiseaseDetectionResult();
   const { mutate: renameResult } = useRenameDiseaseDetectionResult();
 
-  const handleRenameResult = (result: DiseaseDetectionHistory) => {
+  const handleRenameResult = (result: CropInformationAnalytics) => {
     setShowRenameResultModal(true);
     setSelectedResult(result);
   };
 
-  const handleViewResult = (result: DiseaseDetectionHistory) => {
+  const handleViewResult = (result: CropInformationAnalytics) => {
     setSelectedResult(result);
     setShowResultSheet(true);
   };
 
   const handleConfirmRenameResult = (
     newName: string,
-    result: DiseaseDetectionHistory,
+    result: CropInformationAnalytics,
   ) => {
     renameResult(
       { id: result.id, name: newName },
@@ -133,25 +127,14 @@ export const WeatherAnalysisHistoryTable = () => {
       <DataTable title="Analysis history" columns={columns} data={history} />
       <RenameResultModal
         isOpen={showRenameResultModal}
-        value={selectedResult?.name ?? ""}
+        value={selectedResult?.test_id ?? ""}
         onSave={(newName) =>
           handleConfirmRenameResult(newName, selectedResult!)
         }
         onClose={() => setShowRenameResultModal(false)}
       />
       {showResultSheet && (
-        <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
-          <section
-            className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <DiseaseDetectResultSheet
-              isOpen={true}
-              result={selectedResult!}
-              onClose={() => setShowResultSheet(false)}
-            />
-          </section>
-        </section>
+        <WeatherForecastSheet id={selectedResult?.id} onClose={() => setShowResultSheet(false)} />
       )}
     </div>
   );

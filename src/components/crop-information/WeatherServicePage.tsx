@@ -5,16 +5,18 @@ import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
 import { WeatherAnalysisHistoryTable } from "@/components/crop-information/WeatherAnalysisHistoryTable";
-import { WeatherForecastSheet } from "@/components/crop-information/WeatherForecastSheet";
 import { useState } from "react";
+import { useGetWeatherDashboard } from "@/api/crop-information";
+import { RequestWeatherInformationSheetsContainer } from "./RequestWeatherInformationSheetsContainer";
 
 export const WeatherServicePage: React.FC<{
   onClose: () => void;
 }> = ({ onClose }) => {
-  const [showForecastSheet, setShowForecastSheet] = useState(false);
+  const [showRequestSheet, setShowRequestSheet] = useState(false);
+  const { data: dashboardData } = useGetWeatherDashboard()
 
   const onRequestInformation = () => {
-    setShowForecastSheet(true);
+    setShowRequestSheet(true);
   };
 
   return (
@@ -47,7 +49,7 @@ export const WeatherServicePage: React.FC<{
                 </div>
               }
               title="Total no. of test"
-              value="0"
+              value={dashboardData?.number_of_tests ?? 0}
             />
             <StatCard
               icon={
@@ -56,7 +58,7 @@ export const WeatherServicePage: React.FC<{
                 </div>
               }
               title="Pending Tests"
-              value="0"
+              value={dashboardData?.pending_tests ?? 0}
             />
             <StatCard
               className="col-span-2 lg:col-auto"
@@ -66,21 +68,20 @@ export const WeatherServicePage: React.FC<{
                 </div>
               }
               title="Completed Tests"
-              value="0"
+              value={dashboardData?.completed_tests ?? 0}
             />
           </div>
           <div>
-            <WeatherAnalysisHistoryTable />
+            <WeatherAnalysisHistoryTable data={dashboardData?.analytics_history ?? []} />
           </div>
         </section>
       </main>
-      {showForecastSheet && <WeatherForecastSheet onClose={() => setShowForecastSheet(false)} />}
-      {/**
-      <RequestCropHealthSheetsContainer
-        isOpen={showRequestHealthSheet}
-        onClose={() => setShowRequestHealthSheet(false)}
+      {
+      <RequestWeatherInformationSheetsContainer
+        isOpen={showRequestSheet}
+        onClose={() => setShowRequestSheet(false)}
       />
-        */}
+        }
     </>
   );
 };

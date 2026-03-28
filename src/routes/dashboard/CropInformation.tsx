@@ -13,6 +13,7 @@ import { useGetCropInformationDashboard } from "@/api/crop-information";
 import { X } from "lucide-react";
 import { ClimateServicePage } from "@/components/crop-information/ClimateServicePage";
 import { CalendarServicePage } from "@/components/crop-information/CalendarServicePage";
+import { cn } from "@/lib/utils";
 
 const SERVICES = [
   {
@@ -32,6 +33,7 @@ const SERVICES = [
     title: "Crop calendar",
     sub: "Click here to get your crop planting date",
     icon: treeIcon,
+    isDisabled: true,
   },
 ];
 
@@ -112,14 +114,31 @@ function CropInformation() {
                 <ServiceCard
                   key={entry.id}
                   onClick={() => handleServiceClick(entry.id)}
-                  className="cursor-pointer hover:bg-gray-50"
+                  className={cn(
+                    "transition-all",
+                    entry.isDisabled
+                      ? "cursor-not-allowed opacity-50 grayscale-[0.5]"
+                      : "cursor-pointer hover:bg-gray-50",
+                  )}
                   icon={
-                    <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
-                      <img src={entry.icon} width={20} height={20} />
+                    <div
+                      className={cn(
+                        "grid size-9.5 place-items-center rounded-[0.375rem] border",
+                        entry.isDisabled
+                          ? "border-gray-300 bg-gray-100"
+                          : "border-[#0A814A] bg-[#E7F2ED]",
+                      )}
+                    >
+                      <img
+                        src={entry.icon}
+                        width={20}
+                        height={20}
+                        alt={entry.title}
+                      />
                     </div>
                   }
                   title={entry.title}
-                  value={entry.sub}
+                  value={entry.isDisabled ? "Coming Soon" : entry.sub}
                 />
               ))}
             </div>
