@@ -5,11 +5,16 @@ import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
 import { ClimateAnalysisHistoryTable } from "@/components/crop-information/ClimateAnalysisHistoryTable";
+import { useState } from "react";
+import { ClimateInformationSheet } from "@/components/crop-information/ClimateInformationSheet";
 
 export const ClimateServicePage: React.FC<{
   onClose: () => void;
 }> = ({ onClose }) => {
-  const onRequestInformation = () => {};
+  const [showResult, setShowResult] = useState(false)
+  const onRequestInformation = () => {
+    setShowResult(true)
+  };
 
   return (
     <>
@@ -68,6 +73,7 @@ export const ClimateServicePage: React.FC<{
           </div>
         </section>
       </main>
+      {showResult && <ClimateInformationSheet onClose={() => setShowResult(false)} />}
       {/**
       <RequestCropHealthSheetsContainer
         isOpen={showRequestHealthSheet}

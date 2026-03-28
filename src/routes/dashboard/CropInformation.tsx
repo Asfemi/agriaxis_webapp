@@ -11,6 +11,8 @@ import { useState } from "react";
 import { WeatherServicePage } from "@/components/crop-information/WeatherServicePage";
 import { useGetCropInformationDashboard } from "@/api/crop-information";
 import { X } from "lucide-react";
+import { ClimateServicePage } from "@/components/crop-information/ClimateServicePage";
+import { CalendarServicePage } from "@/components/crop-information/CalendarServicePage";
 
 const SERVICES = [
   {
@@ -126,6 +128,12 @@ function CropInformation() {
       )}
       {currentView === "weather" && (
         <WeatherServicePage onClose={() => setCurrentView("overview")} />
+      )}
+      {currentView === "climate" && (
+        <ClimateServicePage onClose={() => setCurrentView("overview")} />
+      )}
+      {currentView === "calendar" && (
+        <CalendarServicePage onClose={() => setCurrentView("overview")} />
       )}
     </>
   );
