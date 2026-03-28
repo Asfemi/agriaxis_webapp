@@ -10,14 +10,11 @@ import {
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import StatusBadge from "@/components/StatusBadge";
-import {
-  useDeleteDiseaseDetectionResult,
-  useRenameDiseaseDetectionResult,
-} from "@/api/crop-monitoring";
 import { toast } from "sonner";
 import { RenameResultModal } from "@/components/dashboard/RenameResultModal";
 import type { CropInformationAnalytics } from "@/models/crop-information.model";
 import { WeatherForecastSheet } from "./WeatherForecastSheet";
+import { useDeleteCropInformationAnalysis, useRenameCropInformationAnalysis } from "@/api/crop-information";
 
 export const WeatherAnalysisHistoryTable: React.FC<{ data: CropInformationAnalytics[] }> = ({ data }) => {
   const columnDefinition: Array<ColumnDef<CropInformationAnalytics>> = [
@@ -90,8 +87,8 @@ export const WeatherAnalysisHistoryTable: React.FC<{ data: CropInformationAnalyt
   const history = data;
   const [showResultSheet, setShowResultSheet] = useState(false);
 
-  const { mutate: deleteResult } = useDeleteDiseaseDetectionResult();
-  const { mutate: renameResult } = useRenameDiseaseDetectionResult();
+  const { mutate: deleteResult } = useDeleteCropInformationAnalysis();
+  const { mutate: renameResult } = useRenameCropInformationAnalysis();
 
   const handleRenameResult = (result: CropInformationAnalytics) => {
     setShowRenameResultModal(true);
