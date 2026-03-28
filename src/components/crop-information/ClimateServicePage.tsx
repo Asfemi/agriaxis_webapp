@@ -6,14 +6,17 @@ import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
 import { ClimateAnalysisHistoryTable } from "@/components/crop-information/ClimateAnalysisHistoryTable";
 import { useState } from "react";
-import { ClimateInformationSheet } from "@/components/crop-information/ClimateInformationSheet";
+import { useGetClimateDashboard } from "@/api/crop-information";
+import { RequestClimateInformationSheetsContainer } from "./RequestClimateInformationSheetsContainer";
 
 export const ClimateServicePage: React.FC<{
   onClose: () => void;
 }> = ({ onClose }) => {
-  const [showResult, setShowResult] = useState(false)
+  const [showRequestSheet, setShowRequestSheet] = useState(false);
+  const { data: dashboardData } = useGetClimateDashboard();
+
   const onRequestInformation = () => {
-    setShowResult(true)
+    setShowRequestSheet(true)
   };
 
   return (
@@ -46,7 +49,7 @@ export const ClimateServicePage: React.FC<{
                 </div>
               }
               title="Total no. of test"
-              value="0"
+              value={dashboardData?.number_of_tests ?? 0}
             />
             <StatCard
               icon={
@@ -55,7 +58,7 @@ export const ClimateServicePage: React.FC<{
                 </div>
               }
               title="Pending Tests"
-              value="0"
+              value={dashboardData?.pending_tests ?? 0}
             />
             <StatCard
               className="col-span-2 lg:col-auto"
@@ -65,21 +68,18 @@ export const ClimateServicePage: React.FC<{
                 </div>
               }
               title="Completed Tests"
-              value="0"
+              value={dashboardData?.completed_tests ?? 0}
             />
           </div>
           <div>
-            <ClimateAnalysisHistoryTable />
+            <ClimateAnalysisHistoryTable data={dashboardData?.analytics_history ?? []} />
           </div>
         </section>
       </main>
-      {showResult && <ClimateInformationSheet onClose={() => setShowResult(false)} />}
-      {/**
-      <RequestCropHealthSheetsContainer
-        isOpen={showRequestHealthSheet}
-        onClose={() => setShowRequestHealthSheet(false)}
+      <RequestClimateInformationSheetsContainer
+        isOpen={showRequestSheet}
+        onClose={() => setShowRequestSheet(false)}
       />
-        */}
     </>
   );
 };

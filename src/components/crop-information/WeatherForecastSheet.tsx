@@ -25,14 +25,26 @@ export const WeatherForecastSheet: React.FC<{
 
   if (!id && !analysisData) {
     return (
-      <section className="size-full">
-        <div className="flex h-full flex-col items-center justify-center pb-10">
-          <div>
-            <p className="rounded-xl bg-[#D10000] px-2 py-1.5 text-xs text-white">
-              Failed to pass data
-            </p>
-          </div>
-        </div>
+      <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
+        <section className="z-50 ml-auto h-auto w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-white p-8">
+          <header className="mb-10 flex items-center gap-3.5">
+            <button
+              onClick={onClose}
+              className="grid size-7 place-items-center rounded-full bg-[#E8E8E8]"
+            >
+              <ChevronLeft size={20} />
+            </button>
+          </header>
+          <section className="size-full">
+            <div className="flex h-full flex-col items-center justify-center pb-10">
+              <div>
+                <p className="rounded-xl bg-[#D10000] px-2 py-1.5 text-xs text-white">
+                  Failed to pass data
+                </p>
+              </div>
+            </div>
+          </section>
+        </section>
       </section>
     );
   }
