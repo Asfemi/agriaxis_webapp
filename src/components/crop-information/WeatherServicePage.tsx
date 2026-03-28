@@ -5,11 +5,17 @@ import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
 import { WeatherAnalysisHistoryTable } from "@/components/crop-information/WeatherAnalysisHistoryTable";
+import { WeatherForecastSheet } from "@/components/crop-information/WeatherForecastSheet";
+import { useState } from "react";
 
 export const WeatherServicePage: React.FC<{
   onClose: () => void;
 }> = ({ onClose }) => {
-  const onRequestInformation = () => {};
+  const [showForecastSheet, setShowForecastSheet] = useState(false);
+
+  const onRequestInformation = () => {
+    setShowForecastSheet(true);
+  };
 
   return (
     <>
@@ -68,6 +74,7 @@ export const WeatherServicePage: React.FC<{
           </div>
         </section>
       </main>
+      {showForecastSheet && <WeatherForecastSheet onClose={() => setShowForecastSheet(false)} />}
       {/**
       <RequestCropHealthSheetsContainer
         isOpen={showRequestHealthSheet}
