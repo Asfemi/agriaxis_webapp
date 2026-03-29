@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const OrganisationSchema = z.object({
-  id: z.number().optional(),
+  id: z.string().optional(),
   organisation_name: z
     .string()
     .min(2, "Organisation name must be at least 2 characters"),
@@ -27,7 +27,7 @@ export interface OrganisationState {
 }
 
 export interface Organisation {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   description: null | string;
