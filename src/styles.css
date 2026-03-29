@@ -155,7 +155,20 @@ code {
   }
 }
 
-
 .stable-gutter {
   scrollbar-gutter: stable;
+}
+
+.pixelated-overlay {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }

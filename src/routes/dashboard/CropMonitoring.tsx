@@ -6,26 +6,27 @@ import monitoringIcon from "/assets/icons/monitoring.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
 import testingIcon from "/assets/icons/testing.svg";
 import { useState } from "react";
-import { CropMonitoringServicePage } from "@/components/crop-monitoring/CropMonitoringServicePage";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
-import { RequestPestMonitoringSheetsContainer } from "@/components/crop-monitoring/RequestPestMonitoringSheetsContainer";
-import { RequestCropHealthSheetsContainer } from "@/components/crop-monitoring/RequestCropHealthSheetsContainer";
 import { useGetCropMonitoringDashboard } from "@/api/crop-monitoring";
 import { cn } from "@/lib/utils";
+import { CropHealthServicePage } from "@/components/crop-monitoring/CropHealthServicePage";
+import { DiseaseServicePage } from "@/components/crop-monitoring/DiseaseServicePage";
 
 const SERVICES = [
   {
+    id: "health",
     title: "Crop health",
     sub: "Click here to get your crop health result",
     icon: healthIcon,
-    isDisabled: true
   },
   {
+    id: "disease",
     title: "Pest/Disease monitoring",
     sub: "Click here to get your pest management result",
     icon: monitoringIcon,
   },
   {
+    id: "yield",
     title: "Yield estimation",
     sub: "Click here to get your expected yield estimation result",
     icon: monitoringIcon,
@@ -33,27 +34,15 @@ const SERVICES = [
   },
 ];
 
-type DASHBOARD_VIEW = "overview" | "service";
+type DASHBOARD_VIEW = "overview" | "health" | "disease";
 
 function CropMonitoring() {
   const [currentView, setCurrentView] = useState<DASHBOARD_VIEW>("overview");
-  const [selectedServiceTitle, setSelectedServiceTitle] = useState("");
-  const [showRequestHealthSheet, setShowRequestHealthSheet] = useState(false);
-  const [showRequestPestSheet, setShowRequestPestSheet] = useState(false);
 
   const { data: dashboardData, isLoading } = useGetCropMonitoringDashboard();
 
-  const handleServiceClick = (title: string) => {
-    setCurrentView("service");
-    setSelectedServiceTitle(title);
-  };
-
-  const handleRequestInformationClick = (type: string) => {
-    if (type === "Crop health") {
-      setShowRequestHealthSheet(true);
-    } else {
-      setShowRequestPestSheet(true);
-    }
+  const handleServiceClick = (id: string) => {
+    setCurrentView(id as DASHBOARD_VIEW);
   };
 
   if (isLoading) {
@@ -117,7 +106,7 @@ function CropMonitoring() {
             <div className="flex w-full flex-col gap-2">
               {SERVICES.map((entry) => (
                 <ServiceCard
-                  key={entry.title}
+                  key={entry.id}
                   className={cn(
                     "transition-all",
                     entry.isDisabled
@@ -126,7 +115,7 @@ function CropMonitoring() {
                   )}
                   onClick={() => {
                     if (!entry.isDisabled) {
-                      handleServiceClick(entry.title);
+                      handleServiceClick(entry.id);
                     }
                   }}
                   icon={
@@ -154,15 +143,11 @@ function CropMonitoring() {
           </section>
         </section>
       )}
-      {currentView === "service" && (
+      {currentView === "health" && (
         <>
-          <CropMonitoringServicePage
-            title={selectedServiceTitle}
+          <CropHealthServicePage
             onClose={() => setCurrentView("overview")}
             data={dashboardData}
-            onRequestInformation={() =>
-              handleRequestInformationClick(selectedServiceTitle)
-            }
           />
           {/**
              <>
@@ -177,15 +162,13 @@ function CropMonitoring() {
                />
                </>
             */}
-          <RequestCropHealthSheetsContainer
-            isOpen={showRequestHealthSheet}
-            onClose={() => setShowRequestHealthSheet(false)}
-          />
-          <RequestPestMonitoringSheetsContainer
-            isOpen={showRequestPestSheet}
-            onClose={() => setShowRequestPestSheet(false)}
-          />
         </>
+      )}
+      {currentView === "disease" && (
+        <DiseaseServicePage
+          onClose={() => setCurrentView("overview")}
+          data={dashboardData}
+        />
       )}
     </>
   );
@@ -200,8 +183,6 @@ export default (parentRoute: AnyRoute) =>
       title: "Crop Monitoring",
     },
     head: () => ({
-      meta: [
-        { title: "Crop Monitoring" }
-      ]
-    })
+      meta: [{ title: "Crop Monitoring" }],
+    }),
   });

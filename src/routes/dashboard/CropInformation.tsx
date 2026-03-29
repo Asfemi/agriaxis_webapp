@@ -2,98 +2,159 @@ import StatCard from "@/components/dashboard/StatCard";
 import farmIcon from "/assets/icons/farm.svg";
 import testingIcon from "/assets/icons/testing.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
-import processingIcon from "/assets/icons/processing.svg";
 import ServiceCard from "@/components/dashboard/ServiceCard";
 import weatherIcon from "/assets/icons/weather.svg";
 import climateIcon from "/assets/icons/climate.svg";
 import treeIcon from "/assets/icons/tree.svg";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { WeatherServicePage } from "@/components/crop-information/WeatherServicePage";
+import { useGetCropInformationDashboard } from "@/api/crop-information";
+import { X } from "lucide-react";
+import { ClimateServicePage } from "@/components/crop-information/ClimateServicePage";
+import { CalendarServicePage } from "@/components/crop-information/CalendarServicePage";
+import { cn } from "@/lib/utils";
 
+const SERVICES = [
+  {
+    id: "weather",
+    title: "Weather information",
+    sub: "Click here to get your weather details",
+    icon: weatherIcon,
+  },
+  {
+    id: "climate",
+    title: "Climate information",
+    sub: "Click here to get your climate details",
+    icon: climateIcon,
+  },
+  {
+    id: "calendar",
+    title: "Crop calendar",
+    sub: "Click here to get your crop planting date",
+    icon: treeIcon,
+    isDisabled: true,
+  },
+];
+
+type DASHBOARD_VIEW = "overview" | "weather" | "climate" | "calendar";
 function CropInformation() {
+  const [currentView, setCurrentView] = useState<DASHBOARD_VIEW>("overview");
+  const { data: dashboardData, isLoading } = useGetCropInformationDashboard();
+
+  const handleServiceClick = (id: string) => {
+    setCurrentView(id as DASHBOARD_VIEW);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-10">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
+
   return (
-    <section className="rounded-[1.25rem] bg-white p-6 pb-9">
-      <section className="mb-6">
-        <header className="mb-3 w-full">
-          <h1 className="font-neue text-lg font-semibold text-[#939397] sm:text-xl">
-            Overview
-          </h1>
-        </header>
-        <div className="flex items-center gap-3">
-          <StatCard
-            icon={
-              <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
-                <img src={farmIcon} width={17.5} height={15.64} />
-              </div>
-            }
-            title="Total farms monitored"
-            value="0"
-          />
-          <StatCard
-            icon={
-              <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#EEB72C] bg-[#FDF8EA]">
-                <img src={testingIcon} width={20} height={20} />
-              </div>
-            }
-            title="Pending Tests"
-            value="0"
-          />
-          <StatCard
-            icon={
-              <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#423C59] bg-[#E7E7EA]">
-                <img src={testingIconGrey} width={20} height={20} />
-              </div>
-            }
-            title="Completed Tests"
-            value="0"
-          />
-          <StatCard
-            icon={
-              <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#4F3824] bg-[#EDEBE9]">
-                <img src={processingIcon} width={20} height={20} />
-              </div>
-            }
-            title="Average turnaround time"
-            value="0"
-          />
-        </div>
-      </section>
-      <section>
-        <header className="mb-4">
-          <h1 className="font-neue text-lg font-semibold text-[#939397] sm:text-xl">
-            Crop information services
-          </h1>
-        </header>
-        <div className="flex w-full flex-col gap-2">
-          <ServiceCard
-            icon={
-              <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
-                <img src={weatherIcon} width={20} height={20} />
-              </div>
-            }
-            title="Weather information"
-            value="Click here to get your weather details"
-          />
-          <ServiceCard
-            icon={
-              <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
-                <img src={climateIcon} width={20} height={20} />
-              </div>
-            }
-            title="Climate information"
-            value="Click here to get your climate details"
-          />
-          <ServiceCard
-            icon={
-              <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
-                <img src={treeIcon} width={20} height={20} />
-              </div>
-            }
-            title="Crop calendar"
-            value="Click here to get your crop planting date"
-          />
-        </div>
-      </section>
-    </section>
+    <>
+      {currentView === "overview" && (
+        <section className="rounded-[1.25rem] bg-white p-6 pb-9">
+          <section className="mb-6">
+            <header className="mb-3 w-full">
+              <h1 className="font-neue text-lg font-semibold text-[#939397] sm:text-xl">
+                Overview
+              </h1>
+            </header>
+            <div className="flex items-center gap-3">
+              <StatCard
+                icon={
+                  <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#0A814A] bg-[#E7F2ED]">
+                    <img src={farmIcon} width={17.5} height={15.64} />
+                  </div>
+                }
+                title="Total tests"
+                value={dashboardData?.total_tests ?? 0}
+              />
+              <StatCard
+                icon={
+                  <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#EEB72C] bg-[#FDF8EA]">
+                    <img src={testingIcon} width={20} height={20} />
+                  </div>
+                }
+                title="Pending Tests"
+                value={dashboardData?.pending_tests ?? 0}
+              />
+              <StatCard
+                icon={
+                  <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-[#423C59] bg-[#E7E7EA]">
+                    <img src={testingIconGrey} width={20} height={20} />
+                  </div>
+                }
+                title="Completed Tests"
+                value={dashboardData?.completed_tests ?? 0}
+              />
+              <StatCard
+                icon={
+                  <div className="grid size-9.5 place-items-center rounded-[0.375rem] border border-red-500 bg-[#E7E7EA]">
+                    <X className="text-red-500" />
+                  </div>
+                }
+                title="Failed Tests"
+                value={dashboardData?.failed_tests ?? 0}
+              />
+            </div>
+          </section>
+          <section>
+            <header className="mb-4">
+              <h1 className="font-neue text-lg font-semibold text-[#939397] sm:text-xl">
+                Crop information services
+              </h1>
+            </header>
+            <div className="flex w-full flex-col gap-2">
+              {SERVICES.map((entry) => (
+                <ServiceCard
+                  key={entry.id}
+                  onClick={() => handleServiceClick(entry.id)}
+                  className={cn(
+                    "transition-all",
+                    entry.isDisabled
+                      ? "cursor-not-allowed opacity-50 grayscale-[0.5]"
+                      : "cursor-pointer hover:bg-gray-50",
+                  )}
+                  icon={
+                    <div
+                      className={cn(
+                        "grid size-9.5 place-items-center rounded-[0.375rem] border",
+                        entry.isDisabled
+                          ? "border-gray-300 bg-gray-100"
+                          : "border-[#0A814A] bg-[#E7F2ED]",
+                      )}
+                    >
+                      <img
+                        src={entry.icon}
+                        width={20}
+                        height={20}
+                        alt={entry.title}
+                      />
+                    </div>
+                  }
+                  title={entry.title}
+                  value={entry.isDisabled ? "Coming Soon" : entry.sub}
+                />
+              ))}
+            </div>
+          </section>
+        </section>
+      )}
+      {currentView === "weather" && (
+        <WeatherServicePage onClose={() => setCurrentView("overview")} />
+      )}
+      {currentView === "climate" && (
+        <ClimateServicePage onClose={() => setCurrentView("overview")} />
+      )}
+      {currentView === "calendar" && (
+        <CalendarServicePage onClose={() => setCurrentView("overview")} />
+      )}
+    </>
   );
 }
 
@@ -106,10 +167,6 @@ export default (parentRoute: AnyRoute) =>
       title: "Crop Information",
     },
     head: () => ({
-      meta: [
-        { title: "Crop Information" }
-      ]
-    })
+      meta: [{ title: "Crop Information" }],
+    }),
   });
-
-//TODO: Rename to "Weather & Climate Information"

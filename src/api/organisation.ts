@@ -28,7 +28,7 @@ export const useEditOrganisationMutation = () => {
       id,
       data,
     }: {
-      id: number;
+      id: string;
       data: OrganisationFormData;
     }) => {
       const response = await apiClient.put(`/organisations/${id}`, data);

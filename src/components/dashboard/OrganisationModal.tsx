@@ -55,7 +55,7 @@ export function OrganisationModal({
         } else {
           try {
             await editOrganisation.mutateAsync({
-              id: Number(formData.id),
+              id: formData.id ?? '',
               data: formData,
             });
             toast.success("Organisation updated successfully!");

@@ -1,31 +1,30 @@
-import { usePaymentInitialise, usePaymentVerify } from "@/api/payments";
-import { useSoilTestingRun, useSoilTestingUpload } from "@/api/soil-testing";
 import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
-import { FarmSizeForMeasurementCard } from "@/components/soil-testing/FarmSizeForMeasurementCard";
-import { SoilTestResultsCard } from "@/components/soil-testing/SoilTestResultsCard";
-import type { PaymentInitialiseResponse } from "@/models/payment.model";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
-import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
-import { useUserStore } from "@/stores/useUserStore";
 import { useState } from "react";
 import { toast } from "sonner";
+import type { ClimateAnalysisData } from "@/models/crop-information.model";
+import { useFetchClimateAnalysis } from "@/api/crop-information";
+import { ClimateInformationSheet } from "@/components/crop-information/ClimateInformationSheet";
+import { usePaymentInitialise, usePaymentVerify } from "@/api/payments";
+import { useUserStore } from "@/stores/useUserStore";
+import type { PaymentInitialiseResponse } from "@/models/payment.model";
 
-const RequestSoilTestSheetsContainer: React.FC<{
+export const RequestClimateInformationSheetsContainer: React.FC<{
   isOpen: boolean;
   onClose: () => void;
 }> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   const { formData } = useSoilTestingFormStore();
   const { user } = useUserStore();
-  const { mutate: initialisePayment } = usePaymentInitialise();
-  const { mutate: confirmPayment } = usePaymentVerify();
-  const { mutate: uploadSoilTest } = useSoilTestingUpload();
-  const { mutate: runSoilTest } = useSoilTestingRun();
-  const { setResult } = useSoilTestingResultStore();
 
   const [currentView, setCurrentView] = useState("details");
+  const [analysisData, setAnalysisData] = useState<ClimateAnalysisData>();
 
-  const handleSubmit = () => {
+  const { mutate: fetchClimateAnalysis } = useFetchClimateAnalysis();
+  const { mutate: initialisePayment } = usePaymentInitialise();
+  const { mutate: confirmPayment } = usePaymentVerify();
+
+  const handleProceedToPayment = () => {
     const request = {
       farmId: formData.farm_id ?? "",
       amount: formData.cost ?? 0,
@@ -91,38 +90,7 @@ const RequestSoilTestSheetsContainer: React.FC<{
           {
             onSuccess: () => {
               toast.success("Payment confirmed successfully!");
-              uploadSoilTest(
-                { farmId: farm_id },
-                {
-                  onSuccess: () => {
-                    toast.success("Soil test uploaded successfully!");
-                    runSoilTest(
-                      {
-                        farmId: farm_id,
-                        crop: formData.crop ?? "",
-                        depth: "0-20",
-                      },
-                      {
-                        onSuccess: (data) => {
-                          setResult(data);
-                          toast.success("Soil test run successfully!");
-                          setCurrentView("result");
-                        },
-                        onError: (error) => {
-                          toast.error(error.message);
-                          toast.error(
-                            "Failed to run soil test. Please try again!",
-                          );
-                        },
-                      },
-                    );
-                  },
-                  onError: (error) => {
-                    toast.error(error.message);
-                    toast.error("Failed to run soil test. Please try again!");
-                  },
-                },
-              );
+              handleConfirm();
             },
             onError: (error) => {
               toast.error(error.message);
@@ -155,27 +123,35 @@ const RequestSoilTestSheetsContainer: React.FC<{
     window.addEventListener("message", handleMessage);
   };
 
+  const handleConfirm = () => {
+    if (!formData.farm_id) {
+      toast.error("Please select a farm first!");
+      return;
+    }
+    fetchClimateAnalysis(formData.farm_id, {
+      onSuccess: (data) => {
+        toast.success("Climate analysis data fetched successfully!");
+        setAnalysisData(data);
+        setCurrentView("result");
+      },
+    });
+  };
+
   return (
     <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
       <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
         <FarmDetailsCard
           isOpen={currentView === "details"}
           onClose={onClose}
-          onConfirm={() => setCurrentView("size")}
-        />
-        <FarmSizeForMeasurementCard
-          isOpen={currentView === "size"}
-          onClose={() => setCurrentView("details")}
-          onConfirm={() => handleSubmit()}
+          onConfirm={handleProceedToPayment}
         />
         {currentView === "result" && (
-          <SoilTestResultsCard
-            onClose={() => setCurrentView("measurement_method")}
+          <ClimateInformationSheet
+            onClose={onClose}
+            analysisData={analysisData}
           />
         )}
       </section>
     </section>
   );
 };
-
-export { RequestSoilTestSheetsContainer };

@@ -13,9 +13,8 @@ import { useRef } from "react";
 import { toPng } from "html-to-image";
 
 export const SoilTestResultsCard: React.FC<{
-  isOpen?: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose }) => {
+}> = ({ onClose }) => {
   const reportRef = useRef<HTMLDivElement>(null);
   const handleDownload = async () => {
     if (!reportRef.current) return;
@@ -93,8 +92,6 @@ export const SoilTestResultsCard: React.FC<{
     isLoading: isLoadingRecommendations,
     isError: isErrorRecommendations,
   } = useSoilTestingRecommendation(Number(result?.id));
-
-  if (!isOpen) return null;
 
   if (!result || isErrorResult)
     return (
