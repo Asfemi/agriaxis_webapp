@@ -18,6 +18,7 @@ import {
 import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 import { RenameResultModal } from "@/components/dashboard/RenameResultModal";
+import { CropHealthResultSheet } from "./CropHealthResultSheet";
 
 export const CropHealthHistoryTable = () => {
   const columnDefinition: Array<ColumnDef<CropHealthHistory>> = [
@@ -121,13 +122,12 @@ export const CropHealthHistoryTable = () => {
             className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/*TODO: Insert Result here
-            <DiseaseDetectResultSheet
-              isOpen={true}
-              result={selectedResult!}
-              onClose={() => setShowResultSheet(false)}
-            />
-            */}
+            {showResultSheet && (
+              <CropHealthResultSheet
+                data={selectedResult!}
+                onClose={() => setShowResultSheet(false)}
+              />
+            )}
           </section>
         </section>
       )}

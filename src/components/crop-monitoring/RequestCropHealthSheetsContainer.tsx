@@ -5,6 +5,8 @@ import { ProcessingResultCard } from "@/components/crop-monitoring/ProcessingRes
 import { CropHealthResultSheet } from "./CropHealthResultSheet";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { useCropHealth } from "@/api/crop-monitoring";
+import type { CropHealthHistory } from "@/models/crop-monitoring.model";
+import { LongRunningProcessWarning } from "./LongRunningProcessWarning";
 
 export const RequestCropHealthSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -12,16 +14,18 @@ export const RequestCropHealthSheetsContainer: React.FC<{
 }> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   const [currentView, setCurrentView] = useState("details");
+  const [result, setResult] = useState<CropHealthHistory>();
   const { formData } = useSoilTestingFormStore();
   const { mutate } = useCropHealth();
 
   const handleConfirm = () => {
-    mutate(formData.farm_id ?? "");
-    toast.success("Crop scanned successfully!");
-    setCurrentView("processing");
-    setTimeout(() => {
-      setCurrentView("result");
-    }, 2e3);
+    mutate(formData.farm_id ?? "", {
+      onSuccess: (data) => {
+        toast.success("Crop scanned successfully!");
+        setResult(data);
+        setCurrentView("result");
+      },
+    });
   };
 
   return (
@@ -37,16 +41,20 @@ export const RequestCropHealthSheetsContainer: React.FC<{
           <FarmDetailsCard
             isOpen={currentView === "details"}
             onClose={onClose}
-            onConfirm={() => handleConfirm()}
+            onConfirm={() => setCurrentView("warning")}
             requestServiceType={"Crop Health"}
           />
-          <ProcessingResultCard isOpen={currentView === "processing"} />
+          {currentView === "warning" && (
+            <LongRunningProcessWarning
+              onClose={onClose}
+              onConfirm={() => handleConfirm()}
+            />
+          )}
         </section>
       </section>
-      <CropHealthResultSheet
-        isOpen={currentView === "result"}
-        onClose={onClose}
-      />
+      {currentView === "result" && (
+        <CropHealthResultSheet data={result!} onClose={onClose} />
+      )}
     </>
   );
 };

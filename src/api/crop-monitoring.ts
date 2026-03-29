@@ -54,8 +54,8 @@ export const useCropMonitoringDiseaseDetect = () => {
 export const useCropHealth = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { data } = await apiClient.post(`/crop-monitoring/crop-health/${id}`)
+    mutationFn: async (farmId: string) => {
+      const { data } = await apiClient.post<CropHealthHistory>("/crop-monitoring/crop-health/fetch", { farmId })
       return data
     },
     onSuccess: () => {
