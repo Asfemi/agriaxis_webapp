@@ -151,9 +151,6 @@ export const CropHealthServicePage: React.FC<{
             </h5>
           </div>
           <div>
-              <Button variant="primary" onClick={() => onRequestInformation()}>
-                Request Information
-              </Button>
             {!cropHealthSub || cropHealthSub.status !== "active" ? (
               <Button variant="primary" onClick={() => onRequestSubscription()}>
                 Subscribe to Crop Health ₦15,000

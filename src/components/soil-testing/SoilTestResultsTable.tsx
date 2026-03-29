@@ -148,10 +148,9 @@ const SoilTestingResultsTable = () => {
       {showResultSheet && (
         <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
           <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
-            <SoilTestResultsCard
-              isOpen={showResultSheet}
-              onClose={() => setShowResultSheet(false)}
-            />
+            {showResultSheet && (
+              <SoilTestResultsCard onClose={() => setShowResultSheet(false)} />
+            )}
           </section>
         </section>
       )}

@@ -1,12 +1,11 @@
 import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ProcessingResultCard } from "@/components/crop-monitoring/ProcessingResultCard";
 import { CropHealthResultSheet } from "./CropHealthResultSheet";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { useCropHealth } from "@/api/crop-monitoring";
 import type { CropHealthHistory } from "@/models/crop-monitoring.model";
-import { LongRunningProcessWarning } from "./LongRunningProcessWarning";
+import { LongRunningProcessWarning } from "@/components/crop-monitoring/LongRunningProcessWarning";
 
 export const RequestCropHealthSheetsContainer: React.FC<{
   isOpen: boolean;

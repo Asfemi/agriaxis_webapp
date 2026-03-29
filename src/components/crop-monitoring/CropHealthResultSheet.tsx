@@ -1,5 +1,5 @@
 import { ChevronLeft } from "lucide-react";
-import healthIcon from "/assets/icons/health.svg";
+//import healthIcon from "/assets/icons/health.svg";
 import { MapContainer, TileLayer, ImageOverlay } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { LatLngBoundsExpression } from "leaflet";
