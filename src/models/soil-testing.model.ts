@@ -83,7 +83,7 @@ export interface SoilTestingRunRequest {
 }
 
 export interface SoilTestingResult {
-  id: number;
+  id: string;
   farm_id: number;
   depth: string;
   clay: number;

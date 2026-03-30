@@ -106,7 +106,7 @@ export const useSoilTestingRun = () => {
   });
 };
 
-export const useSoilTestingRecommendation = (id: number) => {
+export const useSoilTestingRecommendation = (id: string) => {
   return useQuery({
     queryKey: ["soil-testing-recommendation", id],
     queryFn: async () => {

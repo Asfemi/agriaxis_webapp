@@ -91,7 +91,7 @@ export const SoilTestResultsCard: React.FC<{
     data: recommendations,
     isLoading: isLoadingRecommendations,
     isError: isErrorRecommendations,
-  } = useSoilTestingRecommendation(Number(result?.id));
+  } = useSoilTestingRecommendation(result?.id ?? '');
 
   if (!result || isErrorResult)
     return (
