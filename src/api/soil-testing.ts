@@ -161,7 +161,7 @@ export const useGetSoilTestingResultById = (id: string) => {
 export const useDeleteSoilTestingResult = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       const { data } = await apiClient.delete(`/soil-testing/results/${id}`);
       return data;
     },
@@ -172,7 +172,7 @@ export const useDeleteSoilTestingResult = () => {
 };
 
 interface RenameResultRequest {
-  id: number;
+  id: string;
   name: string;
 }
 

@@ -49,7 +49,7 @@ const SoilTestingResultsTable = () => {
   const [showResultSheet, setShowResultSheet] = useState(false);
   const { setResult } = useSoilTestingResultStore();
 
-  const handleDeleteResult = (id: number) => {
+  const handleDeleteResult = (id: string) => {
     deleteResult(id);
   };
 
