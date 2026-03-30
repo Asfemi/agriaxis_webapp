@@ -66,10 +66,11 @@ export const ClimateInformationSheet: React.FC<{
             <ChevronLeft size={20} />
           </button>
           <div className="flex flex-col gap-1">
-            <h5 className="font-neue text-xl font-bold text-[#130B30]">
+            <h4 className="font-neue text-xl font-bold text-[#130B30]">
               {climateData.test_id}
-            </h5>
-            <h6 className="text-[#423C59]">{climateData.farm_name}</h6>
+            </h4>
+            <h5 className="text-[#423C59]">{climateData.farm_name}</h5>
+            <h6 className="text-slate-600 text-sm">Projected rainfall data for this farm over 24 hours</h6>
           </div>
         </header>
         <section className="relative mx-10 pb-5">
@@ -77,7 +78,7 @@ export const ClimateInformationSheet: React.FC<{
             <>
               <div className="mb-6">
                 <h3 className="text-base font-bold text-[#130B30]">
-                  Rainfall Analysis
+                  Rainfall Analysis Chart
                 </h3>
                 <p className="text-xs text-[#615C74]">
                   Blue bars: Amount (mm) | Shaded area: Probability (%)
