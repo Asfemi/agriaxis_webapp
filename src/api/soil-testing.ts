@@ -106,7 +106,7 @@ export const useSoilTestingRun = () => {
   });
 };
 
-export const useSoilTestingRecommendation = (id: number) => {
+export const useSoilTestingRecommendation = (id: string) => {
   return useQuery({
     queryKey: ["soil-testing-recommendation", id],
     queryFn: async () => {
@@ -161,7 +161,7 @@ export const useGetSoilTestingResultById = (id: string) => {
 export const useDeleteSoilTestingResult = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       const { data } = await apiClient.delete(`/soil-testing/results/${id}`);
       return data;
     },
@@ -172,7 +172,7 @@ export const useDeleteSoilTestingResult = () => {
 };
 
 interface RenameResultRequest {
-  id: number;
+  id: string;
   name: string;
 }
 

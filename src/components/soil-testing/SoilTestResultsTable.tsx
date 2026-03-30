@@ -49,7 +49,7 @@ const SoilTestingResultsTable = () => {
   const [showResultSheet, setShowResultSheet] = useState(false);
   const { setResult } = useSoilTestingResultStore();
 
-  const handleDeleteResult = (id: number) => {
+  const handleDeleteResult = (id: string) => {
     deleteResult(id);
   };
 
@@ -147,7 +147,7 @@ const SoilTestingResultsTable = () => {
       <div></div>
       {showResultSheet && (
         <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
-          <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
+          <section className="z-50 ml-auto h-[94vh] w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
             {showResultSheet && (
               <SoilTestResultsCard onClose={() => setShowResultSheet(false)} />
             )}
