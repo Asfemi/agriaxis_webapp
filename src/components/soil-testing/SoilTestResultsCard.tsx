@@ -91,7 +91,7 @@ export const SoilTestResultsCard: React.FC<{
     data: recommendations,
     isLoading: isLoadingRecommendations,
     isError: isErrorRecommendations,
-  } = useSoilTestingRecommendation(result?.id ?? '');
+  } = useSoilTestingRecommendation(result?.id ?? "");
 
   if (!result || isErrorResult)
     return (
@@ -167,102 +167,14 @@ export const SoilTestResultsCard: React.FC<{
               <LoaderCircle className="mx-auto my-10 animate-spin text-[#0A814A]" />
             ) : (
               <div className="mb-7 space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Current pH: {resultData?.ph_level}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Nitrogen (N): {resultData?.nitrogen}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Phosphorus (P): {resultData?.phosphorus}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Pottasium (K): {resultData?.potassium}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Sulphur: {resultData?.sulphur}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Aluminium: {resultData?.alumunium}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Magnesium: {resultData?.magnesium}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Calcium: {resultData?.calcium}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Zinc: {resultData?.zinc}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Stone: {resultData?.stone}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Clay: {resultData?.clay}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Silt: {resultData?.silt}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Sand: {resultData?.sand}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Salinity: {resultData?.salinity}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Carbon content: {resultData?.carbon_content}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-green-600"></div>
-                  <p className="text-sm text-[#423C59]">
-                    Organic matter: {resultData?.organic_matter}
-                  </p>
-                </div>
+                {resultData?.parameters.map((entry) => (
+                  <div className="flex items-center gap-2">
+                    <div className="size-2 rounded-full bg-green-600"></div>
+                    <p className="text-sm text-[#423C59]">
+                      {entry.label}: {`${entry.value}${entry.unit}`}
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
             <div>
