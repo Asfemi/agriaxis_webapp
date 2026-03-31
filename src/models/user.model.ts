@@ -12,7 +12,6 @@ export interface User {
   phone: string | null;
   role: string;
   status: string;
-  date_created: string;
 }
 
 export interface UserSummary {
