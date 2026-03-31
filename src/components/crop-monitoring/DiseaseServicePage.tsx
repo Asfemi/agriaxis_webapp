@@ -40,8 +40,6 @@ export const DiseaseServicePage: React.FC<{
   }, [subscriptions]);
 
   const onSubscribeToDisease = () => {
-    if (!diseaseSub) return;
-
     const request = {
       plan_key: "pest_disease",
       redirect_url: "https://agriaxis-webapp.vercel.app",
@@ -134,6 +132,7 @@ export const DiseaseServicePage: React.FC<{
   })();
 
   const onRequestInformation = () => {
+    if (!diseaseSub) onSubscribeToDisease();
     setShowRequestPestSheet(true);
   };
 
