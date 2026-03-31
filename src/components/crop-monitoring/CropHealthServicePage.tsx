@@ -40,8 +40,6 @@ export const CropHealthServicePage: React.FC<{
   }, [subscriptions]);
 
   const onRequestSubscription = () => {
-    if (!cropHealthSub) return;
-
     const request = {
       plan_key: "crop_health",
       redirect_url: "https://agriaxis-webapp.vercel.app",
@@ -132,6 +130,7 @@ export const CropHealthServicePage: React.FC<{
   })();
 
   const onRequestInformation = () => {
+    if (!cropHealthSub) onRequestSubscription();
     setShowRequestHealthSheet(true);
   };
 
