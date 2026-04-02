@@ -77,10 +77,10 @@ export const useGetPaymentSubscriptions = () => {
   return useQuery({
     queryKey: ["payments-subscriptions"],
     queryFn: async () => {
-      const { data } = await apiClient.get<PaymentSubscription[]>(
+      const { data } = await apiClient.get<{ items: PaymentSubscription[] }>(
         "/payments/subscriptions",
       );
-      return data;
+      return data.items;
     },
   });
 };

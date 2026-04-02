@@ -123,10 +123,10 @@ export const useSoilTestingResults = () => {
   return useQuery({
     queryKey: ["soil-testing-results"],
     queryFn: async () => {
-      const { data } = await apiClient.get<SoilTestingResult[]>(
+      const { data } = await apiClient.get<{ items: SoilTestingResult[] }>(
         "/soil-testing/results",
       );
-      return data;
+      return data.items;
     },
   });
 };
