@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/api/api-client";
 import type {
-    CropHealthHistory,
+  CropHealthHistory,
   CropMonitoringDashboardResponse,
   CropMonitoringDiseaseDetectResponse,
   DiseaseDetectionHistory,
@@ -55,24 +55,29 @@ export const useCropHealth = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (farmId: string) => {
-      const { data } = await apiClient.post<CropHealthHistory>("/crop-monitoring/crop-health/fetch", { farmId })
-      return data
+      const { data } = await apiClient.post<CropHealthHistory>(
+        "/crop-monitoring/crop-health/fetch",
+        { farmId },
+      );
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["crop-monitoring-dashboard"] })
-      queryClient.invalidateQueries({ queryKey: ["crop-health-history"] })
-    }
-  })
-}
+      queryClient.invalidateQueries({
+        queryKey: ["crop-monitoring-dashboard"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["crop-health-history"] });
+    },
+  });
+};
 
 export const useGetCropHealthHistory = () => {
   return useQuery({
     queryKey: ["crop-health-history"],
     queryFn: async () => {
-      const { data } = await apiClient.get<CropHealthHistory[]>(
+      const { data } = await apiClient.get<{ items: CropHealthHistory[] }>(
         "/crop-monitoring/crop-health/history",
       );
-      return data;
+      return data.items;
     },
   });
 };
@@ -111,8 +116,10 @@ export const useGetDiseaseDetectionHistory = () => {
   return useQuery({
     queryKey: ["crop-monitoring-disease-detect-history"],
     queryFn: async () => {
-      const { data } = await apiClient.get<DiseaseDetectionHistory[]>("/crop-monitoring/disease/history");
-      return data;
+      const { data } = await apiClient.get<{
+        items: DiseaseDetectionHistory[];
+      }>("/crop-monitoring/disease/history");
+      return data.items;
     },
   });
 };
@@ -128,25 +135,27 @@ export const useRenameDiseaseDetectionResult = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["crop-monitoring-disease-detect-history"] });
+      queryClient.invalidateQueries({
+        queryKey: ["crop-monitoring-disease-detect-history"],
+      });
       queryClient.invalidateQueries({
         queryKey: ["crop-monitoring-dashboard"],
       });
     },
   });
-}
+};
 
 export const useDeleteDiseaseDetectionResult = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { data } = await apiClient.delete(
-        `/crop-monitoring/disease/${id}`,
-      );
+      const { data } = await apiClient.delete(`/crop-monitoring/disease/${id}`);
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["crop-monitoring-disease-detect-history"] });
+      queryClient.invalidateQueries({
+        queryKey: ["crop-monitoring-disease-detect-history"],
+      });
       queryClient.invalidateQueries({
         queryKey: ["crop-monitoring-dashboard"],
       });
