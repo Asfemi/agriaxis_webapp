@@ -2,7 +2,7 @@ import { ChevronLeft, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { type SoilTestingFormData } from "@/models/soil-testing.model";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { useGetFarm } from "@/api/farms";
 import { useGetCost } from "@/api/payments";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
@@ -27,6 +27,12 @@ export const FarmSizeForMeasurementCard: React.FC<{
     updateFormData({ ...data, cost: cost?.amount ?? 0 });
     onConfirm();
   };
+
+  useEffect(() => {
+    if (cost?.amount) {
+      updateFormData({ cost: cost.amount });
+    }
+  }, [cost, updateFormData]);
 
   return (
     <ErrorBoundary
