@@ -38,6 +38,9 @@ import FarmDetailsRoute from "@/routes/dashboard/farms/details.tsx";
 import PaymentSuccessRoute from "@/routes/payment/success.tsx";
 import OrganisationLayoutRoute from "@/routes/auth/Organisation.tsx";
 import type { QueryClient } from "@tanstack/react-query";
+import WeatherServicePage from "@/components/crop-information/WeatherServicePage.tsx";
+import ClimateServicePage from "@/components/crop-information/ClimateServicePage.tsx";
+import CalendarServicePage from "@/components/crop-information/CalendarServicePage.tsx";
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -103,6 +106,9 @@ const routeTree = rootRoute.addChildren([
     DashboardIndexRoute(dashboardLayoutRoute),
     SoilTestingRoute(dashboardLayoutRoute),
     CropInformationRoute(dashboardLayoutRoute),
+    WeatherServicePage(dashboardLayoutRoute),
+    ClimateServicePage(dashboardLayoutRoute),
+    CalendarServicePage(dashboardLayoutRoute),
     CropMonitoringRoute(dashboardLayoutRoute),
     RolesRoute(dashboardLayoutRoute),
     UsersRoute(dashboardLayoutRoute),

@@ -5,11 +5,11 @@ import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
 import { CalendarAnalysisHistoryTable } from "@/components/crop-information/CalendarAnalysisHistoryTable";
+import { createRoute, useRouter, type AnyRoute } from "@tanstack/react-router";
 
-export const CalendarServicePage: React.FC<{
-  onClose: () => void;
-}> = ({ onClose }) => {
+export const CalendarServicePage = () => {
   const onRequestInformation = () => {};
+  const router = useRouter()
 
   return (
     <>
@@ -17,7 +17,7 @@ export const CalendarServicePage: React.FC<{
         <header className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <button
-              onClick={onClose}
+              onClick={() => router.history.back()}
               className="grid size-7 place-items-center rounded-full bg-[#E8E8E8]"
             >
               <ChevronLeft size={20} />
@@ -78,4 +78,15 @@ export const CalendarServicePage: React.FC<{
   );
 };
 
-
+export default (parentRoute: AnyRoute) => 
+  createRoute({
+    path: 'crop-information/calendar',
+    component: CalendarServicePage,
+    getParentRoute: () => parentRoute,
+    staticData: {
+      title: "Crop Information",
+    },
+    head: () => ({
+      meta: [{ title: "Crop Information | Calendar" }],
+    }),
+  })
