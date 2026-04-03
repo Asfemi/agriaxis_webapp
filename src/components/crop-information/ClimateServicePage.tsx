@@ -8,12 +8,12 @@ import { ClimateAnalysisHistoryTable } from "@/components/crop-information/Clima
 import { useState } from "react";
 import { useGetClimateDashboard } from "@/api/crop-information";
 import { RequestClimateInformationSheetsContainer } from "./RequestClimateInformationSheetsContainer";
+import { createRoute, useRouter, type AnyRoute } from "@tanstack/react-router";
 
-export const ClimateServicePage: React.FC<{
-  onClose: () => void;
-}> = ({ onClose }) => {
+const ClimateServicePage = () => {
   const [showRequestSheet, setShowRequestSheet] = useState(false);
   const { data: dashboardData } = useGetClimateDashboard();
+  const router = useRouter()
 
   const onRequestInformation = () => {
     setShowRequestSheet(true)
@@ -25,7 +25,7 @@ export const ClimateServicePage: React.FC<{
         <header className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <button
-              onClick={onClose}
+              onClick={() => router.history.back()}
               className="grid size-7 place-items-center rounded-full bg-[#E8E8E8]"
             >
               <ChevronLeft size={20} />
@@ -84,3 +84,15 @@ export const ClimateServicePage: React.FC<{
   );
 };
 
+export default (parentRoute: AnyRoute) => 
+  createRoute({
+    path: 'crop-information/climate',
+    component: ClimateServicePage,
+    getParentRoute: () => parentRoute,
+    staticData: {
+      title: "Crop Information",
+    },
+    head: () => ({
+      meta: [{ title: "Crop Information | Climate" }],
+    }),
+  })
