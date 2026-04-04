@@ -80,8 +80,9 @@ const SoilTestingResultsTable = () => {
 
   const soilColumns: ColumnDef<SoilTestingResult>[] = [
     {
-      accessorKey: "id",
-      header: "Test ID",
+      id: 's/n',
+      header: "S/N",
+      cell: ({ row }) => row.index + 1
     },
     {
       accessorKey: "name",

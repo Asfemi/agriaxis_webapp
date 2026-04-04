@@ -24,8 +24,9 @@ export const FarmsListContainer = () => {
   const { data: response, isPending, isError } = useGetAllFarms();
   const farmColumns: ColumnDef<Farm>[] = [
     {
-      accessorKey: "id",
-      header: "ID",
+      id: 's/n',
+      header: "S/N",
+      cell: ({ row }) => row.index + 1
     },
     {
       accessorKey: "farm_name",
