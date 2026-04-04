@@ -19,8 +19,9 @@ function Users() {
   const { data: users } = useGetUsers();
   const userColumns: ColumnDef<UserSummary>[] = [
     {
-      accessorKey: "id",
-      header: "User ID",
+      id: 's/n',
+      header: "S/N",
+      cell: ({ row }) => row.index + 1
     },
     {
       id: "name",

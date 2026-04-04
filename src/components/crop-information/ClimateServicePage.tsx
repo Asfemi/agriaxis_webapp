@@ -36,7 +36,7 @@ const ClimateServicePage = () => {
           </div>
           <div>
             <Button variant="primary" onClick={() => onRequestInformation()}>
-              Request Information ₦25,000
+              Request Information
             </Button>
           </div>
         </header>
