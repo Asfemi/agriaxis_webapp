@@ -161,7 +161,7 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
           isOpen={currentView === "details"}
           onClose={onClose}
           onConfirm={() => setCurrentView("image_upload")}
-          requestServiceType={"Crop Health"}
+          requestServiceType={"Pest/Disease Monitoring"}
         />
         <CropImageCard
           isOpen={currentView === "image_upload"}

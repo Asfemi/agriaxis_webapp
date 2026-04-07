@@ -42,7 +42,7 @@ export const DiseaseServicePage: React.FC<{
   const onSubscribeToDisease = () => {
     const request = {
       plan_key: "pest_disease",
-      redirect_url: "https://agriaxis-webapp.vercel.app",
+      redirect_url: "https://web.agriaxis.org",
       currency: "NGN",
       country: "NG",
       customer: {
@@ -84,7 +84,7 @@ export const DiseaseServicePage: React.FC<{
     const handleMessage = (event: MessageEvent) => {
       const allowedOrigins = [
         window.location.origin,
-        "https://agriaxis-webapp.vercel.app",
+        "https://web.agriaxis.org",
       ];
 
       if (!allowedOrigins.includes(event.origin)) return;
