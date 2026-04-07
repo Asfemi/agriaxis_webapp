@@ -5,17 +5,7 @@ import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
 import type { CropMonitoringDashboardResponse } from "@/models/crop-monitoring.model";
-import {
-  useGetPaymentSubscriptions,
-  usePaymentSubscribe,
-} from "@/api/payments";
-import { useEffect, useState } from "react";
-import type {
-  PaymentSubscription,
-  PaymentSubscriptionRes,
-} from "@/models/payment.model";
-import { useUserStore } from "@/stores/useUserStore";
-import { toast } from "sonner";
+import { useState } from "react";
 import { RequestCropHealthSheetsContainer } from "@/components/crop-monitoring/RequestCropHealthSheetsContainer";
 import { CropHealthHistoryTable } from "@/components/crop-monitoring/CropHealthHistoryTable";
 
