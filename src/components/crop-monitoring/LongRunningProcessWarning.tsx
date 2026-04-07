@@ -23,7 +23,7 @@ export const LongRunningProcessWarning: React.FC<{
       <div className="flex h-auto flex-col items-center justify-center pb-10 px-6">
         <div className="space-y-20">
           <p className="rounded-xl bg-[#D10000] px-2 py-1.5 text-white">
-            Be warned, this is a long running process, and could take several
+            Please note, this is a long running process, and could take several
             minutes to complete.
             <br />
             Please note that for the duration of the process, you will not be

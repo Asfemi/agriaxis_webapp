@@ -69,7 +69,7 @@ const RequestSoilTestSheetsContainer: React.FC<{
     const handleMessage = (event: MessageEvent) => {
       const allowedOrigins = [
         window.location.origin,
-        "https://agriaxis-webapp.vercel.app",
+        "https://web.agriaxis.org",
       ];
 
       if (!allowedOrigins.includes(event.origin)) return;

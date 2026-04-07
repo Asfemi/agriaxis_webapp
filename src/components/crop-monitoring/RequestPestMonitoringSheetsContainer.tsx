@@ -26,16 +26,13 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
 
   const handleUploadImage = (image: File) => {
     setImageFile(image);
-    // setCurrentView("cost");
-    setTimeout(() => {
-      handleConfirm()
-    }, 4e2)
+    handleProceedToPayment();
   };
 
   const handleProceedToPayment = () => {
     const request = {
       farmId: formData.farm_id ?? "",
-      amount: formData.cost ?? 0,
+      amount: 5000,
       currency: "NGN",
       customer: {
         email: user?.email ?? "",
@@ -161,7 +158,7 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
           isOpen={currentView === "details"}
           onClose={onClose}
           onConfirm={() => setCurrentView("image_upload")}
-          requestServiceType={"Crop Health"}
+          requestServiceType={"Pest/Disease Monitoring"}
         />
         <CropImageCard
           isOpen={currentView === "image_upload"}

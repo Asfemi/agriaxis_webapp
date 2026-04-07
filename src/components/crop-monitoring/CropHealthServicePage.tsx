@@ -5,17 +5,7 @@ import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
 import type { CropMonitoringDashboardResponse } from "@/models/crop-monitoring.model";
-import {
-  useGetPaymentSubscriptions,
-  usePaymentSubscribe,
-} from "@/api/payments";
-import { useEffect, useState } from "react";
-import type {
-  PaymentSubscription,
-  PaymentSubscriptionRes,
-} from "@/models/payment.model";
-import { useUserStore } from "@/stores/useUserStore";
-import { toast } from "sonner";
+import { useState } from "react";
 import { RequestCropHealthSheetsContainer } from "@/components/crop-monitoring/RequestCropHealthSheetsContainer";
 import { CropHealthHistoryTable } from "@/components/crop-monitoring/CropHealthHistoryTable";
 
@@ -23,98 +13,7 @@ export const CropHealthServicePage: React.FC<{
   onClose: () => void;
   data: CropMonitoringDashboardResponse | undefined;
 }> = ({ onClose, data }) => {
-  const [cropHealthSub, setCropHealthSub] = useState<PaymentSubscription>();
-  const { data: subscriptions, isLoading: isLoadingSubscriptions } =
-    useGetPaymentSubscriptions();
-  const { user } = useUserStore();
-  const { mutate: initialiseSubscription } = usePaymentSubscribe();
   const [showRequestHealthSheet, setShowRequestHealthSheet] = useState(false);
-
-  useEffect(() => {
-    if (isLoadingSubscriptions) return;
-    const cropHealthSub = subscriptions?.find(
-      (sub) => sub.plan_key === "crop_health",
-    );
-    if (!cropHealthSub) return;
-    setCropHealthSub(cropHealthSub);
-  }, [subscriptions]);
-
-  const onRequestSubscription = () => {
-    const request = {
-      plan_key: "crop_health",
-      redirect_url: "https://agriaxis-webapp.vercel.app",
-      currency: "NGN",
-      country: "NG",
-      customer: {
-        email: user?.email ?? "",
-        name: user?.name ?? "",
-        phonenumber: "",
-      },
-    };
-
-    initialiseSubscription(request, {
-      onSuccess: (data) => {
-        toast.success("Payment initiated successfully!");
-
-        openPaymentModal(data);
-      },
-      onError: (error) =>
-        toast.error(
-          error.message ?? "Failed to initiate payment. Please try again.",
-        ),
-    });
-  };
-
-  const openPaymentModal = (paymentData: PaymentSubscriptionRes) => {
-    const { payment_link } = paymentData;
-
-    const popup = window.open(
-      payment_link,
-      "flutterwave_payment",
-      "width=800,height=600,scrollbars=yes,resizable=yes,left=200,top=100",
-    );
-
-    if (!popup) {
-      toast.error("Popup blocked! Please allow popups and try again.");
-      return;
-    }
-
-    let messageReceived = false;
-
-    const handleMessage = (event: MessageEvent) => {
-      const allowedOrigins = [
-        window.location.origin,
-        "https://agriaxis-webapp.vercel.app",
-      ];
-
-      if (!allowedOrigins.includes(event.origin)) return;
-
-      if (event.data?.type === "PAYMENT_COMPLETE") {
-        messageReceived = true;
-
-        cleanup();
-      }
-    };
-
-    const checkClosed = setInterval(() => {
-      if (popup.closed) {
-        if (!messageReceived) {
-          setTimeout(() => {
-            if (!messageReceived) cleanup();
-          }, 500);
-        } else {
-          cleanup();
-        }
-      }
-    }, 1e3);
-
-    const cleanup = () => {
-      clearInterval(checkClosed);
-      window.removeEventListener("message", handleMessage);
-    };
-
-    window.addEventListener("message", handleMessage);
-  };
 
   const displayData = (() => {
     if (!data) {
@@ -130,7 +29,6 @@ export const CropHealthServicePage: React.FC<{
   })();
 
   const onRequestInformation = () => {
-    if (!cropHealthSub) onRequestSubscription();
     setShowRequestHealthSheet(true);
   };
 
@@ -150,15 +48,9 @@ export const CropHealthServicePage: React.FC<{
             </h5>
           </div>
           <div>
-            {!cropHealthSub || cropHealthSub.status !== "active" ? (
-              <Button variant="primary" onClick={() => onRequestSubscription()}>
-                Subscribe to Crop Health ₦15,000
-              </Button>
-            ) : (
-              <Button variant="primary" onClick={() => onRequestInformation()}>
-                Request Information
-              </Button>
-            )}
+            <Button variant="primary" onClick={() => onRequestInformation()}>
+              Request Information ₦15,000
+            </Button>
           </div>
         </header>
         <section>
