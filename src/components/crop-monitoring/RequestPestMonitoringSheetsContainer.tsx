@@ -26,10 +26,10 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
 
   const handleUploadImage = (image: File) => {
     setImageFile(image);
-    handleProceedToPayment();
+    handleProceedToPayment(image);
   };
 
-  const handleProceedToPayment = () => {
+  const handleProceedToPayment = (image: File) => {
     const request = {
       farmId: formData.farm_id ?? "",
       amount: 5000,
@@ -45,7 +45,7 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
       onSuccess: (data) => {
         toast.success("Payment initiated successfully!");
 
-        openPaymentModal(data);
+        openPaymentModal(data, image);
       },
       onError: (error) =>
         toast.error(
@@ -54,15 +54,15 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
     });
   };
 
-  const handleConfirm = () => {
-    if (!imageFile) {
+  const handleConfirm = (image: File) => {
+    if (!image) {
       toast.error("Please upload an image first!");
       return;
     }
     mutate(
       {
         name: `F/${faker.string.alphanumeric(5).toUpperCase()}`,
-        image: imageFile,
+        image: image,
         farmId: formData.farm_id ?? "",
       },
       {
@@ -77,7 +77,7 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
     );
   };
 
-  const openPaymentModal = (paymentData: PaymentInitialiseResponse) => {
+  const openPaymentModal = (paymentData: PaymentInitialiseResponse, image: File) => {
     const { payment_link, tx_ref, amount, currency, farm_id } = paymentData;
 
     const popup = window.open(
@@ -118,7 +118,7 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
           {
             onSuccess: () => {
               toast.success("Payment confirmed successfully!");
-              handleConfirm();
+              handleConfirm(image);
             },
             onError: (error) => {
               toast.error(error.message);
@@ -171,7 +171,7 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
           service="crop-monitoring"
           isOpen={currentView === "cost"}
           onClose={() => setCurrentView("details")}
-          onConfirm={() => handleProceedToPayment()}
+          onConfirm={() => handleProceedToPayment(imageFile!)}
         />
         <ProcessingResultCard isOpen={currentView === "processing"} />
       </section>
