@@ -20,6 +20,7 @@ export const useGetCropMonitoringDashboard = () => {
 };
 
 export const useCropMonitoringDiseaseDetect = () => {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({
       name,
@@ -47,6 +48,12 @@ export const useCropMonitoringDiseaseDetect = () => {
         );
 
       return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["crop-monitoring-dashboard"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["crop-monitoring-disease-detect-history"] });
     },
   });
 };
