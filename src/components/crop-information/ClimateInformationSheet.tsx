@@ -1,20 +1,98 @@
 import { useGetCropInformationAnalysis } from "@/api/crop-information";
-import type { ClimateAnalysisData } from "@/models/crop-information.model";
-import { ChevronLeft } from "lucide-react";
-import {
-  ComposedChart,
-  Bar,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { ChevronLeft, Thermometer, Droplets, Wind, AlertTriangle, CloudRain, Sun, CalendarDays } from "lucide-react";
+
+// ── Types ────────────────────────────────────────────────────────────────────
+
+export interface UpdatedClimateAnalysisData {
+  id: string;
+  test_id: string;
+  subsection: string;
+  status: string;
+  name: string;
+  farm_name: string;
+  org_farm_id: string;
+  external_farm_id: string;
+  payment: string | null;
+  amount_paid: string | null;
+  currency: string | null;
+  created_at: string;
+  updated_at: string;
+  error_message: string | null;
+  data: {
+    climate_report: string;
+    crop_type: string;
+    gps_coordinates: string;
+  };
+}
+
+// ── Markdown table parser ────────────────────────────────────────────────────
+
+interface ClimateRow {
+  parameter: string;
+  forecast: string;
+  period: string;
+  impact: string;
+  action: string;
+}
+
+function parseMarkdownTable(markdown: string): ClimateRow[] {
+  const lines = markdown
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.startsWith("|") && !l.match(/^\|[\s:|-]+\|/));
+
+  if (lines.length < 2) return [];
+
+  // skip header row
+  const rows = lines.slice(1);
+  return rows.map((row) => {
+    const cols = row
+      .split("|")
+      .map((c) => c.trim())
+      .filter((c) => c.length > 0);
+    return {
+      parameter: cols[0] ?? "",
+      forecast: cols[1] ?? "",
+      period: cols[2] ?? "",
+      impact: cols[3] ?? "",
+      action: cols[4] ?? "",
+    };
+  });
+}
+
+function extractAdvisorySummary(report: string): string {
+  const match = report.match(/\*\*Actionable Advisory Summary:\*\*\s*([\s\S]+)/);
+  return match ? match[1].trim() : "";
+}
+
+// ── Risk badge helper ────────────────────────────────────────────────────────
+
+function getRiskStyle(text: string): { bg: string; text: string; dot: string } {
+  const lower = text.toLowerCase();
+  if (lower.includes("high")) return { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500" };
+  if (lower.includes("medium") || lower.includes("moderate"))
+    return { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400" };
+  if (lower.includes("low")) return { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" };
+  return { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-400" };
+}
+
+function paramIcon(param: string) {
+  const p = param.toLowerCase();
+  if (p.includes("flood")) return <CloudRain size={15} className="text-blue-500" />;
+  if (p.includes("drought")) return <Sun size={15} className="text-amber-500" />;
+  if (p.includes("temperature") || p.includes("heat")) return <Thermometer size={15} className="text-red-500" />;
+  if (p.includes("rain")) return <Droplets size={15} className="text-sky-500" />;
+  if (p.includes("dry spell")) return <Wind size={15} className="text-orange-400" />;
+  if (p.includes("onset") || p.includes("cessation") || p.includes("season"))
+    return <CalendarDays size={15} className="text-violet-500" />;
+  return <AlertTriangle size={15} className="text-slate-400" />;
+}
+
+// ── Main component ───────────────────────────────────────────────────────────
 
 export const ClimateInformationSheet: React.FC<{
   onClose: () => void;
-  analysisData?: ClimateAnalysisData;
+  analysisData?: UpdatedClimateAnalysisData;
   id?: string;
 }> = ({ onClose, analysisData, id }) => {
   const { data, isLoading } = useGetCropInformationAnalysis(
@@ -22,13 +100,14 @@ export const ClimateInformationSheet: React.FC<{
     !!analysisData,
   );
 
-  const climateData: ClimateAnalysisData =
-    analysisData ?? (data as ClimateAnalysisData);
+  const climateData: UpdatedClimateAnalysisData =
+    analysisData ?? (data as UpdatedClimateAnalysisData);
 
+  // ── Guard: no data ────────────────────────────────────────────────────────
   if (!id && !analysisData) {
     return (
-      <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
-        <section className="z-50 ml-auto h-auto w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-white p-8">
+      <section className="fixed inset-0 z-40 bg-black/70 p-4">
+        <section className="z-50 ml-auto h-auto w-3/4 max-w-xl rounded-[1.25rem] bg-white p-8">
           <header className="mb-10 flex items-center gap-3.5">
             <button
               onClick={onClose}
@@ -37,151 +116,157 @@ export const ClimateInformationSheet: React.FC<{
               <ChevronLeft size={20} />
             </button>
           </header>
-          <section className="size-full">
-            <div className="flex h-full flex-col items-center justify-center pb-10">
-              <div>
-                <p className="rounded-xl bg-[#D10000] px-2 py-1.5 text-xs text-white">
-                  Failed to pass data
-                </p>
-              </div>
-            </div>
-          </section>
+          <div className="flex items-center justify-center pb-10">
+            <p className="rounded-xl bg-[#D10000] px-2 py-1.5 text-xs text-white">
+              Failed to pass data
+            </p>
+          </div>
         </section>
       </section>
     );
   }
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70">
+        <div className="rounded-2xl bg-white px-8 py-6">
+          <p className="animate-pulse text-sm font-medium text-gray-500">Loading climate data…</p>
+        </div>
+      </div>
+    );
   }
+
+  const report = climateData?.data?.climate_report ?? "";
+  const rows = parseMarkdownTable(report);
+  const advisory = extractAdvisorySummary(report);
+  const cropType = climateData?.data?.crop_type ?? "";
+  const coords = climateData?.data?.gps_coordinates ?? "";
+  const updatedAt = climateData?.updated_at
+    ? new Date(climateData.updated_at).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "";
 
   return (
     <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
-      <section className="z-50 ml-auto h-auto max-h-[96vh] w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-white p-8">
-        <header className="mb-10 flex items-center gap-3.5">
+      <section className="z-50 ml-auto flex h-full max-h-[96vh] w-3/4 max-w-xl flex-col overflow-hidden rounded-[1.25rem] bg-[#F9F8FC]">
+
+        {/* ── Header ── */}
+        <header className="flex shrink-0 items-start gap-3.5 border-b border-[#EBEBEB] bg-white px-8 py-5">
           <button
             onClick={onClose}
-            className="grid size-7 place-items-center rounded-full bg-[#E8E8E8]"
+            className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-[#E8E8E8] hover:bg-[#DADADF] transition-colors"
           >
             <ChevronLeft size={20} />
           </button>
-          <div className="flex flex-col gap-1">
-            <h4 className="font-neue text-xl font-bold text-[#130B30]">
-              {climateData.test_id}
-            </h4>
-            <h5 className="text-[#423C59]">{climateData.farm_name}</h5>
-            <h6 className="text-slate-600 text-sm">Projected rainfall data for this farm over 24 hours</h6>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-bold text-lg text-[#130B30] leading-tight">
+                {climateData.farm_name}
+              </h4>
+              <span className="rounded-full bg-[#F0EAF8] px-2.5 py-0.5 text-xs font-semibold text-[#7C3AED] capitalize">
+                {cropType}
+              </span>
+              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 capitalize">
+                {climateData.status}
+              </span>
+            </div>
+            <p className="mt-0.5 text-xs text-[#8C87A0]">
+              {climateData.test_id} · {coords}
+            </p>
+            {updatedAt && (
+              <p className="mt-0.5 text-xs text-[#B0ABBB]">Updated {updatedAt}</p>
+            )}
           </div>
         </header>
-        <section className="relative mx-10 pb-5">
-          {climateData.data.chance_of_rainfall.length > 0 ? (
-            <>
-              <div className="mb-6">
-                <h3 className="text-base font-bold text-[#130B30]">
-                  Rainfall Analysis Chart
-                </h3>
-                <p className="text-xs text-[#615C74]">
-                  Blue bars: Amount (mm) | Shaded area: Probability (%)
-                </p>
+
+        {/* ── Scrollable body ── */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+
+          {/* Advisory banner */}
+          {advisory && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle size={15} className="text-amber-600 shrink-0" />
+                <span className="text-xs font-bold uppercase tracking-wide text-amber-700">
+                  Actionable Advisory
+                </span>
               </div>
-              <RainfallChart chartData={climateData.data.chance_of_rainfall} />
-            </>
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <p className="animate-pulse text-xl font-medium text-gray-500">
-                No rainfall data found
-              </p>
+              <p className="text-sm text-amber-900 leading-relaxed">{advisory}</p>
             </div>
           )}
-        </section>
+
+          {/* Climate parameter cards */}
+          {rows.length > 0 ? (
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-[#130B30] px-1">
+                Climate Parameters
+              </h3>
+              {rows.map((row, i) => {
+                const riskStyle = getRiskStyle(row.forecast);
+                return (
+                  <div
+                    key={i}
+                    className="rounded-2xl border border-[#EBEBEB] bg-white p-4 shadow-sm"
+                  >
+                    {/* Parameter name */}
+                    <div className="flex items-start gap-2 mb-3">
+                      <span className="mt-0.5 shrink-0">{paramIcon(row.parameter)}</span>
+                      <h4 className="text-sm font-semibold text-[#130B30] leading-snug">
+                        {row.parameter}
+                      </h4>
+                    </div>
+
+                    {/* Forecast + Period row */}
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${riskStyle.bg} ${riskStyle.text}`}
+                      >
+                        <span className={`h-1.5 w-1.5 rounded-full ${riskStyle.dot}`} />
+                        {row.forecast}
+                      </span>
+                      {row.period && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600">
+                          <CalendarDays size={11} />
+                          {row.period}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Impact */}
+                    {row.impact && (
+                      <div className="mb-2">
+                        <p className="mb-0.5 text-[10px] font-bold uppercase tracking-wider text-[#9E99B0]">
+                          Impact on crop
+                        </p>
+                        <p className="text-xs text-[#423C59] leading-relaxed">{row.impact}</p>
+                      </div>
+                    )}
+
+                    {/* Recommended action */}
+                    {row.action && (
+                      <div className="rounded-xl bg-[#F4F1FA] px-3 py-2">
+                        <p className="mb-0.5 text-[10px] font-bold uppercase tracking-wider text-[#7C3AED]">
+                          Recommended Action
+                        </p>
+                        <p className="text-xs text-[#3D2D6E] leading-relaxed">{row.action}</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex h-40 items-center justify-center rounded-2xl border border-dashed border-[#E0DAF0] bg-white">
+              <p className="text-sm text-gray-400">No climate parameters found</p>
+            </div>
+          )}
+        </div>
       </section>
     </section>
   );
 };
 
-const RainfallChart: React.FC<{
-  chartData: { time: string; chance: number; amount: number }[];
-}> = ({ chartData }) => {
-  return (
-    <div className="h-[75vh] w-full overflow-y-auto rounded-xl border border-[#E8E8E8] bg-white p-6 shadow-sm">
-      <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart
-          layout="vertical"
-          data={chartData}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-        >
-          <CartesianGrid
-            strokeDasharray="3 3"
-            horizontal={true}
-            vertical={false}
-            stroke="#F0F0F0"
-          />
-
-          <XAxis type="number" hide domain={[0, "dataMax + 0.1"]} />
-
-          <XAxis
-            type="number"
-            dataKey="chance"
-            hide
-            domain={[0, 100]}
-            xAxisId="chanceAxis"
-          />
-
-          <YAxis
-            dataKey="time"
-            type="category"
-            width={80}
-            fontSize={12}
-            tickLine={false}
-            axisLine={false}
-            tick={{ fill: "#615C74", fontWeight: 500 }}
-          />
-
-          <Tooltip
-            cursor={{ fill: "#F8FAFC" }}
-            content={({ active, payload }) => {
-              if (active && payload && payload.length) {
-                const { time, chance, amount } = payload[0].payload;
-                return (
-                  <div className="rounded-lg border border-gray-100 bg-white p-3 shadow-xl">
-                    <p className="mb-1 font-bold text-[#130B30]">{time}</p>
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-[#3B82F6]" />
-                      <p className="text-sm text-gray-600">
-                        Amount: <b>{amount} mm</b>
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-[#8EC5AC]" />
-                      <p className="text-sm text-gray-600">
-                        Chance: <b>{chance}%</b>
-                      </p>
-                    </div>
-                  </div>
-                );
-              }
-              return null;
-            }}
-          />
-
-          <Area
-            xAxisId="chanceAxis"
-            dataKey="chance"
-            stroke="#8EC5AC"
-            fill="#E7F2ED"
-            strokeWidth={1}
-            type="monotone"
-            connectNulls
-          />
-
-          <Bar
-            dataKey="amount"
-            fill="#3B82F6"
-            barSize={12}
-            radius={[0, 2, 2, 0]}
-          />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
-  );
-};
+// TODO: Walk through, understand, and refactor if need be

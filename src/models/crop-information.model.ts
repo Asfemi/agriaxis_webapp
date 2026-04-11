@@ -224,3 +224,25 @@ export type ClimateAnalysisData = {
     }[];
   };
 };
+
+export type UpdatedClimateAnalysisData = {
+  id: string;
+  test_id: string;
+  subsection: string;
+  status: string;
+  name: string;
+  farm_name: string;
+  org_farm_id: string;
+  external_farm_id: string;
+  payment: null | string;
+  amount_paid: null | string;
+  currency: null | string;
+  created_at: string;
+  updated_at: string;
+  error_message: null | string;
+  data: {
+    climate_report: string;
+    crop_type: string;
+    gps_coordinates: string;
+  };
+};
