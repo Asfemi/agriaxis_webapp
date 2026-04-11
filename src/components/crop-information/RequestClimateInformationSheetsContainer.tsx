@@ -2,7 +2,7 @@ import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { ClimateAnalysisData } from "@/models/crop-information.model";
+import type { UpdatedClimateAnalysisData } from "@/models/crop-information.model";
 import { useFetchClimateAnalysis } from "@/api/crop-information";
 import { ClimateInformationSheet } from "@/components/crop-information/ClimateInformationSheet";
 
@@ -14,7 +14,7 @@ export const RequestClimateInformationSheetsContainer: React.FC<{
   const { formData } = useSoilTestingFormStore();
 
   const [currentView, setCurrentView] = useState("details");
-  const [analysisData, setAnalysisData] = useState<ClimateAnalysisData>();
+  const [analysisData, setAnalysisData] = useState<UpdatedClimateAnalysisData>();
 
   const { mutate: fetchClimateAnalysis } = useFetchClimateAnalysis();
 

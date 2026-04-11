@@ -5,6 +5,7 @@ import type {
   ClimateDashboardRes,
   CropCalendarDashboardRes,
   CropInformationDashboardResponse,
+  UpdatedClimateAnalysisData,
   WeatherAnalysisData,
   WeatherDashboardRes,
 } from "@/models/crop-information.model";
@@ -63,7 +64,7 @@ export const useFetchWeatherAnalysis = () => {
     mutationFn: async (farmId: string) => {
       const { data } = await apiClient.post<WeatherAnalysisData>(
         "/crop-information/weather/fetch",
-        { farmId },
+        { farm_id: farmId },
       );
       return data;
     },
@@ -80,9 +81,9 @@ export const useFetchClimateAnalysis = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (farmId: string) => {
-      const { data } = await apiClient.post<ClimateAnalysisData>(
+      const { data } = await apiClient.post<UpdatedClimateAnalysisData>(
         "/crop-information/climate/fetch",
-        { farmId },
+        { farm_id: farmId },
       );
       return data;
     },
@@ -101,7 +102,7 @@ export const useFetchCropCalendarAnalysis = () => {
     mutationFn: async (farmId: string) => {
       const { data } = await apiClient.post(
         "/crop-information/crop-calendar/fetch",
-        { farmId },
+        { farm_id: farmId },
       );
       return data;
     },
@@ -161,7 +162,7 @@ export const useGetCropInformationAnalysis = (
     queryKey: ["crop-information-analysis", id],
     queryFn: async () => {
       const { data } = await apiClient.get<
-        WeatherAnalysisData | ClimateAnalysisData
+        WeatherAnalysisData | ClimateAnalysisData | UpdatedClimateAnalysisData
       >(`/crop-information/${id}`);
       return data;
     },
