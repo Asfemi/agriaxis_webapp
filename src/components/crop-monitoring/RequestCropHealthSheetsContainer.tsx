@@ -5,7 +5,6 @@ import { CropHealthResultSheet } from "./CropHealthResultSheet";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { useCropHealth } from "@/api/crop-monitoring";
 import type { CropHealthHistory } from "@/models/crop-monitoring.model";
-import { LongRunningProcessWarning } from "@/components/crop-monitoring/LongRunningProcessWarning";
 import { useUserStore } from "@/stores/useUserStore";
 import { usePaymentInitialise, usePaymentVerify } from "@/api/payments";
 import type { PaymentInitialiseResponse } from "@/models/payment.model";
@@ -146,15 +145,9 @@ export const RequestCropHealthSheetsContainer: React.FC<{
           <FarmDetailsCard
             isOpen={currentView === "details"}
             onClose={onClose}
-            onConfirm={() => setCurrentView("warning")}
+            onConfirm={() => handleSubmit()}
             requestServiceType={"Crop Health"}
           />
-          {currentView === "warning" && (
-            <LongRunningProcessWarning
-              onClose={onClose}
-              onConfirm={() => handleSubmit()}
-            />
-          )}
         </section>
       </section>
       {currentView === "result" && (
