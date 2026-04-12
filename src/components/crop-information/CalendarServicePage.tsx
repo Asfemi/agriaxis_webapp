@@ -6,8 +6,13 @@ import testingIconGreen from "/assets/icons/soil.svg";
 import testingIconGrey from "/assets/icons/testing-grey.svg";
 import { CalendarAnalysisHistoryTable } from "@/components/crop-information/CalendarAnalysisHistoryTable";
 import { createRoute, useRouter, type AnyRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useGetCropCalendarDashboard } from "@/api/crop-information";
+import { RequestCropCalendarInformationSheetsContainer } from "@/components/crop-information/RequestCropCalendarInformationSheetsContainer";
 
 export const CalendarServicePage = () => {
+  const [showRequestSheet, setShowRequestSheet] = useState(false);
+  const { data: dashboardData } = useGetCropCalendarDashboard();
   const onRequestInformation = () => {};
   const router = useRouter()
 
@@ -28,7 +33,7 @@ export const CalendarServicePage = () => {
           </div>
           <div>
             <Button variant="primary" onClick={() => onRequestInformation()}>
-              Request Information ₦25,000
+              Request Information
             </Button>
           </div>
         </header>
@@ -41,7 +46,7 @@ export const CalendarServicePage = () => {
                 </div>
               }
               title="Total no. of test"
-              value="0"
+              value={dashboardData?.number_of_tests ?? 0}
             />
             <StatCard
               icon={
@@ -50,7 +55,7 @@ export const CalendarServicePage = () => {
                 </div>
               }
               title="Pending Tests"
-              value="0"
+              value={dashboardData?.pending_tests ?? 0}
             />
             <StatCard
               className="col-span-2 lg:col-auto"
@@ -60,20 +65,18 @@ export const CalendarServicePage = () => {
                 </div>
               }
               title="Completed Tests"
-              value="0"
+              value={dashboardData?.completed_tests ?? 0}
             />
           </div>
           <div>
-            <CalendarAnalysisHistoryTable />
+            <CalendarAnalysisHistoryTable data={dashboardData?.analytics_history ?? []} />
           </div>
         </section>
       </main>
-      {/**
-      <RequestCropHealthSheetsContainer
-        isOpen={showRequestHealthSheet}
-        onClose={() => setShowRequestHealthSheet(false)}
+      <RequestCropCalendarInformationSheetsContainer
+        isOpen={showRequestSheet}
+        onClose={() => setShowRequestSheet(false)}
       />
-        */}
     </>
   );
 };

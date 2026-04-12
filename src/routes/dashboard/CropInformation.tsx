@@ -15,7 +15,13 @@ import { useGetCropInformationDashboard } from "@/api/crop-information";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const SERVICES = [
+const SERVICES: {
+  id: string;
+  title: string;
+  sub: string;
+  icon: string;
+  isDisabled?: boolean;
+}[] = [
   {
     id: "weather",
     title: "Weather information",
@@ -33,7 +39,6 @@ const SERVICES = [
     title: "Crop calendar",
     sub: "Click here to get your crop planting date",
     icon: treeIcon,
-    isDisabled: true,
   },
 ];
 

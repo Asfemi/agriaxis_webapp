@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/api/api-client";
 import type {
-  ClimateAnalysisData,
   ClimateDashboardRes,
+  CropCalendarAnalysisData,
   CropCalendarDashboardRes,
   CropInformationDashboardResponse,
   UpdatedClimateAnalysisData,
@@ -162,7 +162,7 @@ export const useGetCropInformationAnalysis = (
     queryKey: ["crop-information-analysis", id],
     queryFn: async () => {
       const { data } = await apiClient.get<
-        WeatherAnalysisData | ClimateAnalysisData | UpdatedClimateAnalysisData
+        WeatherAnalysisData | UpdatedClimateAnalysisData | CropCalendarAnalysisData
       >(`/crop-information/${id}`);
       return data;
     },
