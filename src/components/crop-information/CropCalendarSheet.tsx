@@ -1,140 +1,241 @@
 import { useState } from "react";
 import { useGetCropInformationAnalysis } from "@/api/crop-information";
-import { ChevronLeft, MapPin } from "lucide-react";
+import { ChevronLeft, MapPin, AlertCircle } from "lucide-react";
+import type { CropCalendarAnalysisData } from "@/models/crop-information.model";
 
-// ── Types ────────────────────────────────────────────────────────────────────
-
-export interface CropCalendarAnalysisData {
-  id: string;
-  test_id: string;
-  subsection: string;
-  status: string;
+interface ParsedStage {
   name: string;
-  farm_name: string;
-  org_farm_id: string;
-  external_farm_id: string;
-  payment: string | null;
-  amount_paid: string | null;
-  currency: string | null;
-  created_at: string;
-  updated_at: string;
-  error_message: string | null;
-  data: {
-    crop_calendar_report: string;
-    crop_type: string;
-    gps_coordinates: string;
-  };
-}
-
-// ── Calendar config ───────────────────────────────────────────────────────────
-
-const YEAR = 2026;
-
-const MONTHS = [
-  { month: 3, label: "March",  days: 31 },
-  { month: 4, label: "April",  days: 30 },
-  { month: 5, label: "May",    days: 31 },
-  { month: 6, label: "June",   days: 30 },
-  { month: 7, label: "July",   days: 31 },
-];
-
-interface StageConfig {
-  name: string;
-  start: [number, number];
-  end:   [number, number];
-  bg: string;
-  border: string;
-  text: string;
-  dotBg: string;
+  /** [year, month (1-based), day] */
+  start: [number, number, number];
+  end:   [number, number, number];
   activity: string;
   conditions: string;
   advisory: string;
+  /** Assigned after parsing, based on position */
+  colorIndex: number;
 }
 
-const STAGES: StageConfig[] = [
-  {
-    name: "Land preparation",
-    start: [3, 15], end: [4, 5],
-    bg: "bg-amber-100", border: "border-amber-300", text: "text-amber-900", dotBg: "bg-amber-400",
-    activity: "Clearing, primary tillage (ploughing/ridging), secondary tillage (harrowing), fertilizer application.",
-    conditions: "Moist soil after initial light rains, friable soil texture.",
-    advisory: "Initiate land preparation with the first few showers to soften soil. Aim for a fine seedbed. Incorporate organic matter or basal fertilizer during tillage.",
-  },
-  {
-    name: "Planting window",
-    start: [4, 1], end: [4, 30],
-    bg: "bg-emerald-100", border: "border-emerald-300", text: "text-emerald-900", dotBg: "bg-emerald-500",
-    activity: "Optimal sowing Apr 1–15. Extended/acceptable period Apr 16–30. Use certified maize seeds.",
-    conditions: "Consistent soil moisture after reliable rainfall onset, soil temperature >18°C.",
-    advisory: "Plant immediately after sufficient rainfall for good germination. Use spacing 75×25 cm or 90×30 cm, depth 3–5 cm. Early planting maximises yield potential.",
-  },
-  {
-    name: "Germination & establishment",
-    start: [4, 8], end: [4, 29],
-    bg: "bg-teal-100", border: "border-teal-300", text: "text-teal-900", dotBg: "bg-teal-500",
-    activity: "Emergence of seedlings, initial root and shoot development.",
-    conditions: "Adequate soil moisture, warm temperatures 25–32°C, good seed-to-soil contact.",
-    advisory: "Monitor for uniform emergence. Replant gaps within 7–10 days of planting. Protect from armyworms and early weed competition.",
-  },
-  {
-    name: "Vegetative growth",
-    start: [4, 30], end: [5, 30],
-    bg: "bg-green-100", border: "border-green-300", text: "text-green-900", dotBg: "bg-green-500",
-    activity: "Rapid leaf and stalk development, nutrient uptake.",
-    conditions: "Ample soil moisture, good nutrient supply, warm temperatures.",
-    advisory: "Implement first weeding 2–3 weeks after planting and side-dress nitrogen fertilizer. Ensure good drainage to prevent waterlogging.",
-  },
-  {
-    name: "Flowering / reproductive",
-    start: [5, 31], end: [6, 25],
-    bg: "bg-rose-100", border: "border-rose-300", text: "text-rose-900", dotBg: "bg-rose-500",
-    activity: "Tasseling, silking, pollination, and initial kernel development.",
-    conditions: "High soil moisture, moderate temperatures, clear skies for pollination.",
-    advisory: "Most critical stage for yield determination. Avoid any moisture stress. Scout for stem borers, fall armyworm, and diseases like rusts and blight.",
-  },
-  {
-    name: "Maturity & harvest",
-    start: [6, 26], end: [7, 30],
-    bg: "bg-orange-100", border: "border-orange-300", text: "text-orange-900", dotBg: "bg-orange-400",
-    activity: "Grain filling, physiological maturity, drying down of cobs and stalks.",
-    conditions: "Sufficient moisture early, drier conditions later for harvest.",
-    advisory: "Harvest when grains are firm at ~18–20% moisture. Complete before heavy August rains to prevent spoilage. Watch for black layer formation.",
-  },
+// ── Colour palette (cycles by index) ─────────────────────────────────────────
+
+const STAGE_COLORS = [
+  { bg: "bg-amber-100",   border: "border-amber-300",   text: "text-amber-900",   dot: "bg-amber-400"   },
+  { bg: "bg-emerald-100", border: "border-emerald-300", text: "text-emerald-900", dot: "bg-emerald-500" },
+  { bg: "bg-teal-100",    border: "border-teal-300",    text: "text-teal-900",    dot: "bg-teal-500"    },
+  { bg: "bg-green-100",   border: "border-green-300",   text: "text-green-900",   dot: "bg-green-500"   },
+  { bg: "bg-rose-100",    border: "border-rose-300",    text: "text-rose-900",    dot: "bg-rose-500"    },
+  { bg: "bg-orange-100",  border: "border-orange-300",  text: "text-orange-900",  dot: "bg-orange-400"  },
+  { bg: "bg-purple-100",  border: "border-purple-300",  text: "text-purple-900",  dot: "bg-purple-400"  },
+  { bg: "bg-sky-100",     border: "border-sky-300",     text: "text-sky-900",     dot: "bg-sky-400"     },
 ];
 
-// ── Date helpers ──────────────────────────────────────────────────────────────
-
-function toDate(month: number, day: number) {
-  return new Date(YEAR, month - 1, day);
+function stageColor(index: number) {
+  return STAGE_COLORS[index % STAGE_COLORS.length];
 }
 
-function generateWeeks() {
-  const seasonStart = toDate(3, 1);
-  const seasonEnd   = toDate(7, 31);
-  const weeks: { start: Date; end: Date }[] = [];
-  let cursor = new Date(seasonStart);
-  while (cursor <= seasonEnd) {
+// ── Date parsing ──────────────────────────────────────────────────────────────
+
+const MONTH_NAMES: Record<string, number> = {
+  january: 1, february: 2, march: 3, april: 4, may: 5, june: 6,
+  july: 7, august: 8, september: 9, october: 10, november: 11, december: 12,
+  jan: 1, feb: 2, mar: 3, apr: 4, jun: 6, jul: 7, aug: 8,
+  sep: 9, oct: 10, nov: 11, dec: 12,
+};
+
+/**
+ * Attempt to parse a date string like "April 1", "Apr 8", "March 15 – April 5"
+ * Returns [year, month, day] or null.
+ * Falls back to the first date in a range if a range is detected.
+ * yearHint: the year to assume (derived from created_at).
+ */
+function parseDateString(raw: string, yearHint: number): [number, number, number] | null {
+  const cleaned = raw.replace(/\*\*/g, "").trim();
+
+  // Try "Month D" or "Month DD"
+  const simple = cleaned.match(/([A-Za-z]+)\s+(\d{1,2})/);
+  if (simple) {
+    const month = MONTH_NAMES[simple[1].toLowerCase()];
+    const day   = parseInt(simple[2], 10);
+    if (month && day >= 1 && day <= 31) return [yearHint, month, day];
+  }
+  return null;
+}
+
+/**
+ * Parse a period cell that may contain one date, a range ("April 1 – April 15"),
+ * or sub-ranges separated by line breaks / semicolons.
+ * Returns { start, end } as [year, month, day] tuples.
+ */
+function parsePeriodCell(
+  cell: string,
+  yearHint: number,
+): { start: [number, number, number]; end: [number, number, number] } | null {
+  const cleaned = cell.replace(/\*\*/g, "").replace(/<br\s*\/?>/gi, " ").trim();
+
+  // Split on "–", "—", " to ", " - "
+  const parts = cleaned.split(/\s*[–—]\s*|\s+to\s+|\s+-\s+/);
+
+  const dates = parts
+    .map((p) => parseDateString(p.trim(), yearHint))
+    .filter(Boolean) as [number, number, number][];
+
+  if (dates.length >= 2) return { start: dates[0], end: dates[dates.length - 1] };
+  if (dates.length === 1) return { start: dates[0], end: dates[0] };
+  return null;
+}
+
+// ── Markdown report parser ────────────────────────────────────────────────────
+
+function cleanCell(s: string) {
+  return s.replace(/\*\*/g, "").replace(/<br\s*\/?>/gi, " ").trim();
+}
+
+function parseReportRows(report: string): string[][] {
+  return report
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.startsWith("|") && !l.match(/^\|[\s:|-]+\|/))
+    .slice(1) // skip header
+    .map((row) =>
+      row
+        .split("|")
+        .filter((_, i, arr) => i > 0 && i < arr.length - 1)
+        .map(cleanCell),
+    );
+}
+
+function extractFarmerAdvisory(report: string): string {
+  // Matches lines after "Farmer Advisory Summary:" or "Advisory Summary:"
+  const match = report.match(/(?:Farmer\s+)?Advisory\s+Summary[:\s]+([^#\n][\s\S]+?)(?:\n\n|\n#|$)/i);
+  return match ? match[1].replace(/\*\*/g, "").trim() : "";
+}
+
+/**
+ * Build ParsedStage[] from the raw report markdown.
+ * Table columns expected: Stage | Activity | Period | Conditions | Advisory
+ * Column order is detected by scanning the header row.
+ */
+function parseStages(report: string, yearHint: number): ParsedStage[] {
+  // Detect header column positions
+  const headerLine = report
+    .split("\n")
+    .map((l) => l.trim())
+    .find((l) => l.startsWith("|") && !l.match(/^\|[\s:|-]+\|/));
+
+  if (!headerLine) return [];
+
+  const headers = headerLine
+    .split("|")
+    .filter((_, i, arr) => i > 0 && i < arr.length - 1)
+    .map((h) => h.replace(/\*\*/g, "").trim().toLowerCase());
+
+  const col = (keywords: string[]) =>
+    headers.findIndex((h) => keywords.some((k) => h.includes(k)));
+
+  const iStage      = col(["stage", "growth"]);
+  const iActivity   = col(["activity", "action", "task"]);
+  const iPeriod     = col(["period", "date", "timing", "recommended"]);
+  const iConditions = col(["condition", "key", "required"]);
+  const iAdvisory   = col(["advisory", "note", "recommendation"]);
+
+  const rows = parseReportRows(report);
+
+  const stages: ParsedStage[] = [];
+
+  rows.forEach((cols, idx) => {
+    const name       = iStage      >= 0 ? cleanCell(cols[iStage]      ?? "") : `Stage ${idx + 1}`;
+    const activity   = iActivity   >= 0 ? cleanCell(cols[iActivity]   ?? "") : "";
+    const periodRaw  = iPeriod     >= 0 ? cleanCell(cols[iPeriod]     ?? "") : "";
+    const conditions = iConditions >= 0 ? cleanCell(cols[iConditions] ?? "") : "";
+    const advisory   = iAdvisory   >= 0 ? cleanCell(cols[iAdvisory]   ?? "") : "";
+
+    const dates = parsePeriodCell(periodRaw, yearHint);
+    if (!dates) return; // skip rows we can't place on the calendar
+
+    stages.push({
+      name,
+      start: dates.start,
+      end:   dates.end,
+      activity,
+      conditions,
+      advisory,
+      colorIndex: idx,
+    });
+  });
+
+  return stages;
+}
+
+// ── Calendar helpers ──────────────────────────────────────────────────────────
+
+function toDate([y, m, d]: [number, number, number]) {
+  return new Date(y, m - 1, d);
+}
+
+function daysInMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
+}
+
+interface CalMonth { year: number; month: number; label: string; days: number }
+interface CalWeek  { start: Date; end: Date }
+
+/** Derive the month columns from the stages themselves. */
+function buildMonthColumns(stages: ParsedStage[]): CalMonth[] {
+  if (stages.length === 0) return [];
+
+  let minDate = toDate(stages[0].start);
+  let maxDate = toDate(stages[0].end);
+  stages.forEach((s) => {
+    const sd = toDate(s.start);
+    const ed = toDate(s.end);
+    if (sd < minDate) minDate = sd;
+    if (ed > maxDate) maxDate = ed;
+  });
+
+  const months: CalMonth[] = [];
+  const cursor = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+  const end    = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+
+  while (cursor <= end) {
+    const y = cursor.getFullYear();
+    const m = cursor.getMonth() + 1;
+    months.push({
+      year:  y,
+      month: m,
+      label: cursor.toLocaleString("en", { month: "long" }),
+      days:  daysInMonth(y, m),
+    });
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return months;
+}
+
+function buildWeeks(months: CalMonth[]): CalWeek[] {
+  if (months.length === 0) return [];
+  const first   = months[0];
+  const last    = months[months.length - 1];
+  const start   = new Date(first.year, first.month - 1, 1);
+  const end     = new Date(last.year,  last.month  - 1, last.days);
+  const weeks: CalWeek[] = [];
+  const cursor = new Date(start);
+  while (cursor <= end) {
     const weekEnd = new Date(cursor);
     weekEnd.setDate(weekEnd.getDate() + 6);
-    if (weekEnd > seasonEnd) weekEnd.setTime(seasonEnd.getTime());
+    if (weekEnd > end) weekEnd.setTime(end.getTime());
     weeks.push({ start: new Date(cursor), end: new Date(weekEnd) });
     cursor.setDate(cursor.getDate() + 7);
   }
   return weeks;
 }
 
-const WEEKS = generateWeeks();
-const MONTH_SHORT = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
 function stageBandInCell(
-  stage: StageConfig,
-  week: { start: Date; end: Date },
-  month: { month: number; days: number },
+  stage: ParsedStage,
+  week: CalWeek,
+  col: CalMonth,
 ): { left: number; width: number; showLabel: boolean } | null {
-  const ss = toDate(stage.start[0], stage.start[1]);
-  const se = toDate(stage.end[0],   stage.end[1]);
-  const ms = toDate(month.month, 1);
-  const me = toDate(month.month, month.days);
+  const ss = toDate(stage.start);
+  const se = toDate(stage.end);
+  const ms = new Date(col.year, col.month - 1, 1);
+  const me = new Date(col.year, col.month - 1, col.days);
   const DAY = 86400000;
 
   const cellStart = new Date(Math.max(week.start.getTime(), ms.getTime()));
@@ -144,9 +245,9 @@ function stageBandInCell(
 
   if (stStart > stEnd) return null;
 
-  const cellSpan = (cellEnd.getTime() - cellStart.getTime()) / DAY + 1;
-  const fromLeft = (stStart.getTime() - cellStart.getTime()) / DAY;
-  const duration = (stEnd.getTime()   - stStart.getTime())   / DAY + 1;
+  const cellSpan = (cellEnd.getTime()  - cellStart.getTime()) / DAY + 1;
+  const fromLeft = (stStart.getTime()  - cellStart.getTime()) / DAY;
+  const duration = (stEnd.getTime()    - stStart.getTime())   / DAY + 1;
 
   return {
     left:      (fromLeft / cellSpan) * 100,
@@ -157,31 +258,42 @@ function stageBandInCell(
 
 // ── Stage detail panel ────────────────────────────────────────────────────────
 
-const StageDetail: React.FC<{ stage: StageConfig }> = ({ stage }) => (
-  <div className="overflow-hidden rounded-2xl border border-[#EBEBEB] bg-white">
-    <div className="flex items-center gap-3 border-b border-[#EBEBEB] px-4 py-3">
-      <div className={`size-2.5 shrink-0 rounded-full ${stage.dotBg}`} />
-      <span className="flex-1 text-sm font-semibold text-[#130B30]">{stage.name}</span>
-      <span className="text-xs text-[#9E99B0]">
-        {MONTH_SHORT[stage.start[0]]} {stage.start[1]} – {MONTH_SHORT[stage.end[0]]} {stage.end[1]}
-      </span>
-    </div>
-    <div className="grid grid-cols-2 gap-3 p-4">
-      <div>
-        <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#9E99B0]">Activity</p>
-        <p className="text-xs leading-relaxed text-[#423C59]">{stage.activity}</p>
+const MONTH_SHORT = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const StageDetail: React.FC<{ stage: ParsedStage }> = ({ stage }) => {
+  const c = stageColor(stage.colorIndex);
+  return (
+    <div className="overflow-hidden rounded-2xl border border-[#EBEBEB] bg-white">
+      <div className="flex items-center gap-3 border-b border-[#EBEBEB] px-4 py-3">
+        <div className={`size-2.5 shrink-0 rounded-full ${c.dot}`} />
+        <span className="flex-1 text-sm font-semibold text-[#130B30]">{stage.name}</span>
+        <span className="text-xs text-[#9E99B0]">
+          {MONTH_SHORT[stage.start[1]]} {stage.start[2]} – {MONTH_SHORT[stage.end[1]]} {stage.end[2]}
+        </span>
       </div>
-      <div>
-        <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#9E99B0]">Key conditions</p>
-        <p className="text-xs leading-relaxed text-[#423C59]">{stage.conditions}</p>
+      <div className="grid grid-cols-2 gap-3 p-4">
+        {stage.activity && (
+          <div>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#9E99B0]">Activity</p>
+            <p className="text-xs leading-relaxed text-[#423C59]">{stage.activity}</p>
+          </div>
+        )}
+        {stage.conditions && (
+          <div>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#9E99B0]">Key conditions</p>
+            <p className="text-xs leading-relaxed text-[#423C59]">{stage.conditions}</p>
+          </div>
+        )}
       </div>
+      {stage.advisory && (
+        <div className={`mx-4 mb-4 rounded-xl border px-3 py-2.5 ${c.bg} ${c.border}`}>
+          <p className={`mb-1 text-[10px] font-bold uppercase tracking-widest ${c.text}`}>Advisory</p>
+          <p className={`text-xs leading-relaxed ${c.text}`}>{stage.advisory}</p>
+        </div>
+      )}
     </div>
-    <div className={`mx-4 mb-4 rounded-xl border px-3 py-2.5 ${stage.bg} ${stage.border}`}>
-      <p className={`mb-1 text-[10px] font-bold uppercase tracking-widest ${stage.text}`}>Advisory</p>
-      <p className={`text-xs leading-relaxed ${stage.text}`}>{stage.advisory}</p>
-    </div>
-  </div>
-);
+  );
+};
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -227,15 +339,28 @@ export const CropCalendarSheet: React.FC<{
     );
   }
 
-  const cropType  = calendarData?.data?.crop_type ?? "";
-  const coords    = calendarData?.data?.gps_coordinates ?? "";
+  const report  = calendarData?.data?.crop_calendar_report ?? "";
+  const cropType = calendarData?.data?.crop_type ?? "";
+  const coords   = calendarData?.data?.gps_coordinates ?? "";
   const updatedAt = calendarData?.updated_at
     ? new Date(calendarData.updated_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
     : "";
 
+  // Derive year from created_at so the calendar is always anchored to the right season
+  const yearHint = calendarData?.created_at
+    ? new Date(calendarData.created_at).getFullYear()
+    : new Date().getFullYear();
+
+  const stages         = parseStages(report, yearHint);
+  const farmerAdvisory = extractFarmerAdvisory(report);
+  const months         = buildMonthColumns(stages);
+  const weeks          = buildWeeks(months);
+
+  const activeStage = stages[selectedStage] ?? null;
+
   return (
     <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
-      <section className="z-50 ml-auto flex h-full max-h-[96vh] w-[90%] max-w-3xl flex-col overflow-hidden rounded-[1.25rem] bg-[#F9F8FC]">
+      <section className="z-50 ml-auto flex h-full max-h-[96vh] w-[90%] max-w-5xl flex-col overflow-hidden rounded-[1.25rem] bg-[#F9F8FC]">
 
         {/* ── Header ── */}
         <header className="flex shrink-0 items-start gap-3.5 border-b border-[#EBEBEB] bg-white px-8 py-5">
@@ -250,9 +375,11 @@ export const CropCalendarSheet: React.FC<{
               <h4 className="text-lg font-bold leading-tight text-[#130B30]">
                 {calendarData.farm_name}
               </h4>
-              <span className="rounded-full bg-[#F0EAF8] px-2.5 py-0.5 text-xs font-semibold capitalize text-[#7C3AED]">
-                {cropType}
-              </span>
+              {cropType && (
+                <span className="rounded-full bg-[#F0EAF8] px-2.5 py-0.5 text-xs font-semibold capitalize text-[#7C3AED]">
+                  {cropType}
+                </span>
+              )}
               <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium capitalize text-emerald-700">
                 {calendarData.status}
               </span>
@@ -273,100 +400,115 @@ export const CropCalendarSheet: React.FC<{
         {/* ── Scrollable body ── */}
         <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
 
-          {/* Legend */}
-          <div className="flex flex-wrap gap-x-4 gap-y-2">
-            {STAGES.map((s, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedStage(i)}
-                className="flex items-center gap-1.5 text-xs text-[#615C74] transition-opacity hover:opacity-70"
-              >
-                <span className={`inline-block size-2.5 rounded-[3px] ${s.dotBg}`} />
-                {s.name}
-              </button>
-            ))}
-          </div>
-
-          {/* Calendar grid */}
-          <div className="overflow-hidden rounded-2xl border border-[#EBEBEB] bg-white">
-
-            {/* Month header row */}
-            <div
-              className="grid border-b border-[#EBEBEB]"
-              style={{ gridTemplateColumns: "80px repeat(5, 1fr)" }}
-            >
-              <div className="border-r border-[#EBEBEB] px-3 py-2 text-[11px] font-medium text-[#9E99B0]">
-                Week
-              </div>
-              {MONTHS.map((m) => (
-                <div
-                  key={m.month}
-                  className="border-r border-[#EBEBEB] px-2 py-2 text-center text-[11px] font-medium uppercase tracking-wide text-[#615C74] last:border-r-0"
-                >
-                  {m.label}
-                </div>
-              ))}
+          {stages.length === 0 ? (
+            <div className="flex h-40 items-center justify-center rounded-2xl border border-dashed border-[#E0DAF0] bg-white">
+              <p className="text-sm text-gray-400">No calendar stages could be parsed from this report.</p>
             </div>
-
-            {/* Week rows */}
-            {WEEKS.map((week, wi) => (
-              <div
-                key={wi}
-                className="grid border-b border-[#EBEBEB] last:border-b-0"
-                style={{ gridTemplateColumns: "80px repeat(5, 1fr)", minHeight: 34 }}
-              >
-                {/* Week label */}
-                <div className="flex items-center border-r border-[#EBEBEB] px-3 py-1 text-[11px] text-[#9E99B0]">
-                  {week.start.toLocaleString("en", { month: "short" })} {week.start.getDate()}
-                </div>
-
-                {/* Month cells */}
-                {MONTHS.map((m) => {
-                  const bands = STAGES.flatMap((stage, si) => {
-                    const b = stageBandInCell(stage, week, m);
-                    if (!b) return [];
-                    return [{ ...b, stage, si }];
-                  });
-
+          ) : (
+            <>
+              {/* Legend */}
+              <div className="flex flex-wrap gap-x-4 gap-y-2">
+                {stages.map((s, i) => {
+                  const c = stageColor(s.colorIndex);
                   return (
-                    <div
-                      key={m.month}
-                      className="relative border-r border-[#EBEBEB] last:border-r-0"
-                      style={{ minHeight: 34 }}
+                    <button
+                      key={i}
+                      onClick={() => setSelectedStage(i)}
+                      className="flex items-center gap-1.5 text-xs text-[#615C74] transition-opacity hover:opacity-70"
                     >
-                      {bands.map((b, bi) => (
-                        <button
-                          key={bi}
-                          onClick={() => setSelectedStage(b.si)}
-                          className={`absolute bottom-1 top-1 flex items-center overflow-hidden rounded border px-1.5 text-[11px] font-medium transition-opacity hover:opacity-75 ${b.stage.bg} ${b.stage.border} ${b.stage.text}`}
-                          style={{ left: `${b.left}%`, width: `${b.width}%` }}
-                        >
-                          {b.showLabel && (
-                            <span className="truncate">{b.stage.name}</span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
+                      <span className={`inline-block size-2.5 rounded-[3px] ${c.dot}`} />
+                      {s.name}
+                    </button>
                   );
                 })}
               </div>
-            ))}
-          </div>
 
-          {/* Stage detail */}
-          <StageDetail stage={STAGES[selectedStage]} />
+              {/* Calendar grid */}
+              <div className="overflow-x-auto rounded-2xl border border-[#EBEBEB] bg-white">
+                <div style={{ minWidth: `${80 + months.length * 120}px` }}>
+
+                  {/* Month header */}
+                  <div
+                    className="grid border-b border-[#EBEBEB]"
+                    style={{ gridTemplateColumns: `80px repeat(${months.length}, 1fr)` }}
+                  >
+                    <div className="border-r border-[#EBEBEB] px-3 py-2 text-[11px] font-medium text-[#9E99B0]">
+                      Week
+                    </div>
+                    {months.map((m) => (
+                      <div
+                        key={`${m.year}-${m.month}`}
+                        className="border-r border-[#EBEBEB] px-2 py-2 text-center text-[11px] font-medium uppercase tracking-wide text-[#615C74] last:border-r-0"
+                      >
+                        {m.label}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Week rows */}
+                  {weeks.map((week, wi) => (
+                    <div
+                      key={wi}
+                      className="grid border-b border-[#EBEBEB] last:border-b-0"
+                      style={{ gridTemplateColumns: `80px repeat(${months.length}, 1fr)`, minHeight: 34 }}
+                    >
+                      <div className="flex items-center border-r border-[#EBEBEB] px-3 py-1 text-[11px] text-[#9E99B0]">
+                        {week.start.toLocaleString("en", { month: "short" })} {week.start.getDate()}
+                      </div>
+
+                      {months.map((m) => {
+                        const bands = stages.flatMap((stage, si) => {
+                          const b = stageBandInCell(stage, week, m);
+                          if (!b) return [];
+                          return [{ ...b, stage, si }];
+                        });
+
+                        return (
+                          <div
+                            key={`${m.year}-${m.month}`}
+                            className="relative border-r border-[#EBEBEB] last:border-r-0"
+                            style={{ minHeight: 34 }}
+                          >
+                            {bands.map((b, bi) => {
+                              const c = stageColor(b.stage.colorIndex);
+                              return (
+                                <button
+                                  key={bi}
+                                  onClick={() => setSelectedStage(b.si)}
+                                  className={`absolute bottom-1 top-1 flex items-center overflow-hidden rounded border px-1.5 text-[11px] font-medium transition-opacity hover:opacity-75 ${c.bg} ${c.border} ${c.text}`}
+                                  style={{ left: `${b.left}%`, width: `${b.width}%` }}
+                                >
+                                  {b.showLabel && (
+                                    <span className="truncate">{b.stage.name}</span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stage detail */}
+              {activeStage && <StageDetail stage={activeStage} />}
+            </>
+          )}
 
           {/* Farmer advisory */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-700">
-              Farmer advisory
-            </p>
-            <p className="text-xs leading-relaxed text-amber-900">
-              Plant maize between April 1–15 for optimal yields, aligning with reliable first rains.
-              Consider early-maturing varieties if planting after April 20. Always use certified seeds,
-              ensure proper spacing, and implement good weed and moisture management practices.
-            </p>
-          </div>
+          {farmerAdvisory && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <div className="mb-1.5 flex items-center gap-2">
+                <AlertCircle size={13} className="shrink-0 text-amber-600" />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">
+                  Farmer advisory
+                </p>
+              </div>
+              <p className="text-xs leading-relaxed text-amber-900">{farmerAdvisory}</p>
+            </div>
+          )}
         </div>
       </section>
     </section>
