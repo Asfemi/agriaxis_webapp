@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { RenameResultModal } from "@/components/dashboard/RenameResultModal";
 import type { CropInformationAnalytics } from "@/models/crop-information.model";
 import { useDeleteCropInformationAnalysis, useRenameCropInformationAnalysis } from "@/api/crop-information";
-import { ClimateInformationSheet } from "./ClimateInformationSheet";
+import { ClimateInformationSheet } from "@/components/crop-information/ClimateInformationSheet";
 
 export const ClimateAnalysisHistoryTable: React.FC<{ data: CropInformationAnalytics[] }> = ({ data }) => {
   const columnDefinition: Array<ColumnDef<CropInformationAnalytics>> = [
