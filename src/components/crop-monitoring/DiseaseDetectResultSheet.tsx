@@ -11,14 +11,8 @@ export const DiseaseDetectResultSheet: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <section
-      className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity"
-      onClick={onClose}
-    >
-      <section
-        className="z-50 ml-auto h-full w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-white p-8"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
+      <section className="z-50 ml-auto h-full w-3/4 max-w-xl overflow-y-auto rounded-[1.25rem] bg-white p-8">
         <header className="mb-10 flex items-center gap-3.5">
           <button
             onClick={onClose}
@@ -69,7 +63,7 @@ export const DiseaseDetectResultSheet: React.FC<{
             </span>
           </div>
           <div
-            className="h-40 w-full bg-cover mb-4"
+            className="mb-4 h-40 w-full bg-cover"
             style={{ backgroundImage: `url(${result.data.images[0]})` }}
           ></div>
           <div className="pb-8">
@@ -78,7 +72,10 @@ export const DiseaseDetectResultSheet: React.FC<{
             </h6>
             <section className="space-y-4">
               {result.data.predictions.map((entry, index) => (
-                <div key={index} className="w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div
+                  key={index}
+                  className="w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+                >
                   <div className="mb-4">
                     <h2 className="font-neue text-sm font-semibold text-[#130B30]">
                       Name
@@ -113,7 +110,9 @@ export const DiseaseDetectResultSheet: React.FC<{
                           No common names found
                         </p>
                       ) : (
-                        entry.common_names.map((name, index) => <li key={index}>{name}</li>)
+                        entry.common_names.map((name, index) => (
+                          <li key={index}>{name}</li>
+                        ))
                       )}
                     </ul>
                   </div>
@@ -159,7 +158,9 @@ export const DiseaseDetectResultSheet: React.FC<{
                           No treatment found
                         </p>
                       ) : (
-                        entry.treatment.map((treatment, index) => <li key={index}>{treatment}</li>)
+                        entry.treatment.map((treatment, index) => (
+                          <li key={index}>{treatment}</li>
+                        ))
                       )}
                     </ul>
                   </div>
