@@ -77,8 +77,8 @@ export const DiseaseDetectResultSheet: React.FC<{
               {`Planting date: - ${formatDate(result.datetime)}`}
             </h6>
             <section className="space-y-4">
-              {result.data.predictions.map((entry) => (
-                <div className="w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              {result.data.predictions.map((entry, index) => (
+                <div key={index} className="w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                   <div className="mb-4">
                     <h2 className="font-neue text-sm font-semibold text-[#130B30]">
                       Name
@@ -113,7 +113,7 @@ export const DiseaseDetectResultSheet: React.FC<{
                           No common names found
                         </p>
                       ) : (
-                        entry.common_names.map((name) => <li>{name}</li>)
+                        entry.common_names.map((name, index) => <li key={index}>{name}</li>)
                       )}
                     </ul>
                   </div>
@@ -159,7 +159,7 @@ export const DiseaseDetectResultSheet: React.FC<{
                           No treatment found
                         </p>
                       ) : (
-                        entry.treatment.map((treatment) => <li>{treatment}</li>)
+                        entry.treatment.map((treatment, index) => <li key={index}>{treatment}</li>)
                       )}
                     </ul>
                   </div>
