@@ -338,7 +338,7 @@ export const CropCalendarSheet: React.FC<{
                         <button
                           key={bi}
                           onClick={() => setSelectedStage(b.si)}
-                          className={`absolute bottom-[4px] top-[4px] flex items-center overflow-hidden rounded border px-1.5 text-[11px] font-medium transition-opacity hover:opacity-75 ${b.stage.bg} ${b.stage.border} ${b.stage.text}`}
+                          className={`absolute bottom-1 top-1 flex items-center overflow-hidden rounded border px-1.5 text-[11px] font-medium transition-opacity hover:opacity-75 ${b.stage.bg} ${b.stage.border} ${b.stage.text}`}
                           style={{ left: `${b.left}%`, width: `${b.width}%` }}
                         >
                           {b.showLabel && (

@@ -33,6 +33,7 @@ export const WeatherAnalysisHistoryTable: React.FC<{ data: CropInformationAnalyt
       cell: ({ row }) => (
         <StatusBadge<CropInformationAnalytics["status"]>
           status={row.original.status ?? "-"}
+          variant={row.original.status === "completed" ? "success" : "warning"}
         />
       ),
     },

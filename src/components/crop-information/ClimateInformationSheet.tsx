@@ -1,29 +1,6 @@
 import { useGetCropInformationAnalysis } from "@/api/crop-information";
+import type { UpdatedClimateAnalysisData } from "@/models/crop-information.model";
 import { ChevronLeft, Thermometer, Droplets, Wind, AlertTriangle, CloudRain, Sun, CalendarDays } from "lucide-react";
-
-// ── Types ────────────────────────────────────────────────────────────────────
-
-export interface UpdatedClimateAnalysisData {
-  id: string;
-  test_id: string;
-  subsection: string;
-  status: string;
-  name: string;
-  farm_name: string;
-  org_farm_id: string;
-  external_farm_id: string;
-  payment: string | null;
-  amount_paid: string | null;
-  currency: string | null;
-  created_at: string;
-  updated_at: string;
-  error_message: string | null;
-  data: {
-    climate_report: string;
-    crop_type: string;
-    gps_coordinates: string;
-  };
-}
 
 // ── Markdown table parser ────────────────────────────────────────────────────
 
