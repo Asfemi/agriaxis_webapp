@@ -1,4 +1,4 @@
-export type FarmStatus = "healthy" | "no data" | "average" | "poor";
+export type FarmStatus = "healthy" | "no data" | "average" | "poor" | "empty";
 export type NutrientLevel = "High" | "Medium" | "Low" | "-";
 
 export interface FarmStatValues {

@@ -23,6 +23,11 @@ const STATUS_STYLES: Record<FarmStatus, StatusStyle> = {
     badge: "bg-[#E7E7EA] text-[#423C59]",
     valueText: "text-[#423C59]",
   },
+  "empty": {
+    label: "No data",
+    badge: "bg-[#E7E7EA] text-[#423C59]",
+    valueText: "text-[#423C59]",
+  },
   average: {
     label: "Average",
     badge: "bg-[#FFEEBE] text-[#674A00]",
