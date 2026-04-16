@@ -13,8 +13,10 @@ import { RequestCropCalendarInformationSheetsContainer } from "@/components/crop
 export const CalendarServicePage = () => {
   const [showRequestSheet, setShowRequestSheet] = useState(false);
   const { data: dashboardData } = useGetCropCalendarDashboard();
-  const onRequestInformation = () => {};
   const router = useRouter()
+  const onRequestInformation = () => {
+    setShowRequestSheet(true)
+  };
 
   return (
     <>

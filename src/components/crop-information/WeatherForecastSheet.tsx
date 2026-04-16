@@ -99,8 +99,9 @@ export const WeatherForecastSheet: React.FC<{
             </div>
           </div>
           <div className="hide-scrollbar flex w-full items-center gap-3 overflow-x-auto">
-            {weatherData.data.weather_forecast[0].hour.map((entry) => (
+            {weatherData.data.weather_forecast[0].hour.map((entry, index) => (
               <ForecastTime
+                key={index}
                 time={formatTimeEpoch(entry.time_epoch)}
                 temparature={Math.floor(entry.temp_c)}
                 icon_url={`https:${entry.condition.icon}`}
