@@ -5,7 +5,7 @@ import { useSearch } from "@tanstack/react-router";
 
 const paymentSearchSchema = z.object({
   status: z.string().optional(),
-  transaction_id: z.string().optional(),
+  transaction_id: z.union([z.string(), z.number()]).optional(),
   tx_ref: z.string().optional(),
 });
 
