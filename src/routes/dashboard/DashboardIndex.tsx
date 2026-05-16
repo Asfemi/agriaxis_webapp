@@ -68,6 +68,16 @@ function DashboardIndex({ farmListPath = "farms" }) {
             </div>
           </section>
           <section className="mb-6">
+            <header className="mb-4">
+              <h1 className="font-neue text-lg font-semibold text-[#939397] sm:text-xl">
+                Soil tests overview
+              </h1>
+            </header>
+            <div className="w-full grid place-items-center">
+              <p>No soil tests overview</p>
+            </div>
+          </section>
+          <section className="mb-6">
             <header className="mb-4 flex items-center justify-between">
               <h1 className="font-neue text-lg font-semibold text-[#939397] sm:text-xl">
                 Farm overview
