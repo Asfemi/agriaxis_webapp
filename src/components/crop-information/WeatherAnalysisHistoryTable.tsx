@@ -42,7 +42,7 @@ export const WeatherAnalysisHistoryTable: React.FC<{ data: CropInformationAnalyt
       header: "Payment",
       cell: ({ row }) => (
         <span>
-          ₦{row.original.amount_paid ? row.original.amount_paid.toLocaleString() : 0}
+          {row.original.amount_paid ? row.original.amount_paid.toLocaleString() : 0}
         </span>
       ),
     },

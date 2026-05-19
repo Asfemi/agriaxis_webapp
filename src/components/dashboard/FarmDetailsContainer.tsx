@@ -38,7 +38,7 @@ export const FarmDetailsContainer = ({
     {
       accessorKey: "payment",
       header: "Payment",
-      cell: ({ row }) => <span>₦{row.original.payment.toLocaleString()}</span>,
+      cell: ({ row }) => <span>{row.original.payment.toLocaleString()}</span>,
     },
     {
       accessorKey: "date",

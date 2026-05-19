@@ -85,7 +85,7 @@ export const FarmSizeForMeasurementCard: React.FC<{
                     <div>
                       <p className="text-[#615C74]">Price</p>
                       <p className="font-medium text-[#100A37]">
-                        ₦{initialCost?.amount ?? 0}
+                        {initialCost?.amount ?? 0}
                       </p>
                     </div>
                   </div>
@@ -99,7 +99,7 @@ export const FarmSizeForMeasurementCard: React.FC<{
                           <LoaderCircle className="animate-spin" />
                         </span>
                       ) : (
-                        <>₦{cost?.amount ?? 0}</>
+                        <>{cost?.amount ?? 0}</>
                       )}
                     </p>
                   </div>

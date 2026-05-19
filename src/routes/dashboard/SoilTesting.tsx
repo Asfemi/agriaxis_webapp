@@ -44,7 +44,7 @@ function SoilTesting() {
                 {isLoadingCost ? (
                   <LoaderCircle className="mx-auto animate-spin" />
                 ) : (
-                  `Request Test ₦${cost?.amount ?? 0}`
+                  `Request Test ${cost?.amount ?? 0}`
                 )}
               </Button>
             </div>
@@ -75,7 +75,7 @@ function SoilTesting() {
                 </div>
               }
               title="Total Expense"
-              value={`₦${data.total_revenue.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`}
+              value={`${data.total_revenue.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`}
             />
             <StatCard
               icon={

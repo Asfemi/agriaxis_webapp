@@ -49,7 +49,7 @@ export const CropHealthServicePage: React.FC<{
           </div>
           <div>
             <Button variant="primary" onClick={() => onRequestInformation()}>
-              Request Information ₦15,000
+              Request Information 15,000
             </Button>
           </div>
         </header>
