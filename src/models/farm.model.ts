@@ -24,10 +24,11 @@ export interface FarmTest {
 export const NewFarmSchema = z.object({
   farm_name: z.string().optional(),
   farm_size: z.string().optional(),
-  size_hectares: z.number().optional(),
+  size_number: z.number().optional(),
   size_unit: z.string().optional(),
   coordinatesCsv: z.string().optional(),
   crop_type: z.array(z.string()).optional(),
+  other_crop_type: z.string().optional(),
   state: z.string().optional(),
   city: z.string().optional(),
   lga: z.string().optional(),

@@ -74,7 +74,6 @@ export const ManualMapMeasurementCard: React.FC<{
    */
   const handleConfirm = () => {
     const result = points.map((coord) => coord.coordinate).join(",");
-    console.log("manual coordinates", result);
     onConfirm(result);
   };
 
