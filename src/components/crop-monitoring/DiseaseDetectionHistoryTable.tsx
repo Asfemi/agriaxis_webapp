@@ -48,7 +48,7 @@ export const DiseaseDetectionHistoryTable = () => {
       header: "Payment",
       cell: ({ row }) => (
         <span>
-          ₦{row.original.payment ? row.original.payment.toLocaleString() : 0}
+          {row.original.payment ? row.original.payment.toLocaleString() : 0}
         </span>
       ),
     },

@@ -158,7 +158,7 @@ export const CropMonitoringServicePage: React.FC<{
         <div>
           {(!diseaseSub || diseaseSub.status !== 'active') ? (
             <Button variant="primary" onClick={() => onSubscribeToDisease()}>
-              Subscribe to Pest Disease Monitoring ₦5,000
+              Subscribe to Pest Disease Monitoring 5,000
             </Button>
           ) : (
             <Button variant="primary" onClick={() => onRequestInformation()}>

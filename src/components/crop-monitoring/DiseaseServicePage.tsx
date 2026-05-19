@@ -50,7 +50,7 @@ export const DiseaseServicePage: React.FC<{
           </div>
           <div>
             <Button variant="primary" onClick={() => onRequestInformation()}>
-              Request Pest/Disease Monitoring Information ₦5,000
+              Request Pest/Disease Monitoring Information 5,000
             </Button>
           </div>
         </header>
