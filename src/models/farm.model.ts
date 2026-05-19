@@ -29,9 +29,10 @@ export const NewFarmSchema = z.object({
   coordinatesCsv: z.string().optional(),
   crop_type: z.array(z.string()).optional(),
   other_crop_type: z.string().optional(),
+  country: z.string().optional(),
   state: z.string().optional(),
   city: z.string().optional(),
-  lga: z.string().optional(),
+  // lga: z.string().optional(),
   address: z.string().optional(),
 });
 

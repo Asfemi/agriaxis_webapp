@@ -45,10 +45,23 @@ export const NewFarmForm: React.FC<{
     },
   });
 
-  const { data: locations } = useLocations();
-
   const selectedStateName = watch("state");
   const selectedCropType = watch("crop_type");
+  const selectedCountry = watch("country");
+
+  const { data: locations } = useLocations(selectedCountry);
+
+  const country_options = [
+    { label: "Nigeria", value: "nigeria" },
+    { label: "Ghana", value: "ghana" },
+    { label: "Kenya", value: "kenya" },
+    { label: "Ethiopia", value: "ethiopia" },
+    { label: "Tanzania", value: "tanzania" },
+    { label: "Uganda", value: "uganda" },
+    { label: "Rwanda", value: "rwanda" },
+    { label: "South Africa", value: "south_africa" },
+    { label: "Cote D'Ivoire", value: "cote_d_ivoire" },
+  ];
 
   const state_options = useMemo(() => {
     return (
@@ -59,15 +72,15 @@ export const NewFarmForm: React.FC<{
     );
   }, [locations]);
 
-  const lga_options = useMemo(() => {
-    if (!selectedStateName || !locations) return [];
-
-    const stateMatch = locations.find((loc) => loc.name === selectedStateName);
-
-    return stateMatch
-      ? stateMatch.lgas.map((lga) => ({ label: lga, value: lga }))
-      : [];
-  }, [selectedStateName, locations]);
+  // const lga_options = useMemo(() => {
+  //   if (!selectedStateName || !locations) return [];
+  //
+  //   const stateMatch = locations.find((loc) => loc.name === selectedStateName);
+  //
+  //   return stateMatch
+  //     ? stateMatch.lgas.map((lga) => ({ label: lga, value: lga }))
+  //     : [];
+  // }, [selectedStateName, locations]);
 
   const city_options = useMemo(() => {
     if (!selectedStateName || !locations) return [];
@@ -239,6 +252,28 @@ export const NewFarmForm: React.FC<{
                 render={({ field }) => (
                   <SelectDropdown
                     mode="single"
+                    label="Country"
+                    options={country_options}
+                    placeholder="Select country"
+                    headerTitle="Select country"
+                    value={field.value || null}
+                    onChange={(value) => field.onChange(value)}
+                  />
+                )}
+              />
+              {errors.country && (
+                <p className="mt-1 text-xs text-red-600">
+                  {errors.country?.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Controller
+                name="state"
+                control={control}
+                render={({ field }) => (
+                  <SelectDropdown
+                    mode="single"
                     label="State"
                     options={state_options}
                     placeholder="Select state"
@@ -254,28 +289,30 @@ export const NewFarmForm: React.FC<{
                 </p>
               )}
             </div>
-            <div>
-              <Controller
-                name="lga"
-                control={control}
-                render={({ field }) => (
-                  <SelectDropdown
-                    mode="single"
-                    label="Local Government (LGA)"
-                    options={lga_options}
-                    placeholder="Select LGA"
-                    headerTitle="Select LGA"
-                    value={field.value || null}
-                    onChange={(value) => field.onChange(value)}
-                  />
-                )}
-              />
-              {errors.lga && (
-                <p className="mt-1 text-xs text-red-600">
-                  {errors.lga?.message}
-                </p>
-              )}
-            </div>
+            {/**
+               <div>
+               <Controller
+               name="lga"
+               control={control}
+               render={({ field }) => (
+               <SelectDropdown
+               mode="single"
+               label="Local Government (LGA)"
+               options={lga_options}
+               placeholder="Select LGA"
+               headerTitle="Select LGA"
+               value={field.value || null}
+               onChange={(value) => field.onChange(value)}
+               />
+               )}
+               />
+               {errors.lga && (
+               <p className="mt-1 text-xs text-red-600">
+               {errors.lga?.message}
+               </p>
+               )}
+               </div>
+             */}
             <div>
               <Controller
                 name="city"
