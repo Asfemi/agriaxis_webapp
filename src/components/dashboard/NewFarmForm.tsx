@@ -24,6 +24,7 @@ const crop_type_options: SelectOption[] = [
   { label: "Quinoa", value: "quinoa" },
   { label: "Oats", value: "oats" },
   { label: "Millet", value: "millet" },
+  { label: "Others", value: "others" },
 ];
 
 export const NewFarmForm: React.FC<{
@@ -47,6 +48,7 @@ export const NewFarmForm: React.FC<{
   const { data: locations } = useLocations();
 
   const selectedStateName = watch("state");
+  const selectedCropType = watch("crop_type");
 
   const state_options = useMemo(() => {
     return (
@@ -76,13 +78,20 @@ export const NewFarmForm: React.FC<{
       : [];
   }, [selectedStateName, locations]);
 
+  const showOthers = selectedCropType?.includes("others");
+  const otherCropType = showOthers ? watch("other_crop_type") : undefined;
+
   const onSubmit = (data: NewFarmFormData) => {
     const formattedData = {
       ...data,
       farm_size:
-        data.size_hectares && data.size_unit
-          ? `${data.size_hectares} ${data.size_unit}`
+        data.size_number && data.size_unit
+          ? `${data.size_number} ${data.size_unit}`
           : undefined,
+      crop_type: [
+        ...(data.crop_type || []),
+        ...(showOthers ? [otherCropType as string] : []),
+      ],
     };
     onConfirm(formattedData);
   };
@@ -141,7 +150,9 @@ export const NewFarmForm: React.FC<{
                 </label>
                 <div className="rounded-lg bg-[#F3F6F8] p-3.5">
                   <input
-                    {...register("size_hectares", { valueAsNumber: true })}
+                    {...register("size_number", {
+                      setValueAs: (v) => (v === "" ? 0 : parseFloat(v)),
+                    })}
                     id="farm_size"
                     type="number"
                     step="0.01"
@@ -168,9 +179,9 @@ export const NewFarmForm: React.FC<{
                 />
               </div>
             </div>
-            {errors.size_hectares && (
+            {errors.size_number && (
               <p className="inline text-xs text-red-600">
-                {errors.size_hectares?.message}
+                {errors.size_number?.message}
               </p>
             )}
             <div>
@@ -195,6 +206,25 @@ export const NewFarmForm: React.FC<{
                 </p>
               )}
             </div>
+            {showOthers && (
+              <div>
+                <label
+                  htmlFor="farm_size"
+                  className="mb-1.5 text-sm text-[#130B30]"
+                >
+                  Other crop type
+                </label>
+                <div className="rounded-lg bg-[#F3F6F8] p-3.5">
+                  <input
+                    {...register("other_crop_type")}
+                    id="other_crop_type"
+                    type="text"
+                    className="w-full border-none text-sm text-[#423C59] outline-0 placeholder:text-sm placeholder:text-[#423C59] placeholder:opacity-70"
+                    placeholder="What is your crop type"
+                  />
+                </div>
+              </div>
+            )}
           </section>
           <section className="space-y-6">
             <header>
