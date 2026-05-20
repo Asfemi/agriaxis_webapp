@@ -7,7 +7,7 @@ export const useLocations = (country?: string) => {
     queryKey: ["locations", country],
     queryFn: async () => {
       const { data } = await apiClient.get<{ items: Location[] }>(
-        "/locations/nigerian-cities",
+        "/locations/provinces",
         { params: { country: country } },
       );
       return data.items;

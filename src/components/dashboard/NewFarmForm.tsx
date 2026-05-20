@@ -3,7 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/Button";
 import { SelectDropdown } from "@/components/SelectDropdown";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocations } from "@/api/locations";
 import { NewFarmSchema, type NewFarmFormData } from "@/models/farm.model";
 import { type SelectOption } from "@/components/SelectDropdown";
@@ -48,8 +48,13 @@ export const NewFarmForm: React.FC<{
   const selectedStateName = watch("state");
   const selectedCropType = watch("crop_type");
   const selectedCountry = watch("country");
+  const [countryValue, setCountryValue] = useState("nigeria");
 
-  const { data: locations } = useLocations(selectedCountry);
+  const { data: locations } = useLocations(countryValue);
+
+  useEffect(() => {
+    if (selectedCountry) setCountryValue(selectedCountry);
+  }, [selectedCountry]);
 
   const country_options = [
     { label: "Nigeria", value: "nigeria" },
@@ -153,50 +158,52 @@ export const NewFarmForm: React.FC<{
                 </p>
               )}
             </div>
-            <div className="mb-1 flex items-center gap-2">
-              <div className="grow">
-                <label
-                  htmlFor="farm_size"
-                  className="mb-1.5 text-sm text-[#130B30]"
-                >
-                  Farm size
-                </label>
-                <div className="rounded-lg bg-[#F3F6F8] p-3.5">
-                  <input
-                    {...register("size_number", {
-                      setValueAs: (v) => (v === "" ? 0 : parseFloat(v)),
-                    })}
-                    id="farm_size"
-                    type="number"
-                    step="0.01"
-                    className="w-full border-none text-sm text-[#423C59] outline-0 placeholder:text-sm placeholder:text-[#423C59] placeholder:opacity-70"
-                    placeholder="What is your farm size"
+            <div>
+              <div className="mb-1 flex items-center gap-2">
+                <div className="grow">
+                  <label
+                    htmlFor="farm_size"
+                    className="mb-1.5 text-sm text-[#130B30]"
+                  >
+                    Farm size
+                  </label>
+                  <div className="rounded-lg bg-[#F3F6F8] p-3.5">
+                    <input
+                      {...register("size_number", {
+                        setValueAs: (v) => (v === "" ? 0 : parseFloat(v)),
+                      })}
+                      id="farm_size"
+                      type="number"
+                      step="0.01"
+                      className="w-full border-none text-sm text-[#423C59] outline-0 placeholder:text-sm placeholder:text-[#423C59] placeholder:opacity-70"
+                      placeholder="What is your farm size"
+                    />
+                  </div>
+                </div>
+                <div className="min-w-27">
+                  <Controller
+                    name="size_unit"
+                    control={control}
+                    render={({ field }) => (
+                      <SelectDropdown
+                        mode="single"
+                        label="Farm size unit"
+                        options={farm_size_options}
+                        value={field.value || null}
+                        onChange={(value) => field.onChange(value)}
+                        placeholder="Select unit"
+                        headerTitle="Select unit"
+                      />
+                    )}
                   />
                 </div>
               </div>
-              <div className="min-w-27">
-                <Controller
-                  name="size_unit"
-                  control={control}
-                  render={({ field }) => (
-                    <SelectDropdown
-                      mode="single"
-                      label="Farm size unit"
-                      options={farm_size_options}
-                      value={field.value || null}
-                      onChange={(value) => field.onChange(value)}
-                      placeholder="Select unit"
-                      headerTitle="Select unit"
-                    />
-                  )}
-                />
-              </div>
+              {errors.size_number && (
+                <p className="inline text-xs text-red-600">
+                  {errors.size_number?.message}
+                </p>
+              )}
             </div>
-            {errors.size_number && (
-              <p className="inline text-xs text-red-600">
-                {errors.size_number?.message}
-              </p>
-            )}
             <div>
               <Controller
                 name="crop_type"
@@ -247,7 +254,7 @@ export const NewFarmForm: React.FC<{
             </header>
             <div>
               <Controller
-                name="state"
+                name="country"
                 control={control}
                 render={({ field }) => (
                   <SelectDropdown
@@ -274,10 +281,10 @@ export const NewFarmForm: React.FC<{
                 render={({ field }) => (
                   <SelectDropdown
                     mode="single"
-                    label="State"
+                    label="State/Province"
                     options={state_options}
-                    placeholder="Select state"
-                    headerTitle="Select state"
+                    placeholder="Select state/province"
+                    headerTitle="Select state/province"
                     value={field.value || null}
                     onChange={(value) => field.onChange(value)}
                   />
@@ -313,28 +320,30 @@ export const NewFarmForm: React.FC<{
                )}
                </div>
              */}
-            <div>
-              <Controller
-                name="city"
-                control={control}
-                render={({ field }) => (
-                  <SelectDropdown
-                    mode="single"
-                    label="City"
-                    options={city_options}
-                    placeholder="Select city"
-                    headerTitle="Select city"
-                    value={field.value || null}
-                    onChange={(value) => field.onChange(value)}
-                  />
+            {countryValue === "nigeria" && (
+              <div>
+                <Controller
+                  name="city"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectDropdown
+                      mode="single"
+                      label="City"
+                      options={city_options}
+                      placeholder="Select city"
+                      headerTitle="Select city"
+                      value={field.value || null}
+                      onChange={(value) => field.onChange(value)}
+                    />
+                  )}
+                />
+                {errors.city && (
+                  <p className="mt-1 text-xs text-red-600">
+                    {errors.city?.message}
+                  </p>
                 )}
-              />
-              {errors.city && (
-                <p className="mt-1 text-xs text-red-600">
-                  {errors.city?.message}
-                </p>
-              )}
-            </div>
+              </div>
+            )}
             <div className="mb-20">
               <label
                 htmlFor="address"
