@@ -1,5 +1,5 @@
 import { Button } from "@/components/Button";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, LoaderCircle } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 import testingIcon from "/assets/icons/testing.svg";
 import testingIconGreen from "/assets/icons/soil.svg";
@@ -8,12 +8,14 @@ import type { CropMonitoringDashboardResponse } from "@/models/crop-monitoring.m
 import { useState } from "react";
 import { RequestCropHealthSheetsContainer } from "@/components/crop-monitoring/RequestCropHealthSheetsContainer";
 import { CropHealthHistoryTable } from "@/components/crop-monitoring/CropHealthHistoryTable";
+import { useGetCost } from "@/api/payments";
 
 export const CropHealthServicePage: React.FC<{
   onClose: () => void;
   data: CropMonitoringDashboardResponse | undefined;
 }> = ({ onClose, data }) => {
   const [showRequestHealthSheet, setShowRequestHealthSheet] = useState(false);
+  const { data: cost, isLoading: isLoadingCost } = useGetCost("crop-health", 1);
 
   const displayData = (() => {
     if (!data) {
@@ -49,7 +51,11 @@ export const CropHealthServicePage: React.FC<{
           </div>
           <div>
             <Button variant="primary" onClick={() => onRequestInformation()}>
-              Request Information 15,000
+              {isLoadingCost ? (
+                <LoaderCircle className="mx-auto animate-spin" />
+              ) : (
+                `Request Information ${cost?.currency ?? ""}${cost?.amount ?? "N/A"}`
+              )}
             </Button>
           </div>
         </header>

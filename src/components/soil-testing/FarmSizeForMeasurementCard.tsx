@@ -24,7 +24,7 @@ export const FarmSizeForMeasurementCard: React.FC<{
   );
 
   const onSubmit = (data: SoilTestingFormData) => {
-    updateFormData({ ...data, cost: cost?.amount ?? 0 });
+    updateFormData({ ...data, cost: cost?.amount ?? 0, currency: cost?.currency });
     onConfirm();
   };
 

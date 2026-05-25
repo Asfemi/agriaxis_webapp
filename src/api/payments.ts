@@ -20,6 +20,7 @@ export const useGetCost = (service: string, hectares: number) => {
     queryFn: async () => {
       const { data } = await apiClient.get<{
         amount: number;
+        currency: string;
         service: string;
         hectares: number;
       }>("/payments/cost", { params: { service, hectares } });

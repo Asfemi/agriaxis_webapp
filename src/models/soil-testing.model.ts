@@ -20,6 +20,7 @@ export const SoilTestingSchema = z.object({
   coordinatesCsv: z.string().optional(),
   crop: z.string().optional(),
   depth: z.string().optional(),
+  currency: z.string().optional(),
   cost: z.number().optional(),
 });
 
