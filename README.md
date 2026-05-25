@@ -1,4 +1,6 @@
-Welcome to your new TanStack app! 
+Welcome to the agriaxis webapp
+uses laravel for BE
+uses TanStack for routing!
 
 # Getting Started
 
@@ -477,6 +479,8 @@ export default App;
 We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
 
 Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
+
+we would later setup linting as well
 
 You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
 
