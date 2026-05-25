@@ -28,6 +28,13 @@ const countries = [
     value: "ghana",
     label: "Ghana",
   },
+  { label: "Kenya", value: "kenya" },
+  { label: "Ethiopia", value: "ethiopia" },
+  { label: "Tanzania", value: "tanzania" },
+  { label: "Uganda", value: "uganda" },
+  { label: "Rwanda", value: "rwanda" },
+  { label: "South Africa", value: "south_africa" },
+  { label: "Cote D'Ivoire", value: "cote_d_ivoire" },
 ];
 
 function SelectCountryCard() {
@@ -137,8 +144,6 @@ export default (parentRoute: AnyRoute) =>
     component: SelectCountryCard,
     getParentRoute: () => parentRoute,
     head: () => ({
-      meta: [
-        { title: "Select Country" }
-      ]
-    })
+      meta: [{ title: "Select Country" }],
+    }),
   });
