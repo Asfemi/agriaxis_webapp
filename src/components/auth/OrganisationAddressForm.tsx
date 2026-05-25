@@ -4,7 +4,7 @@ import {
   OrganisationSchema,
   type OrganisationFormData,
 } from "@/models/organisation.model";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useOrganisationStore } from "@/stores/useOrganisationStore";
 import { SelectDropdown } from "@/components/SelectDropdown";
 import { useLocations } from "@/api/locations";
@@ -27,8 +27,27 @@ export default function OrganisationAddressForm() {
     defaultValues: formData,
   });
 
-  const { data: locations } = useLocations();
   const selectedStateName = watch("state");
+  const selectedCountry = watch("country");
+  const [countryValue, setCountryValue] = useState("nigeria");
+
+  const { data: locations } = useLocations(countryValue);
+
+  const country_options = [
+    { label: "Nigeria", value: "nigeria" },
+    { label: "Ghana", value: "ghana" },
+    { label: "Kenya", value: "kenya" },
+    { label: "Ethiopia", value: "ethiopia" },
+    { label: "Tanzania", value: "tanzania" },
+    { label: "Uganda", value: "uganda" },
+    { label: "Rwanda", value: "rwanda" },
+    { label: "South Africa", value: "south_africa" },
+    { label: "Cote D'Ivoire", value: "cote_d_ivoire" },
+  ];
+
+  useEffect(() => {
+    if (selectedCountry) setCountryValue(selectedCountry);
+  }, [selectedCountry]);
 
   const state_options = useMemo(() => {
     return (
@@ -59,6 +78,28 @@ export default function OrganisationAddressForm() {
 
   return (
     <div className="w-full space-y-6">
+      <div>
+        <Controller
+          name="country"
+          control={control}
+          render={({ field }) => (
+            <SelectDropdown
+              mode="single"
+              label="Country"
+              options={country_options}
+              placeholder="Select Organisation Country"
+              headerTitle="Select Organisation Country"
+              value={field.value || null}
+              onChange={(value) => field.onChange(value)}
+            />
+          )}
+        />
+        {(errors.country || storeErrors.country) && (
+          <p className="mt-1 text-xs text-red-600">
+            {errors.country?.message || storeErrors.country}
+          </p>
+        )}
+      </div>
       <div>
         <Controller
           name="state"

@@ -10,9 +10,10 @@ export const OrganisationSchema = z.object({
   number_of_farms_to_be_monitored: z
     .number()
     .min(1, "Number of farms to be monitored is required"),
+  country: z.string().optional(),
   state: z.string().min(1, "State is required"),
-  city: z.string().min(1, "City is required"),
-  local_government_area: z.string().min(1, "Local government area is required"),
+  city: z.string().optional(),
+  local_government_area: z.string().optional(),
   address: z.string().min(1, "Address is required"),
 });
 
