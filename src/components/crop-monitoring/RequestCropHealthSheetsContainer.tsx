@@ -1,13 +1,14 @@
 import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
 import { useState } from "react";
 import { toast } from "sonner";
-import { CropHealthResultSheet } from "./CropHealthResultSheet";
+import { CropHealthResultSheet } from "@/components/crop-monitoring/CropHealthResultSheet";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { useCropHealth } from "@/api/crop-monitoring";
 import type { CropHealthHistory } from "@/models/crop-monitoring.model";
 import { useUserStore } from "@/stores/useUserStore";
 import { usePaymentInitialise, usePaymentVerify } from "@/api/payments";
 import type { PaymentInitialiseResponse } from "@/models/payment.model";
+import { MeasurementCostCard } from "@/components/shared/MeasurementCostCard";
 
 export const RequestCropHealthSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -21,6 +22,10 @@ export const RequestCropHealthSheetsContainer: React.FC<{
   const { user } = useUserStore();
   const { mutate: initialisePayment } = usePaymentInitialise();
   const { mutate: confirmPayment } = usePaymentVerify();
+  const [measurementCost, setMeasurementCost] = useState<{
+    amount: number;
+    currency: string;
+  }>();
 
   const handleConfirm = () => {
     mutate(formData.farm_id ?? "", {
@@ -32,11 +37,19 @@ export const RequestCropHealthSheetsContainer: React.FC<{
     });
   };
 
+  const handleProceedFromCost = (cost: {
+    amount: number;
+    currency: string;
+  }) => {
+    setMeasurementCost(cost);
+    setCurrentView("warning");
+  };
+
   const handleSubmit = () => {
     const request = {
       farmId: formData.farm_id ?? "",
-      amount: 15000,
-      currency: "NGN",
+      amount: measurementCost?.amount ?? 0,
+      currency: measurementCost?.currency ?? "",
       customer: {
         email: user?.email ?? "",
         name: user?.name ?? "",
@@ -145,9 +158,21 @@ export const RequestCropHealthSheetsContainer: React.FC<{
           <FarmDetailsCard
             isOpen={currentView === "details"}
             onClose={onClose}
-            onConfirm={() => handleSubmit()}
+            onConfirm={() => setCurrentView("cost")}
             requestServiceType={"Crop Health"}
           />
+          <MeasurementCostCard
+            service="crop-health"
+            isOpen={currentView === "cost"}
+            onClose={() => setCurrentView("details")}
+            onConfirm={(cost) => handleProceedFromCost(cost)}
+          />
+          {currentView === "warning" && (
+            <LongRunningProcessWarning
+              onClose={onClose}
+              onConfirm={() => handleSubmit()}
+            />
+          )}
         </section>
       </section>
       {currentView === "result" && (

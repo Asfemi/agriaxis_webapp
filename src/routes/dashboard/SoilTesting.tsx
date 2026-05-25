@@ -44,7 +44,7 @@ function SoilTesting() {
                 {isLoadingCost ? (
                   <LoaderCircle className="mx-auto animate-spin" />
                 ) : (
-                  `Request Test ${cost?.amount ?? 0}`
+                  `Request Test ${cost?.currency ?? ""}${cost?.amount ?? "N/A"}`
                 )}
               </Button>
             </div>

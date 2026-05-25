@@ -23,17 +23,23 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
   const { user } = useUserStore();
   const { mutate: initialisePayment } = usePaymentInitialise();
   const { mutate: confirmPayment } = usePaymentVerify();
+  const [measurementCost, setMeasurementCost] = useState<{amount: number, currency: string}>();
 
   const handleUploadImage = (image: File) => {
     setImageFile(image);
-    handleProceedToPayment(image);
+    setCurrentView("cost")
   };
+
+  const handleProceedFromCost = (cost: {amount: number, currency: string}) => {
+    setMeasurementCost(cost)
+    handleProceedToPayment(imageFile!);
+  }
 
   const handleProceedToPayment = (image: File) => {
     const request = {
       farmId: formData.farm_id ?? "",
-      amount: 5000,
-      currency: "NGN",
+      amount: measurementCost?.amount ?? 0,
+      currency: measurementCost?.currency ?? "",
       customer: {
         email: user?.email ?? "",
         name: user?.name ?? "",
@@ -77,7 +83,10 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
     );
   };
 
-  const openPaymentModal = (paymentData: PaymentInitialiseResponse, image: File) => {
+  const openPaymentModal = (
+    paymentData: PaymentInitialiseResponse,
+    image: File,
+  ) => {
     const { payment_link, tx_ref, amount, currency, farm_id } = paymentData;
 
     const popup = window.open(
@@ -168,10 +177,10 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
           }}
         />
         <MeasurementCostCard
-          service="crop-monitoring"
+          service="pest-and-disease"
           isOpen={currentView === "cost"}
           onClose={() => setCurrentView("details")}
-          onConfirm={() => handleProceedToPayment(imageFile!)}
+          onConfirm={(cost) => handleProceedFromCost(cost)}
         />
         <ProcessingResultCard isOpen={currentView === "processing"} />
       </section>

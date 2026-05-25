@@ -1,7 +1,6 @@
 import { ChevronLeft, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
-import { type SoilTestingFormData } from "@/models/soil-testing.model";
 import { Suspense } from "react";
 import { useGetFarm } from "@/api/farms";
 import { useGetCost } from "@/api/payments";
@@ -11,11 +10,11 @@ export const MeasurementCostCard: React.FC<{
   service: string;
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (cost: {amount: number, currency: string}) => void;
 }> = ({ isOpen, onClose, onConfirm, service }) => {
   if (!isOpen) return null;
 
-  const { formData, updateFormData } = useSoilTestingFormStore();
+  const { formData } = useSoilTestingFormStore();
 
   const { data: farmData } = useGetFarm(formData.farm_id ?? "");
   const { data: initialCost } = useGetCost(service, 1);
@@ -24,9 +23,8 @@ export const MeasurementCostCard: React.FC<{
     Number(farmData.size.split(" hectares")[0]),
   );
 
-  const onSubmit = (data: SoilTestingFormData) => {
-    updateFormData({ ...data, cost: cost?.amount ?? 0 });
-    onConfirm();
+  const onSubmit = () => {
+    onConfirm({ amount: cost?.amount ?? 0, currency: cost?.currency ?? "" });
   };
 
   return (
@@ -112,7 +110,7 @@ export const MeasurementCostCard: React.FC<{
               <Button
                 type="button"
                 variant="primary"
-                onClick={() => onSubmit(formData)}
+                onClick={() => onSubmit()}
               >
                 Proceed
               </Button>
