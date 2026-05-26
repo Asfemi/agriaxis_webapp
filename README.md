@@ -2,6 +2,8 @@ Welcome to the agriaxis webapp
 uses laravel for BE
 uses TanStack for routing!
 
+and php as the BE language
+
 # Getting Started
 
 To run this application:
