@@ -177,7 +177,7 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
           }}
         />
         <MeasurementCostCard
-          service="pest-and-disease"
+          service="pest-and-diseases"
           isOpen={currentView === "cost"}
           onClose={() => setCurrentView("details")}
           onConfirm={(cost) => handleProceedFromCost(cost)}

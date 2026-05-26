@@ -16,7 +16,7 @@ export const DiseaseServicePage: React.FC<{
 }> = ({ onClose, data }) => {
   const [showRequestPestSheet, setShowRequestPestSheet] = useState(false);
   const { data: cost, isLoading: isLoadingCost } = useGetCost(
-    "pest-and-disease",
+    "pest-and-diseases",
     1,
   );
 
