@@ -73,7 +73,11 @@ export const ManualMapMeasurementCard: React.FC<{
    * @description Handles the confirmation of the coordinates
    */
   const handleConfirm = () => {
-    const result = points.map((coord) => coord.coordinate).join(",");
+    const result = points
+      .map((coord) => coord.coordinate)
+      .filter(Boolean)
+      .map((str) => str?.replace(",", ":"))
+      .join(",");
     onConfirm(result);
   };
 

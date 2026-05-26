@@ -33,7 +33,7 @@ apiClient.interceptors.response.use(
       // window.location.href = "/signin";
     }
     const serverMessage =
-      error.response?.data?.error?.message ||
+      error.response?.data?.error?.details[0]?.message || error.response?.data?.error?.message ||
       "An unexpected error occurred";
     const customError = new Error(serverMessage);
     (customError as any).status = error.response?.status;
