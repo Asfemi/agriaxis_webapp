@@ -4,14 +4,13 @@ import { useSidebar, SidebarProvider } from "@/contexts/SidebarContext";
 import { Suspense, useEffect } from "react";
 import {
   createRoute,
-  isRedirect,
   Outlet,
   redirect,
-  useRouteContext,
+  useNavigate,
   type AnyRoute,
 } from "@tanstack/react-router";
 import { getOrgId, userToken } from "@/lib/utils";
-import { useIsFetching, useIsMutating } from "@tanstack/react-query";
+import { useIsFetching, useIsMutating, useQuery } from "@tanstack/react-query";
 import { LoaderCircle, SquaresExclude } from "lucide-react";
 import { meQueryOptions } from "@/api/auth";
 import { DashboardError } from "@/components/dashboard/DashboardError";
@@ -23,12 +22,26 @@ function DashboardLayoutContent() {
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
   const isGlobalLoading = isFetching > 0 || isMutating > 0;
-  const { user } = useRouteContext({ from: "/dashboard" });
   const { setUser } = useUserStore();
+  const navigate = useNavigate();
+
+  const { data: user, isLoading: isUserLoading } = useQuery(meQueryOptions());
 
   useEffect(() => {
-    if (user) setUser(user);
-  }, [user, setUser]);
+    if (user) {
+      setUser(user);
+
+      let orgId = getOrgId();
+      if (!orgId && user.organisations?.length > 0) {
+        orgId = String(user.organisations[0].id);
+        saveOrgId(orgId);
+      }
+
+      if (!orgId && !user.organisations) {
+        navigate({ to: "/organisation" });
+      }
+    }
+  }, [user, setUser, navigate]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -39,6 +52,14 @@ function DashboardLayoutContent() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [close]);
+
+  if (isUserLoading) {
+    return (
+      <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-[1px]">
+        <SquaresExclude className="text-primary h-12 w-12 animate-bounce" />
+      </div>
+    );
+  }
 
   return (
     <section className="stable-gutter h-screen w-screen gap-4 overflow-hidden bg-[#F3F6F8] p-4 lg:flex">
@@ -93,31 +114,12 @@ export default (parentRoute: AnyRoute) =>
     component: DashboardLayout,
     getParentRoute: () => parentRoute,
     errorComponent: DashboardError,
-    beforeLoad: async ({ context }) => {
+    beforeLoad: async () => {
       const token = userToken();
       if (!token) {
         throw redirect({ to: "/signin", replace: true });
       }
 
-      try {
-        const user =
-          await context.queryClient.ensureQueryData(meQueryOptions());
-
-        let orgId = getOrgId();
-
-        if (!orgId && user.organisations?.length > 0) {
-          orgId = String(user.organisations[0].id);
-          saveOrgId(orgId);
-        }
-
-        if (!orgId) {
-          throw redirect({ to: "/organisation", replace: true });
-        }
-
-        return { user };
-      } catch (error) {
-        if(isRedirect(error)) throw error;
-        throw redirect({ to: "/signin", replace: true });
-      }
+      return {};
     },
   });
