@@ -104,7 +104,7 @@ const DashboardHeader: React.FC = () => {
           <Search className="h-5 w-5" />
         </IconButton>
 
-        <IconButton badge={true}>
+        <IconButton>
           <Bell className="h-5 w-5" />
         </IconButton>
 

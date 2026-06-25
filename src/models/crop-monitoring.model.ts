@@ -70,3 +70,50 @@ export type CropHealthHistory = {
   image_png: string;
   image_tiff: string;
 };
+
+export type YieldEstimation = {
+  id: string;
+  user_id: string;
+  organisation_id: string;
+  org_farm_id: string;
+  farm_name: string;
+  name: string;
+  crop_type: string;
+  latitude: string;
+  longitude: string;
+  land_size: string;
+  land_unit: string;
+  region: string;
+  year: number;
+  created_at: string;
+  status: string;
+  payment: null;
+  data: {
+    crop: string;
+    location: string;
+    land_size: {
+      hectares: string;
+      acres: string;
+    };
+    yield_estimate_per_hectare: {
+      low: string;
+      moderate: string;
+      high: string;
+    };
+    yield_estimate_per_acre: {
+      low: string;
+      moderate: string;
+      high: string;
+    };
+    estimated_total_output: {
+      low: string;
+      moderate: string;
+      high: string;
+    };
+    yield_unit: string;
+    climate_risks: string[];
+    recommendations: string[];
+    confidence_level: string;
+    disclaimer: string;
+  };
+};

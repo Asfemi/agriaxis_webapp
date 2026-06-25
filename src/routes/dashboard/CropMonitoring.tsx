@@ -11,8 +11,15 @@ import { useGetCropMonitoringDashboard } from "@/api/crop-monitoring";
 import { cn } from "@/lib/utils";
 import { CropHealthServicePage } from "@/components/crop-monitoring/CropHealthServicePage";
 import { DiseaseServicePage } from "@/components/crop-monitoring/DiseaseServicePage";
+import { YieldEstimationPage } from "@/components/crop-monitoring/YieldEstimationPage";
 
-const SERVICES = [
+const SERVICES: {
+  id: string;
+  title: string;
+  sub: string;
+  icon: string;
+  isDisabled?: boolean;
+}[] = [
   {
     id: "health",
     title: "Crop health",
@@ -28,13 +35,12 @@ const SERVICES = [
   {
     id: "yield",
     title: "Yield estimation",
-    sub: "Click here to get your expected yield estimation result",
+    sub: "Click here to estimate crop yield using AI",
     icon: monitoringIcon,
-    isDisabled: true,
   },
 ];
 
-type DASHBOARD_VIEW = "overview" | "health" | "disease";
+type DASHBOARD_VIEW = "overview" | "health" | "disease" | "yield";
 
 function CropMonitoring() {
   const [currentView, setCurrentView] = useState<DASHBOARD_VIEW>("overview");
@@ -169,6 +175,9 @@ function CropMonitoring() {
           onClose={() => setCurrentView("overview")}
           data={dashboardData}
         />
+      )}
+      {currentView === "yield" && (
+        <YieldEstimationPage onClose={() => setCurrentView("overview")} />
       )}
     </>
   );
