@@ -335,4 +335,4 @@ export const ClimateInformationSheet: React.FC<{
   );
 };
 
-// TODO: Walk through, understand, and refactor if need be
+// TODO: Walk through, and refactor if need be

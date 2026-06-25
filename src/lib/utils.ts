@@ -35,6 +35,30 @@ export const formatDate = (dateString: string): string => {
   return `${day} ${month}, ${year}`;
 };
 
+export const formatDateTime = (dateString: string): string => {
+  const date = new Date(dateString);
+
+  if (isNaN(date.getTime())) {
+    return "Invalid Date";
+  }
+
+  const day = new Intl.DateTimeFormat("en-GB", { day: "numeric" }).format(date);
+  const month = new Intl.DateTimeFormat("en-GB", { month: "short" }).format(
+    date,
+  );
+  const year = new Intl.DateTimeFormat("en-GB", { year: "numeric" }).format(
+    date,
+  );
+  const hour = new Intl.DateTimeFormat("en-GB", { hour: "numeric" }).format(
+    date,
+  );
+  const minute = new Intl.DateTimeFormat("en-GB", { minute: "numeric" }).format(
+    date,
+  );
+
+  return `${day} ${month} ${year}, ${hour}:${minute}`;
+};
+
 export const formatDateEpoch = (dateEpoch: number): string => {
   const timestamp = dateEpoch;
   const date = new Date(timestamp * 1000);

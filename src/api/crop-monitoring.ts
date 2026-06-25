@@ -5,6 +5,7 @@ import type {
   CropMonitoringDashboardResponse,
   CropMonitoringDiseaseDetectResponse,
   DiseaseDetectionHistory,
+  YieldEstimation,
 } from "@/models/crop-monitoring.model";
 
 export const useGetCropMonitoringDashboard = () => {
@@ -20,7 +21,7 @@ export const useGetCropMonitoringDashboard = () => {
 };
 
 export const useCropMonitoringDiseaseDetect = () => {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({
       name,
@@ -53,7 +54,9 @@ export const useCropMonitoringDiseaseDetect = () => {
       queryClient.invalidateQueries({
         queryKey: ["crop-monitoring-dashboard"],
       });
-      queryClient.invalidateQueries({ queryKey: ["crop-monitoring-disease-detect-history"] });
+      queryClient.invalidateQueries({
+        queryKey: ["crop-monitoring-disease-detect-history"],
+      });
     },
   });
 };
@@ -165,6 +168,77 @@ export const useDeleteDiseaseDetectionResult = () => {
       });
       queryClient.invalidateQueries({
         queryKey: ["crop-monitoring-dashboard"],
+      });
+    },
+  });
+};
+
+export const useGetYieldEstimationHistory = (
+  id?: string,
+  isDisabled?: boolean,
+) => {
+  return useQuery({
+    queryKey: ["yield-estimation-history"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{
+        items: YieldEstimation[];
+      }>("/crop-monitoring/yield-estimation/history", {
+        params: { farm_id: id },
+      });
+      return data.items;
+    },
+    enabled: !isDisabled,
+  });
+};
+
+export const useEstimateCropYield = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (farmId: string) => {
+      const { data } = await apiClient.post<YieldEstimation>(
+        "/crop-monitoring/yield-estimation/estimate",
+        { farm_id: farmId },
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["yield-estimation-history"],
+      });
+    },
+  });
+};
+
+export const useRenameYieldEstimationResult = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (req: { id: string; name: string }) => {
+      const { data } = await apiClient.patch(
+        `/crop-monitoring/yield-estimation/${req.id}/name`,
+        { name: req.name },
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["yield-estimation-history"],
+      });
+    },
+  });
+};
+
+export const useDeleteYieldEstimationResult = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await apiClient.delete(
+        `/crop-monitoring/yield-estimation/${id}`,
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["yield-estimation-history"],
       });
     },
   });
