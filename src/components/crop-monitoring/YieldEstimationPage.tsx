@@ -1,19 +1,14 @@
 import { Button } from "@/components/Button";
-import { ChevronLeft, LoaderCircle } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { YieldEstimationHistoryTable } from "./YieldEstimationHistoryTable";
 import { RequestYieldEstimationSheetsContainer } from "./RequestYieldEstimationSheetsContainer";
 import { useState } from "react";
-import { useGetCost } from "@/api/payments";
 
 export const YieldEstimationPage: React.FC<{
   onClose: () => void;
 }> = ({ onClose }) => {
   const [showRequestYieldEstimationSheet, setShowRequestYieldEstimationSheet] =
     useState(false);
-  const { data: cost, isLoading: isLoadingCost } = useGetCost(
-    "yield-estimation",
-    1,
-  );
 
   const onRequestInformation = () => {
     setShowRequestYieldEstimationSheet(true);
@@ -36,11 +31,7 @@ export const YieldEstimationPage: React.FC<{
           </div>
           <div>
             <Button variant="primary" onClick={() => onRequestInformation()}>
-              {isLoadingCost ? (
-                <LoaderCircle className="mx-auto animate-spin" />
-              ) : (
-                `Request Information ${cost?.currency ?? ""}${cost?.amount ?? "N/A"}`
-              )}
+              Request Information
             </Button>
           </div>
         </header>
