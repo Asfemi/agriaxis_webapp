@@ -8,8 +8,16 @@ import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { faker } from "@faker-js/faker";
 import { MeasurementCostCard } from "@/components/shared/MeasurementCostCard";
 import { useUserStore } from "@/stores/useUserStore";
-import { useMpesaPaymentInitialise, usePaymentInitialise, usePaymentVerify } from "@/api/payments";
-import type { MpesaPaymentInitialiseResponse, PaymentInitialiseResponse } from "@/models/payment.model";
+import {
+  useMpesaPaymentInitialise,
+  usePaymentInitialise,
+  usePaymentVerify,
+} from "@/api/payments";
+import type {
+  MpesaPaymentInitialiseResponse,
+  PaymentInitialiseResponse,
+} from "@/models/payment.model";
+import { EnterMpesaPhoneNumberModal } from "@/components/shared/EnterMpesaPhoneNumberModal.tsx";
 
 export const RequestPestMonitoringSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -24,17 +32,25 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
   const { mutate: initialisePayment } = usePaymentInitialise();
   const { mutate: initialiseMpesaPayment } = useMpesaPaymentInitialise();
   const { mutate: confirmPayment } = usePaymentVerify();
-  const [measurementCost, setMeasurementCost] = useState<{amount: number, currency: string}>();
+  const [measurementCost, setMeasurementCost] = useState<{
+    amount: number;
+    currency: string;
+  }>();
+  const [showPhoneNumberModal, setShowPhoneNumberModal] = useState(false);
+  const [userPhoneNumber, setUserPhoneNumber] = useState<string>("");
 
   const handleUploadImage = (image: File) => {
     setImageFile(image);
-    setCurrentView("cost")
+    setCurrentView("cost");
   };
 
-  const handleProceedFromCost = (cost: {amount: number, currency: string}) => {
-    setMeasurementCost(cost)
+  const handleProceedFromCost = (cost: {
+    amount: number;
+    currency: string;
+  }) => {
+    setMeasurementCost(cost);
     handleProceedToPayment(imageFile!);
-  }
+  };
 
   const handleProceedToPayment = (image: File) => {
     const request = {
@@ -56,23 +72,12 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
           openPaymentModal(data, image);
         },
         onError: (error) =>
-        toast.error(
-          error.message ?? "Failed to initiate payment. Please try again.",
-        ),
+          toast.error(
+            error.message ?? "Failed to initiate payment. Please try again.",
+          ),
       });
     } else {
-      initialiseMpesaPayment(request, {
-        onSuccess: (data) => {
-          toast.success("Initiation successful. Please check your phone!");
-          pollValidation(data, image)
-        },
-        onError: (error) => {
-          toast.error(
-            error.message ??
-              "Faild to initiate Mpesa payment. Please try again.",
-          );
-        },
-      });
+      initMpesaPreValidation(image);
     }
   };
 
@@ -176,59 +181,116 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
     window.addEventListener("message", handleMessage);
   };
 
-  const pollValidation = (paymentData: MpesaPaymentInitialiseResponse, image: File) => {
+  const pollValidation = (
+    paymentData: MpesaPaymentInitialiseResponse,
+    image: File,
+  ) => {
     const { tx_ref, amount, currency, farm_id, transaction_id } = paymentData;
     const validate = setInterval(() => {
-        confirmPayment(
-          {
-            farmId: farm_id,
-            amount,
-            currency,
-            txRef: tx_ref,
-            transactionId: String(transaction_id) ?? "",
-            status: status ?? "",
-            success: status === "successful" || status === "completed",
+      confirmPayment(
+        {
+          farmId: farm_id,
+          amount,
+          currency,
+          txRef: tx_ref,
+          transactionId: String(transaction_id) ?? "",
+          status: status ?? "",
+          success: status === "successful" || status === "completed",
+        },
+        {
+          onSuccess: () => {
+            toast.success("Payment confirmed successfully!");
+            toast.success("Initiating pest monitoring check...");
+            clearInterval(validate);
+            handleConfirm(image);
           },
-          {
-            onSuccess: () => {
-              toast.success("Payment confirmed successfully!");
-              toast.success("Initiating pest monitoring check...");
-              clearInterval(validate)
-              handleConfirm(image);
-            },
-            onError: (error) => {
-              toast.error(error.message);
-              toast.error("Failed to confirm payment. Please try again!");
-            },
+          onError: (error) => {
+            console.error(error.message);
+            console.error("Failed to confirm payment. Please try again!");
           },
-        );
+        },
+      );
     }, 5e3);
   };
 
+  const executeMpesaPayment = (phoneNumber: string, image: File) => {
+    const request = {
+      farmId: formData.farm_id ?? "",
+      amount: measurementCost?.amount ?? 0,
+      currency: measurementCost?.currency ?? "KES",
+      customer: {
+        email: user?.email ?? "",
+        name: user?.name ?? "",
+        phonenumber: phoneNumber,
+      },
+    };
+
+    initialiseMpesaPayment(request, {
+      onSuccess: (data) => {
+        toast.success("Initiation successful. Please check your phone!");
+        pollValidation(data, image);
+      },
+      onError: (error) => {
+        toast.error(
+          error.message ??
+            "Failed to initiate Mpesa payment. Please try again.",
+        );
+      },
+    });
+  };
+
+  const initMpesaPreValidation = (image: File) => {
+    const activePhone = user?.phone || userPhoneNumber;
+
+    if (!activePhone) {
+      setShowPhoneNumberModal(true);
+      return;
+    }
+
+    executeMpesaPayment(activePhone, image);
+  };
+
+  const confirmPhoneNumber = (data: { phone: string }) => {
+    setUserPhoneNumber(data.phone);
+    setShowPhoneNumberModal(false);
+    if (imageFile) {
+      executeMpesaPayment(data.phone, imageFile);
+    } else {
+      toast.error("Image file missing. Please re-upload.");
+    }
+  };
+
   return (
-    <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
-      <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
-        <FarmDetailsCard
-          isOpen={currentView === "details"}
-          onClose={onClose}
-          onConfirm={() => setCurrentView("image_upload")}
-          requestServiceType={"Pest/Disease Monitoring"}
-        />
-        <CropImageCard
-          isOpen={currentView === "image_upload"}
-          onClose={() => setCurrentView("details")}
-          onConfirm={(imageData) => {
-            handleUploadImage(imageData);
-          }}
-        />
-        <MeasurementCostCard
-          service="pest-and-diseases"
-          isOpen={currentView === "cost"}
-          onClose={() => setCurrentView("details")}
-          onConfirm={(cost) => handleProceedFromCost(cost)}
-        />
-        <ProcessingResultCard isOpen={currentView === "processing"} />
+    <>
+      <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
+        <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
+          <FarmDetailsCard
+            isOpen={currentView === "details"}
+            onClose={onClose}
+            onConfirm={() => setCurrentView("image_upload")}
+            requestServiceType={"Pest/Disease Monitoring"}
+          />
+          <CropImageCard
+            isOpen={currentView === "image_upload"}
+            onClose={() => setCurrentView("details")}
+            onConfirm={(imageData) => {
+              handleUploadImage(imageData);
+            }}
+          />
+          <MeasurementCostCard
+            service="pest-and-diseases"
+            isOpen={currentView === "cost"}
+            onClose={() => setCurrentView("details")}
+            onConfirm={(cost) => handleProceedFromCost(cost)}
+          />
+          <ProcessingResultCard isOpen={currentView === "processing"} />
+        </section>
       </section>
-    </section>
+      <EnterMpesaPhoneNumberModal
+        isOpen={showPhoneNumberModal}
+        onClose={() => setShowPhoneNumberModal(false)}
+        onConfirm={confirmPhoneNumber}
+      />
+    </>
   );
 };
