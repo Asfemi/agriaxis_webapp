@@ -1,9 +1,16 @@
-import { usePaymentInitialise, usePaymentVerify } from "@/api/payments";
+import {
+  useMpesaPaymentInitialise,
+  usePaymentInitialise,
+  usePaymentVerify,
+} from "@/api/payments";
 import { useSoilTestingRun, useSoilTestingUpload } from "@/api/soil-testing";
 import { FarmDetailsCard } from "@/components/soil-testing/FarmDetailsCard";
 import { FarmSizeForMeasurementCard } from "@/components/soil-testing/FarmSizeForMeasurementCard";
 import { SoilTestResultsCard } from "@/components/soil-testing/SoilTestResultsCard";
-import type { PaymentInitialiseResponse } from "@/models/payment.model";
+import type {
+  MpesaPaymentInitialiseResponse,
+  PaymentInitialiseResponse,
+} from "@/models/payment.model";
 import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
 import { useUserStore } from "@/stores/useUserStore";
@@ -18,6 +25,7 @@ const RequestSoilTestSheetsContainer: React.FC<{
   const { formData } = useSoilTestingFormStore();
   const { user } = useUserStore();
   const { mutate: initialisePayment } = usePaymentInitialise();
+  const { mutate: initialiseMpesaPayment } = useMpesaPaymentInitialise();
   const { mutate: confirmPayment } = usePaymentVerify();
   const { mutate: uploadSoilTest } = useSoilTestingUpload();
   const { mutate: runSoilTest } = useSoilTestingRun();
@@ -37,17 +45,32 @@ const RequestSoilTestSheetsContainer: React.FC<{
       },
     };
 
-    initialisePayment(request, {
-      onSuccess: (data) => {
-        toast.success("Payment initiated successfully!");
+    if (request.currency !== "KES") {
+      initialisePayment(request, {
+        onSuccess: (data) => {
+          toast.success("Payment initiated successfully!");
 
-        openPaymentModal(data);
-      },
-      onError: (error) =>
-        toast.error(
-          error.message ?? "Failed to initiate payment. Please try again.",
-        ),
-    });
+          openPaymentModal(data);
+        },
+        onError: (error) =>
+          toast.error(
+            error.message ?? "Failed to initiate payment. Please try again.",
+          ),
+      });
+    } else {
+      initialiseMpesaPayment(request, {
+        onSuccess: (data) => {
+          toast.success("Initiation successful. Please check your phone!");
+          pollValidation(data)
+        },
+        onError: (error) => {
+          toast.error(
+            error.message ??
+              "Faild to initiate Mpesa payment. Please try again.",
+          );
+        },
+      });
+    }
   };
 
   const openPaymentModal = (paymentData: PaymentInitialiseResponse) => {
@@ -153,6 +176,65 @@ const RequestSoilTestSheetsContainer: React.FC<{
     };
 
     window.addEventListener("message", handleMessage);
+  };
+
+  const pollValidation = (paymentData: MpesaPaymentInitialiseResponse) => {
+    const { tx_ref, amount, currency, farm_id, transaction_id } = paymentData;
+    const validate = setInterval(() => {
+      confirmPayment(
+        {
+          farmId: farm_id,
+          amount,
+          currency,
+          txRef: tx_ref,
+          transactionId: String(transaction_id) ?? "",
+          status: status ?? "",
+          success: status === "successful" || status === "completed",
+        },
+        {
+          onSuccess: () => {
+            clearInterval(validate)
+            toast.success("Payment confirmed successfully!");
+            uploadSoilTest(
+              { farmId: farm_id },
+              {
+                onSuccess: () => {
+                  toast.success("Soil test uploaded successfully!");
+                  runSoilTest(
+                    {
+                      farmId: farm_id,
+                      crop: formData.crop ?? "",
+                      depth: "0-20",
+                    },
+                    {
+                      onSuccess: (data) => {
+                        setResult(data);
+                        toast.success("Soil test run successfully!");
+                        setCurrentView("result");
+                      },
+                      onError: (error) => {
+                        toast.error(error.message);
+                        toast.error(
+                          "Failed to run soil test. Please try again!",
+                        );
+                      },
+                    },
+                  );
+                },
+                onError: (error) => {
+                  toast.error(error.message);
+                  toast.error("Failed to run soil test. Please try again!");
+                },
+              },
+            );
+          },
+          onError: (error) => {
+            toast.error(error.message);
+            toast.error("Failed to confirm payment. Please try again!");
+          },
+        },
+      );
+    }, 5e3);
   };
 
   return (

@@ -31,7 +31,7 @@ function SoilTesting() {
 
   useEffect(() => {
     updateFormData({ currency: cost?.currency })
-  }, [cost])
+  }, [cost, updateFormData])
 
   return (
     <>
