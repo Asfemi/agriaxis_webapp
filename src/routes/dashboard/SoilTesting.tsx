@@ -12,11 +12,13 @@ import { createRoute, type AnyRoute } from "@tanstack/react-router";
 import { useSoilTestingDashboard } from "@/api/soil-testing";
 import { LoaderCircle } from "lucide-react";
 import { useGetCost } from "@/api/payments";
+import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 
 function SoilTesting() {
   const [showRequestTest, setShowRequestTest] = useState(false);
   const [IS_EMPTY, setIsEmpty] = useState(false);
   const { data } = useSoilTestingDashboard();
+  const { updateFormData } = useSoilTestingFormStore()
   const { data: cost, isLoading: isLoadingCost } = useGetCost(
     "soil-testing",
     1,
@@ -26,6 +28,10 @@ function SoilTesting() {
     const isEmpty = Object.values(data).every((value) => value === 0);
     setIsEmpty(isEmpty);
   }, [data]);
+
+  useEffect(() => {
+    updateFormData({ currency: cost?.currency })
+  }, [cost])
 
   return (
     <>

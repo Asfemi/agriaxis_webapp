@@ -29,7 +29,7 @@ const RequestSoilTestSheetsContainer: React.FC<{
     const request = {
       farmId: formData.farm_id ?? "",
       amount: formData.cost ?? 0,
-      currency: "NGN",
+      currency: formData.currency ?? "NGN",
       customer: {
         email: user?.email ?? "",
         name: user?.name ?? "",
