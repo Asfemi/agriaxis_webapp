@@ -243,7 +243,7 @@ export const RequestYieldEstimationSheetsContainer: React.FC<{
           <FarmDetailsCard
             isOpen={currentView === "details"}
             onClose={onClose}
-            onConfirm={() => setCurrentView("cost")}
+            onConfirm={() => setCurrentView("warning")}
           />
           <MeasurementCostCard
             service="yield-estimation"
@@ -254,7 +254,7 @@ export const RequestYieldEstimationSheetsContainer: React.FC<{
           {currentView === "warning" && (
             <LongRunningProcessWarning
               onClose={onClose}
-              onConfirm={() => handleSubmit()}
+              onConfirm={() => handleConfirm()}
             />
           )}
           {currentView === "result" && (
