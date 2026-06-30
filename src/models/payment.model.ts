@@ -1,7 +1,7 @@
 export interface PaymentInitialiseRequest {
   farmId: string;
   amount: number;
-  currency: string;
+  currency?: string;
   country?: string;
   redirect_url?: string;
   customer: {
@@ -19,6 +19,18 @@ export interface PaymentInitialiseResponse {
   farm_id: string;
 }
 
+export interface MpesaPaymentInitialiseResponse {
+  tx_ref: string;
+  transaction_id: string;
+  status: string;
+  message: string;
+  flw_ref: string;
+  amount: number;
+  currency: string;
+  farm_id: string;
+  payment_method: string;
+}
+
 export interface PaymentVerifyRequest {
   farmId: string;
   amount: number;
@@ -31,8 +43,8 @@ export interface PaymentVerifyRequest {
 
 export type PaymentSubscription = {
   id: string;
-  plan_key: string 
-  status: string
+  plan_key: string;
+  status: string;
   entitled: boolean;
   customer_email: string;
   tx_ref: string;
@@ -49,7 +61,7 @@ export type PaymentSubscription = {
 };
 
 export type PaymentSubscriptionReq = {
-  plan_key: string
+  plan_key: string;
   redirect_url: string;
   currency: string;
   country: string;
@@ -61,10 +73,10 @@ export type PaymentSubscriptionReq = {
 };
 
 export type PaymentSubscriptionRes = {
-  payment_link: string
-  tx_ref: string
-  subscription_id: string
+  payment_link: string;
+  tx_ref: string;
+  subscription_id: string;
   plan_key: string;
   amount: number;
-  currency: string
+  currency: string;
 };

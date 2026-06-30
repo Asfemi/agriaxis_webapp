@@ -8,8 +8,8 @@ import { useSoilTestingFormStore } from "@/stores/useSoilTestingFormStore";
 import { faker } from "@faker-js/faker";
 import { MeasurementCostCard } from "@/components/shared/MeasurementCostCard";
 import { useUserStore } from "@/stores/useUserStore";
-import { usePaymentInitialise, usePaymentVerify } from "@/api/payments";
-import type { PaymentInitialiseResponse } from "@/models/payment.model";
+import { useMpesaPaymentInitialise, usePaymentInitialise, usePaymentVerify } from "@/api/payments";
+import type { MpesaPaymentInitialiseResponse, PaymentInitialiseResponse } from "@/models/payment.model";
 
 export const RequestPestMonitoringSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -22,6 +22,7 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
   const { mutate } = useCropMonitoringDiseaseDetect();
   const { user } = useUserStore();
   const { mutate: initialisePayment } = usePaymentInitialise();
+  const { mutate: initialiseMpesaPayment } = useMpesaPaymentInitialise();
   const { mutate: confirmPayment } = usePaymentVerify();
   const [measurementCost, setMeasurementCost] = useState<{amount: number, currency: string}>();
 
@@ -47,17 +48,32 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
       },
     };
 
-    initialisePayment(request, {
-      onSuccess: (data) => {
-        toast.success("Payment initiated successfully!");
+    if (request.currency !== "KES") {
+      initialisePayment(request, {
+        onSuccess: (data) => {
+          toast.success("Payment initiated successfully!");
 
-        openPaymentModal(data, image);
-      },
-      onError: (error) =>
+          openPaymentModal(data, image);
+        },
+        onError: (error) =>
         toast.error(
           error.message ?? "Failed to initiate payment. Please try again.",
         ),
-    });
+      });
+    } else {
+      initialiseMpesaPayment(request, {
+        onSuccess: (data) => {
+          toast.success("Initiation successful. Please check your phone!");
+          pollValidation(data, image)
+        },
+        onError: (error) => {
+          toast.error(
+            error.message ??
+              "Faild to initiate Mpesa payment. Please try again.",
+          );
+        },
+      });
+    }
   };
 
   const handleConfirm = (image: File) => {
@@ -158,6 +174,35 @@ export const RequestPestMonitoringSheetsContainer: React.FC<{
     };
 
     window.addEventListener("message", handleMessage);
+  };
+
+  const pollValidation = (paymentData: MpesaPaymentInitialiseResponse, image: File) => {
+    const { tx_ref, amount, currency, farm_id, transaction_id } = paymentData;
+    const validate = setInterval(() => {
+        confirmPayment(
+          {
+            farmId: farm_id,
+            amount,
+            currency,
+            txRef: tx_ref,
+            transactionId: String(transaction_id) ?? "",
+            status: status ?? "",
+            success: status === "successful" || status === "completed",
+          },
+          {
+            onSuccess: () => {
+              toast.success("Payment confirmed successfully!");
+              toast.success("Initiating pest monitoring check...");
+              clearInterval(validate)
+              handleConfirm(image);
+            },
+            onError: (error) => {
+              toast.error(error.message);
+              toast.error("Failed to confirm payment. Please try again!");
+            },
+          },
+        );
+    }, 5e3);
   };
 
   return (

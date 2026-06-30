@@ -10,7 +10,8 @@ const initialData: SoilTestingFormData = {
   coordinatesCsv: "",
   crop: "",
   depth: "",
-  cost: 0
+  cost: 0,
+  currency: "NGN"
 };
 
 export const useSoilTestingFormStore = create<SoilTestingState>((set, get) => ({
@@ -19,7 +20,8 @@ export const useSoilTestingFormStore = create<SoilTestingState>((set, get) => ({
     coordinatesCsv: "",
     crop: "",
     depth: "",
-    cost: 0
+    cost: 0,
+    currency: "NGN"
   },
   errors: {},
 
