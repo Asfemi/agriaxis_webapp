@@ -6,9 +6,9 @@ import type { YieldEstimation } from "@/models/crop-monitoring.model";
 import { useEstimateCropYield } from "@/api/crop-monitoring";
 import { YieldEstimationSheet } from "./YieldEstimationSheet";
 import { useUserStore } from "@/stores/useUserStore";
-import { usePaymentInitialise, usePaymentVerify } from "@/api/payments";
+import { useMpesaPaymentInitialise, usePaymentInitialise, usePaymentVerify } from "@/api/payments";
 import { MeasurementCostCard } from "@/components/shared/MeasurementCostCard";
-import type { PaymentInitialiseResponse } from "@/models/payment.model";
+import type { MpesaPaymentInitialiseResponse, PaymentInitialiseResponse } from "@/models/payment.model";
 import { LongRunningProcessWarning } from "@/components/crop-monitoring/LongRunningProcessWarning";
 
 export const RequestYieldEstimationSheetsContainer: React.FC<{
@@ -25,6 +25,7 @@ export const RequestYieldEstimationSheetsContainer: React.FC<{
 
   const { user } = useUserStore();
   const { mutate: initialisePayment } = usePaymentInitialise();
+  const { mutate: initialiseMpesaPayment } = useMpesaPaymentInitialise();
   const { mutate: confirmPayment } = usePaymentVerify();
   const [measurementCost, setMeasurementCost] = useState<{
     amount: number;
@@ -61,6 +62,7 @@ export const RequestYieldEstimationSheetsContainer: React.FC<{
       },
     };
 
+    if (request.currency !== "KES") {
     initialisePayment(request, {
       onSuccess: (data) => {
         toast.success("Payment initiated successfully!");
@@ -72,6 +74,20 @@ export const RequestYieldEstimationSheetsContainer: React.FC<{
           error.message ?? "Failed to initiate payment. Please try again.",
         ),
     });
+    } else {
+      initialiseMpesaPayment(request, {
+        onSuccess: (data) => {
+          toast.success("Initiation successful. Please check your phone!");
+          pollValidation(data)
+        },
+        onError: (error) => {
+          toast.error(
+            error.message ??
+              "Faild to initiate Mpesa payment. Please try again.",
+          );
+        },
+      });
+    }
   };
 
   const openPaymentModal = (paymentData: PaymentInitialiseResponse) => {
@@ -115,7 +131,7 @@ export const RequestYieldEstimationSheetsContainer: React.FC<{
           {
             onSuccess: () => {
               toast.success("Payment confirmed successfully!");
-              toast.success("Initiating crop health check...");
+              toast.success("Initiating farm yield estimation...");
               handleConfirm();
             },
             onError: (error) => {
@@ -147,6 +163,35 @@ export const RequestYieldEstimationSheetsContainer: React.FC<{
     };
 
     window.addEventListener("message", handleMessage);
+  };
+
+  const pollValidation = (paymentData: MpesaPaymentInitialiseResponse) => {
+    const { tx_ref, amount, currency, farm_id, transaction_id } = paymentData;
+    const validate = setInterval(() => {
+        confirmPayment(
+          {
+            farmId: farm_id,
+            amount,
+            currency,
+            txRef: tx_ref,
+            transactionId: String(transaction_id) ?? "",
+            status: status ?? "",
+            success: status === "successful" || status === "completed",
+          },
+          {
+            onSuccess: () => {
+              toast.success("Payment confirmed successfully!");
+              toast.success("Initiating farm yield estimation...");
+              clearInterval(validate)
+              handleConfirm();
+            },
+            onError: (error) => {
+              toast.error(error.message);
+              toast.error("Failed to confirm payment. Please try again!");
+            },
+          },
+        );
+    }, 5e3);
   };
 
   return (
