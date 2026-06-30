@@ -16,6 +16,7 @@ import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
 import { useUserStore } from "@/stores/useUserStore";
 import { useState } from "react";
 import { toast } from "sonner";
+import { EnterMpesaPhoneNumberModal } from "@/components/shared/EnterMpesaPhoneNumberModal.tsx";
 
 const RequestSoilTestSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -32,6 +33,8 @@ const RequestSoilTestSheetsContainer: React.FC<{
   const { setResult } = useSoilTestingResultStore();
 
   const [currentView, setCurrentView] = useState("details");
+  const [showPhoneNumberModal, setShowPhoneNumberModal] = useState(false);
+  const [userPhoneNumber, setUserPhoneNumber] = useState<string>("");
 
   const handleSubmit = () => {
     const request = {
@@ -58,18 +61,7 @@ const RequestSoilTestSheetsContainer: React.FC<{
           ),
       });
     } else {
-      initialiseMpesaPayment(request, {
-        onSuccess: (data) => {
-          toast.success("Initiation successful. Please check your phone!");
-          pollValidation(data)
-        },
-        onError: (error) => {
-          toast.error(
-            error.message ??
-              "Faild to initiate Mpesa payment. Please try again.",
-          );
-        },
-      });
+      initMpesaPreValidation();
     }
   };
 
@@ -193,7 +185,7 @@ const RequestSoilTestSheetsContainer: React.FC<{
         },
         {
           onSuccess: () => {
-            clearInterval(validate)
+            clearInterval(validate);
             toast.success("Payment confirmed successfully!");
             uploadSoilTest(
               { farmId: farm_id },
@@ -237,26 +229,76 @@ const RequestSoilTestSheetsContainer: React.FC<{
     }, 5e3);
   };
 
+  const executeMpesaPayment = (phoneNumber: string) => {
+    const request = {
+      farmId: formData.farm_id ?? "",
+      amount: formData.cost ?? 0,
+      currency: formData.currency ?? "KES",
+      customer: {
+        email: user?.email ?? "",
+        name: user?.name ?? "",
+        phonenumber: phoneNumber,
+      },
+    };
+
+    initialiseMpesaPayment(request, {
+      onSuccess: (data) => {
+        toast.success("Initiation successful. Please check your phone!");
+        pollValidation(data);
+      },
+      onError: (error) => {
+        toast.error(
+          error.message ??
+            "Failed to initiate Mpesa payment. Please try again.",
+        );
+      },
+    });
+  };
+
+  const initMpesaPreValidation = () => {
+    const activePhone = user?.phone || userPhoneNumber
+
+    if (!activePhone) {
+      setShowPhoneNumberModal(true)
+      return;
+    }
+
+    executeMpesaPayment(activePhone)
+  };
+
+  const confirmPhoneNumber = (data: { phone: string }) => {
+    setUserPhoneNumber(data.phone);
+    setShowPhoneNumberModal(false);
+    executeMpesaPayment(data.phone)
+  };
+
   return (
-    <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
-      <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
-        <FarmDetailsCard
-          isOpen={currentView === "details"}
-          onClose={onClose}
-          onConfirm={() => setCurrentView("size")}
-        />
-        <FarmSizeForMeasurementCard
-          isOpen={currentView === "size"}
-          onClose={() => setCurrentView("details")}
-          onConfirm={() => handleSubmit()}
-        />
-        {currentView === "result" && (
-          <SoilTestResultsCard
-            onClose={() => setCurrentView("measurement_method")}
+    <>
+      <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
+        <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
+          <FarmDetailsCard
+            isOpen={currentView === "details"}
+            onClose={onClose}
+            onConfirm={() => setCurrentView("size")}
           />
-        )}
+          <FarmSizeForMeasurementCard
+            isOpen={currentView === "size"}
+            onClose={() => setCurrentView("details")}
+            onConfirm={() => handleSubmit()}
+          />
+          {currentView === "result" && (
+            <SoilTestResultsCard
+              onClose={() => setCurrentView("measurement_method")}
+            />
+          )}
+        </section>
       </section>
-    </section>
+      <EnterMpesaPhoneNumberModal
+        isOpen={showPhoneNumberModal}
+        onClose={() => setShowPhoneNumberModal(false)}
+        onConfirm={confirmPhoneNumber}
+      />
+    </>
   );
 };
 
