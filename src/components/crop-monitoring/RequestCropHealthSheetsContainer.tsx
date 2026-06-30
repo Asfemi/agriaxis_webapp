@@ -10,6 +10,7 @@ import { useMpesaPaymentInitialise, usePaymentInitialise, usePaymentVerify } fro
 import type { MpesaPaymentInitialiseResponse, PaymentInitialiseResponse } from "@/models/payment.model";
 import { MeasurementCostCard } from "@/components/shared/MeasurementCostCard";
 import { LongRunningProcessWarning } from "@/components/crop-monitoring/LongRunningProcessWarning";
+import { EnterMpesaPhoneNumberModal } from "@/components/shared/EnterMpesaPhoneNumberModal.tsx";
 
 export const RequestCropHealthSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -28,6 +29,8 @@ export const RequestCropHealthSheetsContainer: React.FC<{
     amount: number;
     currency: string;
   }>();
+  const [showPhoneNumberModal, setShowPhoneNumberModal] = useState(false);
+  const [userPhoneNumber, setUserPhoneNumber] = useState<string>("");
 
   const handleConfirm = () => {
     mutate(formData.farm_id ?? "", {
@@ -72,18 +75,7 @@ export const RequestCropHealthSheetsContainer: React.FC<{
         ),
       });
     } else {
-      initialiseMpesaPayment(request, {
-        onSuccess: (data) => {
-          toast.success("Initiation successful. Please check your phone!");
-          pollValidation(data)
-        },
-        onError: (error) => {
-          toast.error(
-            error.message ??
-              "Faild to initiate Mpesa payment. Please try again.",
-          );
-        },
-      });
+      initMpesaPreValidation()
     }
   };
 
@@ -191,6 +183,49 @@ export const RequestCropHealthSheetsContainer: React.FC<{
     }, 5e3);
   };
 
+  const executeMpesaPayment = (phoneNumber: string) => {
+    const request = {
+      farmId: formData.farm_id ?? "",
+      amount: formData.cost ?? 0,
+      currency: formData.currency ?? "KES",
+      customer: {
+        email: user?.email ?? "",
+        name: user?.name ?? "",
+        phonenumber: phoneNumber,
+      },
+    };
+
+    initialiseMpesaPayment(request, {
+      onSuccess: (data) => {
+        toast.success("Initiation successful. Please check your phone!");
+        pollValidation(data);
+      },
+      onError: (error) => {
+        toast.error(
+          error.message ??
+            "Failed to initiate Mpesa payment. Please try again.",
+        );
+      },
+    });
+  };
+
+  const initMpesaPreValidation = () => {
+    const activePhone = user?.phone || userPhoneNumber
+
+    if (!activePhone) {
+      setShowPhoneNumberModal(true)
+      return;
+    }
+
+    executeMpesaPayment(activePhone)
+  };
+
+  const confirmPhoneNumber = (data: { phone: string }) => {
+    setUserPhoneNumber(data.phone);
+    setShowPhoneNumberModal(false);
+    executeMpesaPayment(data.phone)
+  };
+
   return (
     <>
       <section
@@ -224,6 +259,11 @@ export const RequestCropHealthSheetsContainer: React.FC<{
       {currentView === "result" && (
         <CropHealthResultSheet data={result!} onClose={onClose} />
       )}
+      <EnterMpesaPhoneNumberModal
+        isOpen={showPhoneNumberModal}
+        onClose={() => setShowPhoneNumberModal(false)}
+        onConfirm={confirmPhoneNumber}
+      />
     </>
   );
 };
