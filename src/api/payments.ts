@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "./api-client";
 import type {
+  MpesaPaymentInitialiseResponse,
   PaymentInitialiseRequest,
   PaymentInitialiseResponse,
   PaymentSubscription,
@@ -29,11 +30,29 @@ export const useGetCost = (service: string, hectares: number) => {
   });
 };
 
+/**
+ * @description initialise flutterwave payment
+ */
 export const usePaymentInitialise = () => {
   return useMutation({
     mutationFn: async (request: PaymentInitialiseRequest) => {
       const response = await apiClient.post<PaymentInitialiseResponse>(
         "/payments/flutterwave/initialize",
+        request,
+      );
+      return response.data;
+    },
+  });
+};
+
+/**
+ * @description initialise mpesa payment (for kenya)
+ */
+export const useMpesaPaymentInitialise = () => {
+  return useMutation({
+    mutationFn: async (request: PaymentInitialiseRequest) => {
+      const response = await apiClient.post<MpesaPaymentInitialiseResponse>(
+        "/payments/flutterwave/mpesa/initialize",
         request,
       );
       return response.data;
