@@ -93,7 +93,7 @@ const DashboardHeader: React.FC = () => {
 
       <div className="flex items-center space-x-2 sm:space-x-3">
         <a
-          title="Report" 
+          title="Contact" 
           className="relative rounded-full bg-[#F1F5F9] p-3 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100"
           href="mailto:agriaxisinternational@gmail.com"
         >

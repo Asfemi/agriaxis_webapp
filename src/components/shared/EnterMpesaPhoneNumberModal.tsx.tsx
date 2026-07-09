@@ -30,7 +30,7 @@ export const EnterMpesaPhoneNumberModal: React.FC<{
 
   return (
     <section className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 transition-opacity">
-      <div className="rounded-[1.25rem] bg-white">
+      <div className="rounded-md bg-white p-3">
         <header className="mb-10 flex items-start gap-3.5 pt-7 pr-20 pl-6">
           <h5 className="font-neue text-xl font-bold text-[#130B30]">
             Enter your valid Mpesa Phone Number
