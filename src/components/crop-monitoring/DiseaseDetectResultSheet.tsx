@@ -97,7 +97,7 @@ export const DiseaseDetectResultSheet: React.FC<{
                       Probability
                     </h2>
                     <p className="text-sm text-[#615C74]">
-                      {entry.probability}%
+                      {(entry.probability * 100).toFixed(2)}%
                     </p>
                   </div>
                   <div className="mb-4">
@@ -111,7 +111,7 @@ export const DiseaseDetectResultSheet: React.FC<{
                         </p>
                       ) : (
                         entry.common_names.map((name, index) => (
-                          <li key={index}>{name}</li>
+                          <li key={index} className="text-sm text-[#615C74] ml-4.5">{name}</li>
                         ))
                       )}
                     </ul>
@@ -148,21 +148,66 @@ export const DiseaseDetectResultSheet: React.FC<{
                       {entry.spreading || "-"}
                     </p>
                   </div>
+                  {entry.symptoms && Object.keys(entry.symptoms).length > 0 && (
+                    <div className="mb-4">
+                      <h2 className="font-neue text-sm font-semibold text-[#130B30] mb-2">
+                        Symptoms
+                      </h2>
+                      <div className="space-y-2">
+                        {Object.entries(entry.symptoms).map(([key, value], idx) => (
+                          <div key={idx} className="text-sm text-[#615C74]">
+                            <span className="font-medium text-[#130B30]">{key}:</span> {value}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="mb-4">
-                    <h2 className="font-neue text-sm font-semibold text-[#130B30]">
+                    <h2 className="font-neue text-sm font-semibold text-[#130B30] mb-2">
                       Treatment
                     </h2>
-                    <ul className="list-disc">
-                      {entry.treatment.length < 1 ? (
-                        <p className="text-sm text-[#615C74]">
-                          No treatment found
-                        </p>
-                      ) : (
-                        entry.treatment.map((treatment, index) => (
-                          <li key={index}>{treatment}</li>
-                        ))
-                      )}
-                    </ul>
+                    {(() => {
+                      const treatment = entry.treatment;
+                      if (Array.isArray(treatment)) {
+                        return treatment.length < 1 ? (
+                          <p className="text-sm text-[#615C74]">No treatment found</p>
+                        ) : (
+                          <ul className="list-disc ml-5 space-y-1">
+                            {treatment.map((item, idx) => (
+                              <li key={idx} className="text-sm text-[#615C74]">{item}</li>
+                            ))}
+                          </ul>
+                        );
+                      }
+                      return (
+                        <div className="space-y-4">
+                          {treatment.prevention && treatment.prevention.length > 0 && (
+                            <div>
+                              <h3 className="text-sm font-medium text-[#130B30] mb-1">Prevention</h3>
+                              <ul className="list-disc ml-5 space-y-1 text-[#615C74] text-sm">
+                                {treatment.prevention.map((item, idx) => <li key={idx}>{item}</li>)}
+                              </ul>
+                            </div>
+                          )}
+                          {treatment.chemical_treatment && treatment.chemical_treatment.length > 0 && (
+                            <div>
+                              <h3 className="text-sm font-medium text-[#130B30] mb-1">Chemical Treatment</h3>
+                              <ul className="list-disc ml-5 space-y-1 text-[#615C74] text-sm">
+                                {treatment.chemical_treatment.map((item, idx) => <li key={idx}>{item}</li>)}
+                              </ul>
+                            </div>
+                          )}
+                          {treatment.biological_treatment && treatment.biological_treatment.length > 0 && (
+                            <div>
+                              <h3 className="text-sm font-medium text-[#130B30] mb-1">Biological Treatment</h3>
+                              <ul className="list-disc ml-5 space-y-1 text-[#615C74] text-sm">
+                                {treatment.biological_treatment.map((item, idx) => <li key={idx}>{item}</li>)}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               ))}
