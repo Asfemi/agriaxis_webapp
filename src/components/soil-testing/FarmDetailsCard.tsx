@@ -128,7 +128,7 @@ const FarmDetailsCard: React.FC<{
           </h5>
           <h6 className="text-[#423C59]">
             Let's know the farm and crop type you are requesting{" "}
-            {requestServiceType ?? "soil test"} for
+            {requestServiceType ?? "information"} for
           </h6>
         </div>
       </header>
