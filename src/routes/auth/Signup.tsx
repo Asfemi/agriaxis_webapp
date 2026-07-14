@@ -115,7 +115,7 @@ function Signup() {
   const contactFieldEmpty = loginType === "email" ? !emailValue : !phoneValue;
 
   return (
-    <div className="max-h-[82vh] max-w-5/12 min-w-135 space-y-8 overflow-y-auto rounded-3xl bg-white p-12">
+    <div className="max-h-[82vh] max-w-5/12 min-w-135 space-y-8 rounded-3xl bg-white p-12">
       <header className="space-y-2">
         <h5 className="font-neue text-2xl font-semibold text-[#130B30]">
           Create account
@@ -286,14 +286,12 @@ function Signup() {
                     {errors.email.message}
                   </p>
                 )}
-                {/** 
                    <p
                    className="ml-auto w-fit cursor-pointer text-sm text-[#0A814A]"
                    onClick={() => handleSelectLoginType("phone number")}
                    >
                    Use phone number
                    </p>
-                  */}
               </div>
             )}
           </>
