@@ -6,6 +6,10 @@ import "@geoman-io/leaflet-geoman-free";
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import "leaflet/dist/leaflet.css";
 import { useCoordinatesStore } from "@/stores/useCoordinatesStore";
+import {
+  calculatePolygonAreaInHectares,
+  type Coordinate,
+} from "@/components/shared/LeafletMapMeasurementCard";
 
 const MEASUREMENT_STEPS = [
   "Stand at each corner of your land",
@@ -69,6 +73,22 @@ export const ManualMapMeasurementCard: React.FC<{
     { title: "Point 4", coordinate: formData.point_4 },
   ];
 
+  const coordinates: Coordinate[] = [
+    formData.point_1,
+    formData.point_2,
+    formData.point_3,
+    formData.point_4,
+  ]
+    .filter(Boolean)
+    .map((str) => {
+      const [lat, lng] = str!.split(",").map(Number);
+      return { lat, lng };
+    })
+    .filter((coord) => !isNaN(coord.lat) && !isNaN(coord.lng));
+
+  const areaInHectares = calculatePolygonAreaInHectares(coordinates);
+  const areaInAcres = areaInHectares * 2.47105;
+
   /**
    * @description Handles the confirmation of the coordinates
    */
@@ -84,7 +104,7 @@ export const ManualMapMeasurementCard: React.FC<{
   return (
     <>
       {!openCoordinatesSelection ? (
-        <section className="z-50 ml-auto size-full overflow-y-auto rounded-[1.25rem] bg-white px-7 lg:max-w-xl">
+        <section className="z-50 ml-auto size-full overflow-y-auto rounded-[1.25rem] bg-white lg:max-w-xl">
           <div className="flex h-full flex-col justify-between overflow-y-auto pb-10">
             <div>
               <header className="mb-10 flex items-start gap-3.5 pt-7 pl-6">
@@ -163,6 +183,14 @@ export const ManualMapMeasurementCard: React.FC<{
                     </div>
                   ))}
                 </div>
+
+                {coordinates.length >= 3 && (
+                  <div className="flex items-center justify-center gap-2 rounded-full bg-slate-900/90 px-4 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-sm border border-slate-700 w-fit mx-auto whitespace-nowrap">
+                    <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                    <span>Area: {areaInHectares.toFixed(2)} ha ({areaInAcres.toFixed(2)} ac)</span>
+                  </div>
+                )}
+
                 <div className="rounded-xl bg-[#F3F6F8] px-4 py-6">
                   <div className="mb-10">
                     <svg
