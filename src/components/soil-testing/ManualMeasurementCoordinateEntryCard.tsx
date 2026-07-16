@@ -128,7 +128,7 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
   };
 
   return (
-    <section className="size-full overflow-y-auto px-7">
+    <section className="size-full overflow-y-auto">
       <header className="mb-10 flex items-center gap-3.5 pt-7">
         <button
           onClick={onClose}
