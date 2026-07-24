@@ -366,7 +366,7 @@ export const SoilTestResultsCard: React.FC<{
                         <tr className="bg-[#F5F4FA] text-left text-[#423C59]">
                           <th className="px-4 py-2.5 font-medium">Parameter</th>
                           <th className="px-4 py-2.5 font-medium">Value</th>
-                          <th className="px-4 py-2.5 font-medium">Status</th>
+                          {/** <th className="px-4 py-2.5 font-medium">Status</th> */}
                         </tr>
                       </thead>
                       <tbody>
@@ -384,12 +384,12 @@ export const SoilTestResultsCard: React.FC<{
                               {entry.value}
                               {entry.unit}
                             </td>
-                            <td className="px-4 py-2.5">
+                            {/** <td className="px-4 py-2.5">
                               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E7F2ED] px-2.5 py-0.5 text-xs font-medium text-[#0A814A]">
                                 <span className="size-1.5 rounded-full bg-[#0A814A]" />
                                 {entry.status}
                               </span>
-                            </td>
+                            </td> */}
                           </tr>
                         ))}
                       </tbody>
