@@ -541,14 +541,15 @@ export const SoilTestResultsCard: React.FC<{
                     <span className="font-medium text-[#615C74]">
                       Disclaimer:
                     </span>{" "}
-                    These results and AI-generated recommendations are provided
-                    for informational purposes only and are based on the soil
-                    sample data submitted. They do not constitute professional
-                    agronomic, environmental, or financial advice, and yields,
-                    costs, and outcomes may vary based on local conditions,
-                    weather, and farming practices. Please consult a certified
-                    agronomist or soil scientist before making significant
-                    farming decisions.
+                    AgriAxis combines advanced satellite technology, artificial
+                    intelligence, and agronomic science to provide reliable soil
+                    insights and personalized recommendations. These
+                    recommendations are intended to guide better farming
+                    decisions and should be considered alongside local knowledge
+                    and field observations. For large-scale farming investments
+                    or specialized soil management, we encourage consulting a
+                    soil scientist/certified agronomist or agricultural
+                    extension professional for additional guidance.
                   </p>
                 </div>
               </div>
