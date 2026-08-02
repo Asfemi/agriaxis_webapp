@@ -42,11 +42,13 @@ export type CropMonitoringDiseaseDetectResponse = {
     severity: string;
     spreading: string;
     symptoms?: Record<string, string>;
-    treatment: string[] | {
-      prevention?: string[];
-      chemical_treatment?: string[];
-      biological_treatment?: string[];
-    };
+    treatment:
+      | string[]
+      | {
+          prevention?: string[];
+          chemical_treatment?: string[];
+          biological_treatment?: string[];
+        };
   }[];
 };
 
@@ -74,6 +76,12 @@ export type CropHealthHistory = {
   farm_id: string;
   image_png: string;
   image_tiff: string;
+  primary_index: "NDVI" | "NDRE" | "RECI" | "NDMI" | "MSAVI";
+  indices: Record<
+    CropHealthHistory["primary_index"],
+    { image_png: string; image_tiff: string; description: string }
+  >;
+  available_indices: CropHealthHistory["primary_index"][];
 };
 
 export type YieldEstimation = {

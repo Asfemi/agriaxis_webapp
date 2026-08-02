@@ -9,13 +9,12 @@ import {
   useNavigate,
   type AnyRoute,
 } from "@tanstack/react-router";
-import { getOrgId, userToken } from "@/lib/utils";
+import { getOrgId, userToken, saveOrgId } from "@/lib/utils";
 import { useIsFetching, useIsMutating, useQuery } from "@tanstack/react-query";
 import { LoaderCircle, SquaresExclude } from "lucide-react";
 import { meQueryOptions } from "@/api/auth";
 import { DashboardError } from "@/components/dashboard/DashboardError";
 import { useUserStore } from "@/stores/useUserStore";
-import { saveOrgId } from "@/lib/utils";
 
 function DashboardLayoutContent() {
   const { isOpen, close } = useSidebar();
