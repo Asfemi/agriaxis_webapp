@@ -6,22 +6,25 @@ import type {
   Question,
 } from "@/models/feedback.model";
 
-export const useGetQuestions = (
-  tag:
-    | "general"
-    | " soil_test"
-    | " crop_health"
-    | " yield_estimation"
-    | " crop_information"
-    | " disease_detection",
-) => {
+export type FeedbackTag =
+  | "general"
+  | "soil_test"
+  | "crop_health"
+  | "yield_estimation"
+  | "crop_information"
+  | "disease_detection";
+
+export const useGetQuestions = (tag: FeedbackTag = "general") => {
   return useQuery({
-    queryKey: ["feedback-questions"],
+    queryKey: ["feedback-questions", tag],
     queryFn: async () => {
-      const { data } = await apiClient.get<Question[]>("/feedback/questions", {
-        params: { tag },
-      });
-      return data;
+      const { data } = await apiClient.get<{ questions: Question[] }>(
+        "/feedback/questions",
+        {
+          params: { tag },
+        },
+      );
+      return data.questions;
     },
   });
 };
