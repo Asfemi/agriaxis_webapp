@@ -26,6 +26,19 @@ export const CropHealthResultSheet: React.FC<{
 
   const bounds = parseBounds(data.coordinates);
 
+  const availableIndices = (data.available_indices ?? []).flatMap((index) => {
+    const detail = data.indices?.[index];
+    if (!detail) {
+      return [];
+    }
+
+    return [{
+      index,
+      image_png: detail.image_png,
+      description: detail.description,
+    }];
+  });
+
   return (
     <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
       <section className="relative z-45 ml-auto h-full w-3/4 overflow-hidden rounded-[1.25rem] bg-white">
@@ -64,6 +77,17 @@ export const CropHealthResultSheet: React.FC<{
                 interactive={true}
                 className="pixelated-overlay"
               />
+
+              {availableIndices.map((entry) => (
+                <ImageOverlay
+                  key={entry.index}
+                  url={entry.image_png}
+                  bounds={bounds}
+                  opacity={0.55}
+                  interactive={true}
+                  className="pixelated-overlay"
+                />
+              ))}
             </MapContainer>
           </div>
 
