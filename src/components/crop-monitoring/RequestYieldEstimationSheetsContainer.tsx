@@ -37,6 +37,7 @@ export const RequestYieldEstimationSheetsContainer: React.FC<{
             isOpen={currentView === "details"}
             onClose={onClose}
             onConfirm={() => setCurrentView("warning")}
+            requestServiceType="yield estimation"
           />
           {currentView === "warning" && (
             <LongRunningProcessWarning

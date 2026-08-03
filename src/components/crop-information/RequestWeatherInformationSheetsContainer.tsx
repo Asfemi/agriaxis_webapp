@@ -35,6 +35,7 @@ export const RequestWeatherInformationSheetsContainer: React.FC<{
           isOpen={currentView === "details"}
           onClose={onClose}
           onConfirm={handleSelectFarm}
+          requestServiceType="weather information"
         />
         {currentView === "result" && <WeatherForecastSheet onClose={onClose} analysisData={analysisData} />}
       </section>

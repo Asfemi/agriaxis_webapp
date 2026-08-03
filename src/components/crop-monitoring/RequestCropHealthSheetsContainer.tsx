@@ -240,7 +240,7 @@ export const RequestCropHealthSheetsContainer: React.FC<{
             isOpen={currentView === "details"}
             onClose={onClose}
             onConfirm={() => setCurrentView("cost")}
-            requestServiceType={"Crop Health"}
+            requestServiceType={"crop health"}
           />
           <MeasurementCostCard
             service="crop-health"
