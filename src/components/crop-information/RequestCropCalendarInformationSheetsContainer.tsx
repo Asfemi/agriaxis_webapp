@@ -39,6 +39,7 @@ export const RequestCropCalendarInformationSheetsContainer: React.FC<{
           isOpen={currentView === "details"}
           onClose={onClose}
           onConfirm={handleConfirm}
+          requestServiceType="crop calendar information"
         />
         {currentView === "result" && (
           <CropCalendarSheet

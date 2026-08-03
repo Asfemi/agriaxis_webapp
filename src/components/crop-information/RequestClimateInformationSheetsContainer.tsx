@@ -39,6 +39,7 @@ export const RequestClimateInformationSheetsContainer: React.FC<{
           isOpen={currentView === "details"}
           onClose={onClose}
           onConfirm={handleConfirm}
+          requestServiceType="climate information"
         />
         {currentView === "result" && (
           <ClimateInformationSheet

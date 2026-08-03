@@ -280,6 +280,7 @@ const RequestSoilTestSheetsContainer: React.FC<{
             isOpen={currentView === "details"}
             onClose={onClose}
             onConfirm={() => setCurrentView("size")}
+            requestServiceType="soil test"
           />
           <FarmSizeForMeasurementCard
             isOpen={currentView === "size"}
