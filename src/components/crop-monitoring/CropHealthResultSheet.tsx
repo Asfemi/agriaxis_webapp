@@ -1,9 +1,11 @@
+import React, { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import healthIcon from "/assets/icons/health.svg";
 import { MapContainer, TileLayer, ImageOverlay } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { LatLngBoundsExpression } from "leaflet";
 import type { CropHealthHistory } from "@/models/crop-monitoring.model";
+import { SelectDropdown } from "@/components/SelectDropdown";
 
 export const CropHealthResultSheet: React.FC<{
   onClose?: () => void;
@@ -38,6 +40,14 @@ export const CropHealthResultSheet: React.FC<{
       description: detail.description,
     }];
   });
+
+  const [selectedIndex, setSelectedIndex] = useState<string | null>(
+    availableIndices[0]?.index ?? null,
+  );
+
+  const selectedOverlay = availableIndices.find(
+    (entry) => entry.index === selectedIndex,
+  );
 
   return (
     <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
@@ -78,17 +88,31 @@ export const CropHealthResultSheet: React.FC<{
                 className="pixelated-overlay"
               />
 
-              {availableIndices.map((entry) => (
+              {selectedOverlay && (
                 <ImageOverlay
-                  key={entry.index}
-                  url={entry.image_png}
+                  url={selectedOverlay.image_png}
                   bounds={bounds}
                   opacity={0.55}
                   interactive={true}
                   className="pixelated-overlay"
                 />
-              ))}
+              )}
             </MapContainer>
+          </div>
+
+          <div className="absolute right-8 top-8 z-50 w-64 rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-xl backdrop-blur-sm">
+            <SelectDropdown
+              mode="single"
+              headerTitle="Overlay Index"
+              label="Choose an index"
+              placeholder="Select index"
+              options={availableIndices.map((entry) => ({
+                label: entry.index,
+                value: entry.index,
+              }))}
+              value={selectedIndex}
+              onChange={setSelectedIndex}
+            />
           </div>
 
           <div className="z-10 mx-auto mt-auto w-[95%] rounded-xl border border-gray-100 bg-white/95 px-6 py-6 shadow-xl backdrop-blur-sm">
