@@ -121,7 +121,17 @@ export interface SoilTestingResult {
     status: string;
     unit: string;
     value: number;
-  }[]
+  }[];
+  classification_standards?: {
+    title: string;
+    parameters: {
+      key: string;
+      label: string;
+      unit: string;
+      ranges: { value: string; rating: string }[];
+    }[];
+  };
+  disclaimer?: string;
 }
 
 export interface SoilTestingRecommendationResponse {

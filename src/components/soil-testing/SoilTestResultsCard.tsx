@@ -171,16 +171,70 @@ export const SoilTestResultsCard: React.FC<{
               {isLoadingResult ? (
                 <LoaderCircle className="mx-auto my-10 animate-spin text-[#0A814A]" />
               ) : (
-                <div className="mb-7 space-y-3">
-                  {resultData?.parameters.map((entry) => (
-                    <div className="flex items-center gap-2">
-                      <div className="size-2 rounded-full bg-green-600"></div>
-                      <p className="text-sm text-[#423C59]">
-                        {entry.label}: {`${entry.value}${entry.unit}`}
+                <>
+                  <div className="mb-7 space-y-3">
+                    {resultData?.parameters.map((entry) => (
+                      <div key={entry.key} className="flex items-center gap-2">
+                        <div className="size-2 rounded-full bg-green-600"></div>
+                        <p className="text-sm text-[#423C59]">
+                          {entry.label}: {`${entry.value}${entry.unit}`}
+                          {entry.status ? (
+                            <span className="text-[#0A814A]">
+                              {" "}
+                              · {entry.status}
+                            </span>
+                          ) : null}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {resultData?.classification_standards && (
+                    <div className="mb-7 space-y-4">
+                      <h5 className="font-neue text-xl font-semibold">
+                        {resultData.classification_standards.title}
+                      </h5>
+                      <div className="space-y-5">
+                        {resultData.classification_standards.parameters.map(
+                          (standard) => (
+                            <div key={standard.key}>
+                              <h6 className="mb-2 text-sm font-semibold text-[#130B30]">
+                                {standard.label}
+                                {standard.unit ? ` (${standard.unit})` : ""}
+                              </h6>
+                              <div className="overflow-hidden rounded-md border border-[#E8E8E8]">
+                                <div className="grid grid-cols-2 bg-[#F5F7F6] px-3 py-2 text-xs font-medium text-[#423C59]">
+                                  <span>Value</span>
+                                  <span>Rating</span>
+                                </div>
+                                {standard.ranges.map((range) => (
+                                  <div
+                                    key={`${standard.key}-${range.value}`}
+                                    className="grid grid-cols-2 border-t border-[#E8E8E8] px-3 py-2 text-sm text-[#423C59]"
+                                  >
+                                    <span>{range.value}</span>
+                                    <span>{range.rating}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {resultData?.disclaimer && (
+                    <div className="mb-7 rounded-md border-l-4 border-[#0A814A] bg-[#F5F7F6] px-4 py-3">
+                      <p className="mb-1 text-sm font-semibold text-[#130B30]">
+                        Disclaimer
+                      </p>
+                      <p className="text-sm leading-relaxed text-[#615C74]">
+                        {resultData.disclaimer}
                       </p>
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               )}
               <div>
                 <h5 className="font-neue mb-3 text-xl font-semibold">
