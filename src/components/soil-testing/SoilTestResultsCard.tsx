@@ -6,11 +6,185 @@ import { formatDate } from "@/lib/utils";
 import { useCoordinatesStore } from "@/stores/useCoordinatesStore";
 import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
 import { ChevronLeft, LoaderCircle, TicketPercent } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { Button } from "@/components/Button";
 import jsPDF from "jspdf";
-import { useRef } from "react";
 import { toPng } from "html-to-image";
+
+/**
+ * The `recommendation` field returned by the API sometimes embeds a
+ * "Soil correction plan" as a JSON blob appended after a plain-text
+ * intro paragraph, e.g.:
+ *
+ *   "Maize is NOT suitable for this soil ...
+ *
+ *    Soil correction plan:
+ *    {"1. Acidity & Aluminium Mitigation": {...}, ...}"
+ *
+ * This helper splits that apart so we can render the intro as prose
+ * and the plan as a table.
+ */
+type CorrectionStep = {
+  fertilizer_type?: string;
+  application_rate_kg_ha?: string;
+  timing_dosage?: string;
+  strategy?: string;
+};
+
+type ParsedRecommendation = {
+  /** Legacy format: plain intro + a structured JSON correction plan */
+  intro: string | null;
+  plan: Record<string, CorrectionStep> | null;
+  /** New format: free-form text with markdown-ish (**bold**, "* " bullets) hints */
+  markdown: string | null;
+};
+
+function parseRecommendation(raw?: string | null): ParsedRecommendation {
+  if (!raw) return { intro: null, plan: null, markdown: null };
+
+  const marker = "soil correction plan:";
+  const markerIndex = raw.toLowerCase().indexOf(marker);
+
+  if (markerIndex !== -1) {
+    const intro = raw.slice(0, markerIndex).trim();
+    const jsonPart = raw.slice(markerIndex + marker.length).trim();
+
+    try {
+      const plan = JSON.parse(jsonPart) as Record<string, CorrectionStep>;
+      return { intro, plan, markdown: null };
+    } catch {
+      // Not actually JSON (e.g. it's a markdown "Soil Correction Plan" section
+      // instead) — fall through and treat the whole string as markdown text.
+    }
+  }
+
+  return { intro: null, plan: null, markdown: raw.trim() };
+}
+
+/**
+ * Renders a single line of text, converting **bold** markers into <strong>
+ * tags. This is intentionally tiny/dependency-free rather than pulling in a
+ * full markdown renderer, since the AI output only ever uses bold + bullets.
+ */
+const InlineText: React.FC<{ text: string }> = ({ text }) => {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
+
+  return (
+    <>
+      {parts.map((part, index) =>
+        part.startsWith("**") && part.endsWith("**") ? (
+          <strong key={index} className="font-semibold text-slate-800">
+            {part.slice(2, -2)}
+          </strong>
+        ) : (
+          <span key={index}>{part}</span>
+        ),
+      )}
+    </>
+  );
+};
+
+/**
+ * Renders free-form AI recommendation text that uses lightweight markdown
+ * hints (blank-line separated sections, standalone "Title" lines, **bold**
+ * sub-headings like "**1. Organic Matter Improvement:**", and "* " bullet
+ * lists with bold labels) into clean, non-asterisk-y JSX.
+ */
+const FormattedRecommendation: React.FC<{ text: string }> = ({ text }) => {
+  const blocks = useMemo(
+    () =>
+      text
+        .split(/\n\s*\n/)
+        .map((block) => block.trim())
+        .filter(Boolean),
+    [text],
+  );
+
+  return (
+    <div className="space-y-5">
+      {blocks.map((block, blockIndex) => {
+        const lines = block
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        // A block that opens with a short, unadorned, un-punctuated line is
+        // treated as a section title (e.g. "Soil Correction Plan").
+        let title: string | null = null;
+        let contentLines = lines;
+        const [firstLine] = lines;
+        if (
+          firstLine &&
+          !firstLine.startsWith("*") &&
+          !/\*\*/.test(firstLine) &&
+          !/[.:]$/.test(firstLine) &&
+          firstLine.split(" ").length <= 6
+        ) {
+          title = firstLine;
+          contentLines = lines.slice(1);
+        }
+
+        const elements: React.ReactNode[] = [];
+        let bulletBuffer: string[] = [];
+
+        const flushBullets = () => {
+          if (!bulletBuffer.length) return;
+          elements.push(
+            <ul
+              key={`ul-${elements.length}`}
+              className="list-disc space-y-1.5 pl-5"
+            >
+              {bulletBuffer.map((item, i) => (
+                <li key={i} className="text-sm leading-relaxed text-[#615C74]">
+                  <InlineText text={item} />
+                </li>
+              ))}
+            </ul>,
+          );
+          bulletBuffer = [];
+        };
+
+        contentLines.forEach((line, i) => {
+          const wholeLineBold = /^\*\*(.+)\*\*:?$/.exec(line);
+
+          if (line.startsWith("*")) {
+            bulletBuffer.push(line.replace(/^\*\s*/, ""));
+          } else if (wholeLineBold) {
+            flushBullets();
+            elements.push(
+              <h6
+                key={`h-${i}`}
+                className="mt-3 mb-1 text-sm font-semibold text-slate-800"
+              >
+                {wholeLineBold[1].replace(/:$/, "")}
+              </h6>,
+            );
+          } else {
+            flushBullets();
+            elements.push(
+              <p
+                key={`p-${i}`}
+                className="text-sm leading-relaxed text-[#615C74]"
+              >
+                <InlineText text={line} />
+              </p>,
+            );
+          }
+        });
+        flushBullets();
+
+        return (
+          <div key={blockIndex} className="space-y-1.5">
+            {title && (
+              <h6 className="text-sm font-semibold text-slate-800">{title}</h6>
+            )}
+            {elements}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 export const SoilTestResultsCard: React.FC<{
   onClose: () => void;
@@ -97,6 +271,15 @@ export const SoilTestResultsCard: React.FC<{
     isError: isErrorRecommendations,
   } = useSoilTestingRecommendation(result?.id ?? "");
 
+  const {
+    intro: recommendationIntro,
+    plan: correctionPlan,
+    markdown: recommendationMarkdown,
+  } = useMemo(
+    () => parseRecommendation(recommendations?.recommendation),
+    [recommendations?.recommendation],
+  );
+
   if (!result || isErrorResult)
     return (
       <div className="flex h-screen items-center justify-center">
@@ -168,74 +351,54 @@ export const SoilTestResultsCard: React.FC<{
                   </>
                 </div>
               )}
-              {isLoadingResult ? (
-                <LoaderCircle className="mx-auto my-10 animate-spin text-[#0A814A]" />
-              ) : (
-                <>
-                  <div className="mb-7 space-y-3">
-                    {resultData?.parameters.map((entry) => (
-                      <div key={entry.key} className="flex items-center gap-2">
-                        <div className="size-2 rounded-full bg-green-600"></div>
-                        <p className="text-sm text-[#423C59]">
-                          {entry.label}: {`${entry.value}${entry.unit}`}
-                          {entry.status ? (
-                            <span className="text-[#0A814A]">
-                              {" "}
-                              · {entry.status}
-                            </span>
-                          ) : null}
-                        </p>
-                      </div>
-                    ))}
+
+              {/* ---------- Soil parameters table ---------- */}
+              <div className="mb-7">
+                <h6 className="mb-4 text-lg font-medium text-[#423C59]">
+                  Soil Parameters
+                </h6>
+                {isLoadingResult ? (
+                  <LoaderCircle className="mx-auto my-10 animate-spin text-[#0A814A]" />
+                ) : (
+                  <div className="overflow-hidden rounded-lg border border-[#E5E3EE]">
+                    <table className="w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-[#F5F4FA] text-left text-[#423C59]">
+                          <th className="px-4 py-2.5 font-medium">Parameter</th>
+                          <th className="px-4 py-2.5 font-medium">Value</th>
+                          <th className="px-4 py-2.5 font-medium">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {resultData?.parameters.map((entry, index) => (
+                          <tr
+                            key={entry.key}
+                            className={
+                              index % 2 === 0 ? "bg-white" : "bg-[#FAFAFC]"
+                            }
+                          >
+                            <td className="px-4 py-2.5 text-[#130B30]">
+                              {entry.label}
+                            </td>
+                            <td className="px-4 py-2.5 text-[#423C59]">
+                              {entry.value}
+                              {entry.unit}
+                            </td>
+                            <td className="px-4 py-2.5">
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E7F2ED] px-2.5 py-0.5 text-xs font-medium text-[#0A814A]">
+                                <span className="size-1.5 rounded-full bg-[#0A814A]" />
+                                {entry.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
+                )}
+              </div>
 
-                  {resultData?.classification_standards && (
-                    <div className="mb-7 space-y-4">
-                      <h5 className="font-neue text-xl font-semibold">
-                        {resultData.classification_standards.title}
-                      </h5>
-                      <div className="space-y-5">
-                        {resultData.classification_standards.parameters.map(
-                          (standard) => (
-                            <div key={standard.key}>
-                              <h6 className="mb-2 text-sm font-semibold text-[#130B30]">
-                                {standard.label}
-                                {standard.unit ? ` (${standard.unit})` : ""}
-                              </h6>
-                              <div className="overflow-hidden rounded-md border border-[#E8E8E8]">
-                                <div className="grid grid-cols-2 bg-[#F5F7F6] px-3 py-2 text-xs font-medium text-[#423C59]">
-                                  <span>Value</span>
-                                  <span>Rating</span>
-                                </div>
-                                {standard.ranges.map((range) => (
-                                  <div
-                                    key={`${standard.key}-${range.value}`}
-                                    className="grid grid-cols-2 border-t border-[#E8E8E8] px-3 py-2 text-sm text-[#423C59]"
-                                  >
-                                    <span>{range.value}</span>
-                                    <span>{range.rating}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {resultData?.disclaimer && (
-                    <div className="mb-7 rounded-md border-l-4 border-[#0A814A] bg-[#F5F7F6] px-4 py-3">
-                      <p className="mb-1 text-sm font-semibold text-[#130B30]">
-                        Disclaimer
-                      </p>
-                      <p className="text-sm leading-relaxed text-[#615C74]">
-                        {resultData.disclaimer}
-                      </p>
-                    </div>
-                  )}
-                </>
-              )}
+              {/* ---------- AI recommendations ---------- */}
               <div>
                 <h5 className="font-neue mb-3 text-xl font-semibold">
                   AI recommendations
@@ -249,40 +412,146 @@ export const SoilTestResultsCard: React.FC<{
                   </p>
                 )}
                 {!isLoadingRecommendations && !isErrorRecommendations && (
-                  <>
-                    <div className="mb-5 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <div className="size-2.5 animate-pulse rounded-lg bg-blue-500"></div>
+                  <div className="space-y-6">
+                    {/* Summary */}
+                    <div className="rounded-lg border border-[#E5E3EE] bg-[#FAFAFC] p-4">
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="size-2.5 rounded-lg bg-blue-500" />
                         <h6 className="font-medium text-slate-800">Summary</h6>
                       </div>
-                      <p className="text-sm text-[#615C74]">
+                      <p className="text-sm leading-relaxed whitespace-pre-line text-[#615C74]">
                         {recommendations?.summary}
                       </p>
                     </div>
-                    <div className="mb-5 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <div className="size-2.5 animate-pulse rounded-lg bg-blue-500"></div>
+
+                    {/* Recommendation */}
+                    <div className="rounded-lg border border-[#E5E3EE] bg-[#FAFAFC] p-4">
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="size-2.5 rounded-lg bg-blue-500" />
                         <h6 className="font-medium text-slate-800">
                           Recommendation
                         </h6>
                       </div>
-                      <p className="text-sm text-[#615C74]">
-                        {recommendations?.recommendation}
-                      </p>
+
+                      {/* Legacy format: plain intro + structured JSON plan */}
+                      {correctionPlan && (
+                        <>
+                          <p className="text-sm leading-relaxed whitespace-pre-line text-[#615C74]">
+                            {recommendationIntro}
+                          </p>
+                          <div className="mt-4">
+                            <h6 className="mb-2 text-sm font-medium text-slate-800">
+                              Soil Correction Plan
+                            </h6>
+                            <div className="overflow-hidden rounded-lg border border-[#E5E3EE]">
+                              <table className="w-full border-collapse text-sm">
+                                <thead>
+                                  <tr className="bg-[#F5F4FA] text-left text-[#423C59]">
+                                    <th className="px-3 py-2 font-medium">
+                                      Step
+                                    </th>
+                                    <th className="px-3 py-2 font-medium">
+                                      Fertilizer / Input
+                                    </th>
+                                    <th className="px-3 py-2 font-medium">
+                                      Rate (kg/ha)
+                                    </th>
+                                    <th className="px-3 py-2 font-medium">
+                                      Timing &amp; Dosage
+                                    </th>
+                                    <th className="px-3 py-2 font-medium">
+                                      Strategy
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {Object.entries(correctionPlan).map(
+                                    ([step, details], index) => (
+                                      <tr
+                                        key={step}
+                                        className={
+                                          index % 2 === 0
+                                            ? "bg-white"
+                                            : "bg-[#FAFAFC]"
+                                        }
+                                      >
+                                        <td className="px-3 py-2 align-top font-medium text-[#130B30]">
+                                          {step}
+                                        </td>
+                                        <td className="px-3 py-2 align-top text-[#423C59]">
+                                          {details.fertilizer_type ?? "—"}
+                                        </td>
+                                        <td className="px-3 py-2 align-top text-[#423C59]">
+                                          {details.application_rate_kg_ha ??
+                                            "—"}
+                                        </td>
+                                        <td className="px-3 py-2 align-top text-[#423C59]">
+                                          {details.timing_dosage ?? "—"}
+                                        </td>
+                                        <td className="px-3 py-2 align-top text-[#423C59]">
+                                          {details.strategy ?? "—"}
+                                        </td>
+                                      </tr>
+                                    ),
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* New format: free-form markdown-ish text (**bold**, * bullets) */}
+                      {!correctionPlan && recommendationMarkdown && (
+                        <FormattedRecommendation
+                          text={recommendationMarkdown}
+                        />
+                      )}
                     </div>
-                    <div className="mb-5 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <div className="size-2.5 animate-pulse rounded-lg bg-blue-500"></div>
+
+                    {/* Suitable crops */}
+                    <div className="rounded-lg border border-[#E5E3EE] bg-[#FAFAFC] p-4">
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="size-2.5 rounded-lg bg-blue-500" />
                         <h6 className="font-medium text-slate-800">
                           Suitable crops
                         </h6>
                       </div>
-                      <p className="text-sm text-[#615C74]">
-                        {recommendations?.suitable_crops}
-                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {recommendations?.suitable_crops
+                          ?.split(",")
+                          .map((crop) => crop.trim())
+                          .filter(Boolean)
+                          .map((crop) => (
+                            <span
+                              key={crop}
+                              className="rounded-full bg-[#E7F2ED] px-3 py-1 text-xs font-medium text-[#0A814A]"
+                            >
+                              {crop}
+                            </span>
+                          ))}
+                      </div>
                     </div>
-                  </>
+                  </div>
                 )}
+
+                {/* ---------- Disclaimer ---------- */}
+                <div className="mt-6 rounded-lg border border-dashed border-[#D8D5E8] bg-[#FAFAFC] p-4">
+                  <p className="text-xs leading-relaxed text-[#8A849C]">
+                    <span className="font-medium text-[#615C74]">
+                      Disclaimer:
+                    </span>{" "}
+                    AgriAxis combines advanced satellite technology, artificial
+                    intelligence, and agronomic science to provide reliable soil
+                    insights and personalized recommendations. These
+                    recommendations are intended to guide better farming
+                    decisions and should be considered alongside local knowledge
+                    and field observations. For large-scale farming investments
+                    or specialized soil management, we encourage consulting a
+                    soil scientist/certified agronomist or agricultural
+                    extension professional for additional guidance.
+                  </p>
+                </div>
               </div>
             </section>
             <div className="py-5">

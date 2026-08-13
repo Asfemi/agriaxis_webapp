@@ -12,13 +12,18 @@ import { cn } from "@/lib/utils";
 import { CropHealthServicePage } from "@/components/crop-monitoring/CropHealthServicePage";
 import { DiseaseServicePage } from "@/components/crop-monitoring/DiseaseServicePage";
 import { YieldEstimationPage } from "@/components/crop-monitoring/YieldEstimationPage";
+import { ShieldQuestionMark, Loader2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+const INSURANCE_MAILTO = `mailto:agriaxisinternational@gmail.com?subject=${encodeURIComponent("Insurance Support Request")}&body=${encodeURIComponent("Hello AgriAxis Support Team,\n\nI am interested in learning more about crop insurance options available through AgriAxis. Please contact me with details on coverage plans, eligibility requirements, and how to get started.\n\nThank you.")}`;
 
 const SERVICES: {
   id: string;
   title: string;
   sub: string;
-  icon: string;
+  icon: string | LucideIcon;
   isDisabled?: boolean;
+  action?: "mailto";
 }[] = [
   {
     id: "health",
@@ -38,17 +43,38 @@ const SERVICES: {
     sub: "Click here to estimate crop yield using AI",
     icon: monitoringIcon,
   },
+  {
+    id: "support",
+    title: "Insurance support",
+    sub: "Interested in insurance? Contact us for offline assistance",
+    icon: ShieldQuestionMark,
+    action: "mailto",
+  },
 ];
 
 type DASHBOARD_VIEW = "overview" | "health" | "disease" | "yield";
 
 function CropMonitoring() {
   const [currentView, setCurrentView] = useState<DASHBOARD_VIEW>("overview");
+  const [mailLoading, setMailLoading] = useState(false);
 
   const { data: dashboardData, isLoading } = useGetCropMonitoringDashboard();
 
-  const handleServiceClick = (id: string) => {
-    setCurrentView(id as DASHBOARD_VIEW);
+  const handleServiceClick = (service: {
+    id: string;
+    isDisabled?: boolean;
+    action?: "mailto";
+  }) => {
+    if (service.isDisabled) return;
+    if (service.action === "mailto") {
+      setMailLoading(true);
+      window.location.href = INSURANCE_MAILTO;
+      setTimeout(() => {
+        setMailLoading(false);
+      }, 1e3);
+      return;
+    }
+    setCurrentView(service.id as DASHBOARD_VIEW);
   };
 
   if (isLoading) {
@@ -120,9 +146,7 @@ function CropMonitoring() {
                       : "cursor-pointer hover:bg-gray-50",
                   )}
                   onClick={() => {
-                    if (!entry.isDisabled) {
-                      handleServiceClick(entry.id);
-                    }
+                    handleServiceClick(entry);
                   }}
                   icon={
                     <div
@@ -133,12 +157,26 @@ function CropMonitoring() {
                           : "border-[#0A814A] bg-[#E7F2ED]",
                       )}
                     >
-                      <img
-                        src={entry.icon}
-                        width={20}
-                        height={20}
-                        alt={entry.title}
-                      />
+                      {mailLoading && entry.action === "mailto" ? (
+                        <Loader2
+                          size={20}
+                          className="animate-spin text-[#0A814A]"
+                        />
+                      ) : typeof entry.icon === "string" ? (
+                        <img
+                          src={entry.icon}
+                          width={20}
+                          height={20}
+                          alt={entry.title}
+                        />
+                      ) : (
+                        <entry.icon
+                          size={20}
+                          className={cn(
+                            entry.isDisabled ? "text-gray-400" : "text-[#0A814A]",
+                          )}
+                        />
+                      )}
                     </div>
                   }
                   title={entry.title}

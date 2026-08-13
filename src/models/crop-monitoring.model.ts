@@ -36,20 +36,27 @@ export type CropMonitoringDiseaseDetectResponse = {
     name: string;
     scientific_name: string;
     probability: number;
-    common_names: [];
+    common_names: string[];
     type: string;
     description: string;
     severity: string;
     spreading: string;
-    treatment: [];
+    symptoms?: Record<string, string>;
+    treatment:
+      | string[]
+      | {
+          prevention?: string[];
+          chemical_treatment?: string[];
+          biological_treatment?: string[];
+        };
   }[];
 };
 
 export type DiseaseDetectionHistory = {
   id: string;
   user_id: string;
-  organisation_id: number;
-  org_farm_id: number;
+  organisation_id: string;
+  org_farm_id: string;
   farm_name: string;
   status: "processing" | "completed";
   payment: number | null;
@@ -69,6 +76,12 @@ export type CropHealthHistory = {
   farm_id: string;
   image_png: string;
   image_tiff: string;
+  primary_index: "NDVI" | "NDRE" | "RECI" | "NDMI" | "MSAVI";
+  indices: Record<
+    CropHealthHistory["primary_index"],
+    { image_png: string; image_tiff: string; description: string }
+  >;
+  available_indices: CropHealthHistory["primary_index"][];
 };
 
 export type YieldEstimation = {

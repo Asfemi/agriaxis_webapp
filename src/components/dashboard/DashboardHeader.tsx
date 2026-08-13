@@ -1,11 +1,19 @@
 import React from "react";
-import { Search, Bell, ChevronsRight, MailWarning } from "lucide-react";
+import {
+  Search,
+  Bell,
+  ChevronsRight,
+  MailWarning,
+  MessageSquareQuote,
+} from "lucide-react";
 import { useState } from "react";
 import NotificationPermissionModal from "@/components/dashboard/NotificationPermissionModal";
 import LocationPermissionModal from "@/components/dashboard/LocationPermissionModal";
+import { FeedbackQuestionsModal } from "@/components/dashboard/FeedbackQuestionsModal";
 import { useSidebar } from "@/contexts/SidebarContext";
-import { Link, useMatches } from "@tanstack/react-router";
+import { Link, useLocation, useMatches } from "@tanstack/react-router";
 import { useUserStore } from "@/stores/useUserStore";
+import type { FeedbackTag } from "@/api/feedback";
 
 interface IconButtonProps {
   children: React.ReactNode;
@@ -36,6 +44,21 @@ const ProfileButton: React.FC<{ profilePath: string }> = ({ profilePath }) => {
   );
 };
 
+const getFeedbackTagFromPath = (pathname: string): FeedbackTag => {
+  const normalizedPath = pathname.replace(/^\/dashboard\/?/, "").split("/")[0] ?? "";
+
+  switch (normalizedPath) {
+    case "soil-testing":
+      return "soil_test";
+    case "crop-information":
+      return "crop_information";
+    case "crop-monitoring":
+      return "crop_health";
+    default:
+      return "general";
+  }
+};
+
 const DashboardHeader: React.FC = () => {
   const [
     isNotificationPermissionModalOpen,
@@ -52,6 +75,8 @@ const DashboardHeader: React.FC = () => {
   const [isLocationPermissionModalOpen, setIsLocationPermissionModalOpen] =
     useState(false);
 
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+
   const handleAllowLocation = () => {
     setIsLocationPermissionModalOpen(false);
   };
@@ -61,6 +86,8 @@ const DashboardHeader: React.FC = () => {
 
   const { toggle } = useSidebar();
   const matches = useMatches();
+  const location = useLocation();
+  const feedbackTag = getFeedbackTagFromPath(location.pathname);
 
   return (
     <header className="flex items-center justify-between rounded-[1.25rem] border-b border-[#E6EBF0] bg-white p-4 sm:p-6">
@@ -93,7 +120,7 @@ const DashboardHeader: React.FC = () => {
 
       <div className="flex items-center space-x-2 sm:space-x-3">
         <a
-          title="Report" 
+          title="Contact" 
           className="relative rounded-full bg-[#F1F5F9] p-3 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100"
           href="mailto:agriaxisinternational@gmail.com"
         >
@@ -103,6 +130,16 @@ const DashboardHeader: React.FC = () => {
         <IconButton>
           <Search className="h-5 w-5" />
         </IconButton>
+
+        <button
+          type="button"
+          onClick={() => setIsFeedbackModalOpen(true)}
+          className="rounded-full bg-[#F1F5F9] p-3 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100"
+          aria-label="Open feedback questions"
+          title="Feedback"
+        >
+          <MessageSquareQuote className="h-5 w-5" />
+        </button>
 
         <IconButton>
           <Bell className="h-5 w-5" />
@@ -123,6 +160,12 @@ const DashboardHeader: React.FC = () => {
         onAllow={handleAllowLocation}
         onDeny={handleDenyLocation}
         onClose={() => setIsLocationPermissionModalOpen(false)}
+      />
+
+      <FeedbackQuestionsModal
+        open={isFeedbackModalOpen}
+        onOpenChange={setIsFeedbackModalOpen}
+        tag={feedbackTag}
       />
     </header>
   );

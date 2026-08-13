@@ -12,15 +12,20 @@ import {
   type AnyRoute,
 } from "@tanstack/react-router";
 import { useGetCropInformationDashboard } from "@/api/crop-information";
-import { X } from "lucide-react";
+import { ShieldQuestionMark, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
+import { useState } from "react";
+
+const INSURANCE_MAILTO = `mailto:agriaxisinternational@gmail.com?subject=${encodeURIComponent("Insurance Support Request")}&body=${encodeURIComponent("Hello AgriAxis Support Team,\n\nI am interested in learning more about crop insurance options available through AgriAxis. Please contact me with details on coverage plans, eligibility requirements, and how to get started.\n\nThank you.")}`;
 
 const SERVICES: {
   id: string;
   title: string;
   sub: string;
-  icon: string;
+  icon: string | LucideIcon;
   isDisabled?: boolean;
+  action?: "mailto";
 }[] = [
   {
     id: "weather",
@@ -40,20 +45,37 @@ const SERVICES: {
     sub: "Click here to get your crop planting date",
     icon: treeIcon,
   },
+  {
+    id: "support",
+    title: "Insurance support",
+    sub: "Interested in insurance? Contact us for offline assistance",
+    icon: ShieldQuestionMark,
+    action: "mailto",
+  },
 ];
 
 function CropInformation() {
   const { data: dashboardData, isLoading } = useGetCropInformationDashboard();
   const navigate = useNavigate();
+  const [mailLoading, setMailLoading] = useState(false);
 
   const handleServiceClick = (service: {
     id: string;
     title: string;
     sub: string;
-    icon: string;
+    icon: string | LucideIcon;
     isDisabled?: boolean;
+    action?: "mailto";
   }) => {
     if (service.isDisabled) return;
+    if (service.action === "mailto") {
+      setMailLoading(true);
+      window.location.href = INSURANCE_MAILTO;
+      setTimeout(() => {
+        setMailLoading(false);
+      }, 1e3);
+      return;
+    }
     navigate({ to: `${service.id}` });
   };
 
@@ -138,12 +160,26 @@ function CropInformation() {
                       : "border-[#0A814A] bg-[#E7F2ED]",
                   )}
                 >
-                  <img
-                    src={entry.icon}
-                    width={20}
-                    height={20}
-                    alt={entry.title}
-                  />
+                  {mailLoading && entry.action === "mailto" ? (
+                    <Loader2
+                      size={20}
+                      className="animate-spin text-[#0A814A]"
+                    />
+                  ) : typeof entry.icon === "string" ? (
+                    <img
+                      src={entry.icon}
+                      width={20}
+                      height={20}
+                      alt={entry.title}
+                    />
+                  ) : (
+                    <entry.icon
+                      size={20}
+                      className={cn(
+                        entry.isDisabled ? "text-gray-400" : "text-[#0A814A]",
+                      )}
+                    />
+                  )}
                 </div>
               }
               title={entry.title}

@@ -11,12 +11,12 @@ import {
   type PointsFormData,
 } from "@/stores/useCoordinatesStore";
 
-interface Coordinate {
+export interface Coordinate {
   lat: number;
   lng: number;
 }
 
-const calculatePolygonAreaInHectares = (coords: Coordinate[]): number => {
+export const calculatePolygonAreaInHectares = (coords: Coordinate[]): number => {
   if (coords.length < 3) return 0;
   
   const latLngs = coords.map(c => new L.LatLng(c.lat, c.lng));
@@ -154,6 +154,7 @@ export const LeafletMapMeasurementCard: React.FC<{
   };
 
   const areaInHectares = calculatePolygonAreaInHectares(coordinates);
+  const areaInAcres = areaInHectares * 2.47105;
 
   return (
     <section className="size-full overflow-y-auto rounded-[1.25rem] bg-white px-7 lg:max-w-xl z-50 ml-auto">
@@ -188,9 +189,9 @@ export const LeafletMapMeasurementCard: React.FC<{
         </MapContainer>
 
         {coordinates.length >= 3 && (
-          <div className="absolute bottom-4 left-1/2 z-[1000] -translate-x-1/2 rounded-full bg-slate-900/90 px-4 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-sm flex items-center gap-2 border border-slate-700">
+          <div className="absolute bottom-4 left-1/2 z-[1000] -translate-x-1/2 rounded-full bg-slate-900/90 px-4 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-sm flex items-center gap-2 border border-slate-700 whitespace-nowrap">
             <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-            <span>Area: {areaInHectares.toFixed(2)} ha</span>
+            <span>Area: {areaInHectares.toFixed(2)} ha ({areaInAcres.toFixed(2)} ac)</span>
           </div>
         )}
       </div>

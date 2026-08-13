@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import type { YieldEstimation } from "@/models/crop-monitoring.model";
 import { useEstimateCropYield } from "@/api/crop-monitoring";
 import { YieldEstimationSheet } from "./YieldEstimationSheet";
+import { LongRunningProcessWarning } from "@/components/crop-monitoring/LongRunningProcessWarning";
 
 export const RequestYieldEstimationSheetsContainer: React.FC<{
   isOpen: boolean;
@@ -18,27 +19,40 @@ export const RequestYieldEstimationSheetsContainer: React.FC<{
 
   const { mutate: fetchEstimation } = useEstimateCropYield();
 
-  const handleSelectFarm = () => {
+  const handleConfirm = () => {
     fetchEstimation(formData.farm_id ?? "", {
       onSuccess: (data) => {
         toast.success("Yield estimation data fetched successfully!");
         setResultData(data);
         setCurrentView("result");
-      }
+      },
     });
-  }
+  };
 
   return (
-    <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
-      <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
-        <FarmDetailsCard
-          isOpen={currentView === "details"}
-          onClose={onClose}
-          onConfirm={handleSelectFarm}
-        />
-        {currentView === "result" && <YieldEstimationSheet onClose={onClose} estimationData={resultData} />}
+    <>
+      <section className="fixed inset-0 z-40 bg-black/70 p-4 transition-opacity">
+        <section className="z-50 ml-auto h-full w-full rounded-[1.25rem] bg-white lg:w-3/4 lg:max-w-xl">
+          <FarmDetailsCard
+            isOpen={currentView === "details"}
+            onClose={onClose}
+            onConfirm={() => setCurrentView("warning")}
+            requestServiceType="yield estimation"
+          />
+          {currentView === "warning" && (
+            <LongRunningProcessWarning
+              onClose={onClose}
+              onConfirm={() => handleConfirm()}
+            />
+          )}
+          {currentView === "result" && (
+            <YieldEstimationSheet
+              onClose={onClose}
+              estimationData={resultData}
+            />
+          )}
+        </section>
       </section>
-    </section>
+    </>
   );
 };
-

@@ -1,7 +1,14 @@
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Polygon, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Polygon,
+  Marker,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useCoordinatesStore } from "@/stores/useCoordinatesStore";
@@ -26,6 +33,26 @@ const MapUpdater: React.FC<{ coordinates: Coordinate[] }> = ({
   return null;
 };
 
+// Pending-pin icon so a tapped-but-unconfirmed point is visually distinct
+// from the green polygon vertices already saved.
+const pendingIcon = L.divIcon({
+  className: "",
+  html: `<div style="width:16px;height:16px;border-radius:9999px;background:#F59E0B;border:2px solid white;box-shadow:0 0 0 2px rgba(0,0,0,0.15);"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
+const MapClickHandler: React.FC<{
+  onPick: (coord: Coordinate) => void;
+}> = ({ onPick }) => {
+  useMapEvents({
+    click: (e) => {
+      onPick({ lat: e.latlng.lat, lng: e.latlng.lng });
+    },
+  });
+  return null;
+};
+
 export const ManualMeasurementCoordinateEntryCard: React.FC<{
   isOpen?: boolean;
   onClose: () => void;
@@ -34,6 +61,7 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
   const { formData, updateFormData } = useCoordinatesStore();
   const [coordinateInput, setCoordinateInput] = useState("");
   const [error, setError] = useState("");
+  const [pendingPoint, setPendingPoint] = useState<Coordinate | null>(null);
 
   const coordinates: Coordinate[] = [
     formData.point_1,
@@ -47,6 +75,12 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
       return { lat, lng };
     })
     .filter((coord) => !isNaN(coord.lat) && !isNaN(coord.lng));
+
+  const handleMapPick = (coord: Coordinate) => {
+    setError("");
+    setPendingPoint(coord);
+    setCoordinateInput(`${coord.lat.toFixed(6)},${coord.lng.toFixed(6)}`);
+  };
 
   const handleEnterCoordinate = () => {
     setError("");
@@ -83,6 +117,7 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
     }
 
     setCoordinateInput("");
+    setPendingPoint(null);
     onConfirm();
   };
 
@@ -93,7 +128,7 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
   };
 
   return (
-    <section className="size-full overflow-y-auto px-7">
+    <section className="size-full overflow-y-auto">
       <header className="mb-10 flex items-center gap-3.5 pt-7">
         <button
           onClick={onClose}
@@ -104,7 +139,7 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
         <div>
           <h5 className="font-neue text-xl font-bold text-[#130B30]">Map</h5>
           <p className="text-sm text-[#615C74]">
-            Enter coordinates manually (format: lat,lng)
+            Tap the map or type coordinates directly (format: lat,lng)
           </p>
         </div>
       </header>
@@ -134,6 +169,14 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
             />
           )}
 
+          {pendingPoint && (
+            <Marker
+              position={[pendingPoint.lat, pendingPoint.lng]}
+              icon={pendingIcon}
+            />
+          )}
+
+          <MapClickHandler onPick={handleMapPick} />
           <MapUpdater coordinates={coordinates} />
         </MapContainer>
 
@@ -152,7 +195,10 @@ export const ManualMeasurementCoordinateEntryCard: React.FC<{
               id="coordinate"
               type="text"
               value={coordinateInput}
-              onChange={(e) => setCoordinateInput(e.target.value)}
+              onChange={(e) => {
+                setCoordinateInput(e.target.value);
+                setPendingPoint(null);
+              }}
               onKeyPress={handleKeyPress}
               className="w-full border-none text-sm text-[#423C59] outline-0 placeholder:text-sm placeholder:text-[#423C59] placeholder:opacity-70"
               placeholder="Enter coordinate (e.g., 6.6172,3.3530)"
