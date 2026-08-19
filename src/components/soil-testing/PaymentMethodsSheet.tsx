@@ -10,6 +10,9 @@ interface PaymentMethod {
   imageSrc?: string;
 }
 
+// The payment gateway (Flutterwave/Paystack) is chosen automatically by the
+// backend, with automatic failover when the primary provider is down — the
+// user only picks a method type here, never a specific processor.
 const paymentMethods: PaymentMethod[] = [
   {
     id: "1",
@@ -22,12 +25,6 @@ const paymentMethods: PaymentMethod[] = [
     title: "Bank transfer",
     subtitle: "Transfer money directly from your bank account",
     imageSrc: "/assets/icons/bank.svg",
-  },
-  {
-    id: "3",
-    title: "Paystack",
-    subtitle: "Transaction via Paystack's gateway",
-    imageSrc: "/assets/icons/paystack.png",
   },
 ];
 
