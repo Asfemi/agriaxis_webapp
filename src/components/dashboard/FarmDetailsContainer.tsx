@@ -1,5 +1,5 @@
 import type { Farm, FarmTest } from "@/models/farm.model";
-import { ChevronLeft, MoreVertical } from "lucide-react";
+import { ChevronLeft, MoreVertical, Pencil } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
@@ -13,6 +13,7 @@ import {
 import { DataTable } from "@/components/DataTable";
 import { Link, useParams } from "@tanstack/react-router";
 import { useGetFarm } from "@/api/farms";
+import { RenameFarmDialog } from "@/components/dashboard/RenameFarmDialog";
 
 export const FarmDetailsContainer = ({
   farmListPath = "/dashboard/dashboard/farms",
@@ -20,6 +21,7 @@ export const FarmDetailsContainer = ({
   const { id } = useParams({ from: "/dashboard/dashboard/farms/details/$id" });
 
   const { data: farmData, isLoading, isError } = useGetFarm(id);
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
   const testColumns: ColumnDef<FarmTest>[] = [
     {
       accessorKey: "testID",
@@ -89,7 +91,7 @@ export const FarmDetailsContainer = ({
             </button>
           </Link>
           <div className="mb-6">
-            <div className="mb-2 flex items-center gap-6">
+            <div className="mb-2 flex flex-wrap items-center gap-3">
               <h6 className="font-neue text-2xl font-bold text-[#0F172A]">
                 {`${farmData?.farm_name}, ${farmData?.location}`}
               </h6>
@@ -99,6 +101,14 @@ export const FarmDetailsContainer = ({
                   farmData?.status === "healthy" ? "success" : "warning"
                 }
               />
+              <button
+                type="button"
+                onClick={() => setIsRenameOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#E7F2ED] px-3 py-1.5 font-neue text-sm font-medium text-[#0A814A]"
+              >
+                <Pencil size={14} />
+                Rename
+              </button>
             </div>
             <div className="flex items-center gap-3">
               <svg
@@ -155,6 +165,13 @@ export const FarmDetailsContainer = ({
           <DataTable title="Test performed" columns={columns} data={data} />
         </header>
       </main>
+
+      <RenameFarmDialog
+        farmId={id}
+        currentName={farmData.farm_name}
+        open={isRenameOpen}
+        onOpenChange={setIsRenameOpen}
+      />
     </>
   );
 };

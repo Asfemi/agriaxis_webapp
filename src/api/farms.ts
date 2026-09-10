@@ -36,6 +36,29 @@ export const useCreateFarm = () => {
   });
 };
 
+export const useUpdateFarm = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      name,
+    }: {
+      id: string;
+      name: string;
+    }) => {
+      const { data } = await apiClient.put(`/farms/${encodeURIComponent(id)}`, {
+        name,
+      });
+      return data;
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["farms"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["farm", variables.id] });
+    },
+  });
+};
+
 export const useGetDashboard = () => {
   return useSuspenseQuery({
     queryKey: ["dashboard"],

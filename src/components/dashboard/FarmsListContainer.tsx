@@ -15,13 +15,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useGetAllFarms } from "@/api/farms";
 import { Link } from "@tanstack/react-router";
 import { AddNewFarmSheet } from "@/components/dashboard/AddNewFarmSheet";
+import { RenameFarmDialog } from "@/components/dashboard/RenameFarmDialog";
 
 export const FarmsListContainer = () => {
   const { data: response, isPending, isError } = useGetAllFarms();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [farmToRename, setFarmToRename] = useState<Farm | null>(null);
+
   const farmColumns: ColumnDef<Farm>[] = [
     {
       id: 's/n',
@@ -71,6 +75,11 @@ export const FarmsListContainer = () => {
               >
                 <DropdownMenuItem>View farm</DropdownMenuItem>
               </Link>
+              <DropdownMenuItem
+                onSelect={() => setFarmToRename(row.original)}
+              >
+                Rename farm
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <span className="text-[#E61504CC]">Delete farm</span>
               </DropdownMenuItem>
@@ -80,8 +89,7 @@ export const FarmsListContainer = () => {
       ),
     },
   ];
-  const columns = useMemo(() => farmColumns, []);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const columns = farmColumns;
 
   if (isPending) {
     return <div className="bg-white p-6">Fetching farms...</div>;
@@ -167,6 +175,17 @@ export const FarmsListContainer = () => {
         <AddNewFarmSheet
           isOpen={isFormOpen}
           onClose={() => setIsFormOpen(false)}
+        />
+      )}
+
+      {farmToRename && (
+        <RenameFarmDialog
+          farmId={farmToRename.id}
+          currentName={farmToRename.farm_name}
+          open={!!farmToRename}
+          onOpenChange={(open) => {
+            if (!open) setFarmToRename(null);
+          }}
         />
       )}
     </>
