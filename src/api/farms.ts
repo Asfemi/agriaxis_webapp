@@ -59,6 +59,23 @@ export const useUpdateFarm = () => {
   });
 };
 
+export const useDeleteFarm = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await apiClient.delete(
+        `/farms/${encodeURIComponent(id)}`,
+      );
+      return data;
+    },
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ queryKey: ["farms"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.removeQueries({ queryKey: ["farm", id] });
+    },
+  });
+};
+
 export const useGetDashboard = () => {
   return useSuspenseQuery({
     queryKey: ["dashboard"],

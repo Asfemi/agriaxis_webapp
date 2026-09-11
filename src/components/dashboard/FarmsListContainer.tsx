@@ -19,12 +19,14 @@ import { useState } from "react";
 import { useGetAllFarms } from "@/api/farms";
 import { Link } from "@tanstack/react-router";
 import { AddNewFarmSheet } from "@/components/dashboard/AddNewFarmSheet";
+import { DeleteFarmDialog } from "@/components/dashboard/DeleteFarmDialog";
 import { RenameFarmDialog } from "@/components/dashboard/RenameFarmDialog";
 
 export const FarmsListContainer = () => {
   const { data: response, isPending, isError } = useGetAllFarms();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [farmToRename, setFarmToRename] = useState<Farm | null>(null);
+  const [farmToDelete, setFarmToDelete] = useState<Farm | null>(null);
 
   const farmColumns: ColumnDef<Farm>[] = [
     {
@@ -80,7 +82,9 @@ export const FarmsListContainer = () => {
               >
                 Rename farm
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => setFarmToDelete(row.original)}
+              >
                 <span className="text-[#E61504CC]">Delete farm</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -185,6 +189,17 @@ export const FarmsListContainer = () => {
           open={!!farmToRename}
           onOpenChange={(open) => {
             if (!open) setFarmToRename(null);
+          }}
+        />
+      )}
+
+      {farmToDelete && (
+        <DeleteFarmDialog
+          farmId={farmToDelete.id}
+          farmName={farmToDelete.farm_name}
+          open={!!farmToDelete}
+          onOpenChange={(open) => {
+            if (!open) setFarmToDelete(null);
           }}
         />
       )}
