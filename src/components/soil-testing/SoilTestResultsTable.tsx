@@ -14,7 +14,7 @@ import {
 import { formatDate } from "@/lib/utils";
 import type {
   SoilTestingResult,
-  Transaction,
+  // Transaction,
 } from "@/models/soil-testing.model";
 import { type ColumnDef } from "@tanstack/react-table";
 import { LoaderCircle, MoreVertical } from "lucide-react";
@@ -24,21 +24,21 @@ import { toast } from "sonner";
 import { SoilTestResultsCard } from "@/components/soil-testing/SoilTestResultsCard";
 import { useSoilTestingResultStore } from "@/stores/useSoilTestingResultStore";
 
-const StatusBadge: React.FC<{ status: Transaction["status"] }> = ({
-  status,
-}) => {
-  const isCompleted = status === "completed";
-  const bgColor = isCompleted ? "bg-[#E7F2ED]" : "bg-[#FFEEBE]";
-  const textColor = isCompleted ? "text-[#0A814A]" : "text-[#674A00]";
+// const StatusBadge: React.FC<{ status: Transaction["status"] }> = ({
+//   status,
+// }) => {
+//   const isCompleted = status === "completed";
+//   const bgColor = isCompleted ? "bg-[#E7F2ED]" : "bg-[#FFEEBE]";
+//   const textColor = isCompleted ? "text-[#0A814A]" : "text-[#674A00]";
 
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium capitalize ${bgColor} ${textColor}`}
-    >
-      {status}
-    </span>
-  );
-};
+//   return (
+//     <span
+//       className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium capitalize ${bgColor} ${textColor}`}
+//     >
+//       {status}
+//     </span>
+//   );
+// };
 
 const SoilTestingResultsTable = () => {
   const { data: results, isLoading } = useSoilTestingResults();
@@ -88,11 +88,11 @@ const SoilTestingResultsTable = () => {
       accessorKey: "name",
       header: "Name",
     },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => <StatusBadge status={row.original.status} />,
-    },
+    // {
+    //   accessorKey: "status",
+    //   header: "Status",
+    //   cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    // },
     {
       accessorKey: "completed_at",
       header: "Date",
