@@ -120,7 +120,7 @@ export interface SoilTestingResult {
     label: string;
     status: string;
     unit: string;
-    value: number;
+    value: number | null;
   }[];
   classification_standards?: {
     title: string;
